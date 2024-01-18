@@ -44,24 +44,9 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
     @Composable
     open fun Content() {
         CompositionLocalProvider(LocalPageScope provides scope) {
+            SysBackPressed { scope.backPressed() }
+
             var event by remember { lifeEvent }
-            val windowEvent by remember { scope.windowScope.lifecycleEvent }
-            when (windowEvent) {
-                Lifecycle.Event.ON_STOP -> {
-                    if (state == Lifecycle.State.RESUMED) {
-                        shouldStop = true
-                        event = windowEvent
-                    }
-                }
-
-                Lifecycle.Event.ON_RESUME -> if (state == Lifecycle.State.STARTED) event =
-                    windowEvent
-
-
-                Lifecycle.Event.ON_DESTROY -> shouldDestroy = true
-                else -> {}
-            }
-
             SystemLifecycle {
                 if (it == Lifecycle.Event.ON_DESTROY)
                     shouldDestroy = true
@@ -103,7 +88,6 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
 //                }
 
             }
-            SysBackPressed { scope.backPressed() }
 
             if (event != Lifecycle.Event.ON_ANY) dispatcher(event)
 
@@ -112,9 +96,27 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
                     lifeEvent.value = it
                     state = it.targetState
                 }
+
+                scope.windowScope.lifecycleEvent = {
+                    when (it) {
+                        Lifecycle.Event.ON_STOP -> {
+                            if (state == Lifecycle.State.RESUMED) {
+                                shouldStop = true
+                                negativeDispatcher(Lifecycle.Event.ON_PAUSE)
+                            }
+                        }
+
+                        Lifecycle.Event.ON_START -> if (state == Lifecycle.State.CREATED) {
+                            dispatcher(it)
+                        }
+
+
+                        Lifecycle.Event.ON_DESTROY -> shouldDestroy = true
+                        else -> {}
+                    }
+                }
                 onDispose {
-                    val wEvent = scope.windowScope.lifecycleEvent.value
-                    if (wEvent == Lifecycle.Event.ON_DESTROY) shouldDestroy = true
+                    if (event == Lifecycle.Event.ON_DESTROY) shouldDestroy = true
                     event = Lifecycle.Event.ON_PAUSE
                     negativeDispatcher(event)
                 }

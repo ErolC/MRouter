@@ -33,8 +33,9 @@ actual fun PlatformWindow(options: WindowOptions, entry: WindowEntry, content: @
     val size by remember(state.size) {
         mutableStateOf(WindowSize.calculateFromSize(state.size))
     }
-    var lifecycleEvent by remember(entry.getScope()) { entry.getScope().lifecycleEvent }
-    lifecycleEvent = if (state.isMinimized) Lifecycle.Event.ON_STOP else Lifecycle.Event.ON_RESUME
+
+    val event = if (state.isMinimized)  Lifecycle.Event.ON_STOP else Lifecycle.Event.ON_START
+    entry.getScope().onLifeEvent(event)
     entry.getScope().windowSize.value = size
     val application =
         LocalApplication.current

@@ -10,7 +10,11 @@ import kotlin.time.Duration.Companion.seconds
 
 class WindowScope : PageScope() {
     val windowSize = mutableStateOf(DefWindowSize)
-    internal val lifecycleEvent = mutableStateOf(Lifecycle.Event.ON_ANY)
+
+    var lifecycleEvent: ((Lifecycle.Event) -> Unit)? = null
+    internal fun onLifeEvent(event: Lifecycle.Event) {
+        lifecycleEvent?.invoke(event)
+    }
 
 //    internal val toastOptions = mutableStateOf<ToastOptions?>(null)
 //

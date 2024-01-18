@@ -35,7 +35,7 @@ class WindowEntry(val options: WindowOptions, private val pageRouter: PageRouter
     internal fun getScope() = scope as WindowScope
 
     fun close(): Boolean {
-        getScope().lifecycleEvent.value = Lifecycle.Event.ON_DESTROY
+        getScope().onLifeEvent(Lifecycle.Event.ON_DESTROY)
         return pageRouter.windowRouter.close(this)
     }
 
