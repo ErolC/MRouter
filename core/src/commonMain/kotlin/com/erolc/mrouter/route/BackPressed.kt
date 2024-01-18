@@ -93,19 +93,19 @@ class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPressedHandle
 
 /**
  * 退出
- * @param doubleConfirm 为true时开启双重确认。目前只有android才生效
+ * @param doubleConfirm 为true时开启双重确认。目前android和desktop已生效
  */
 @Composable
 fun Exit(doubleConfirm: Boolean = false, delayTime: Duration = 1000.milliseconds, msg: String = "") {
-//    val scope = rememberPageCoroutineScope()
-    val scope = rememberCoroutineScope()
+    val scope = rememberPageCoroutineScope()
+//    val scope = rememberCoroutineScope()
     var enable by remember { mutableStateOf(false) }
     var preEnable by remember { mutableStateOf(false) }
     BackInterceptor {
         if (doubleConfirm) {
             if (preEnable) enable = true
             preEnable = true
-            scope.launch {
+            scope?.launch {
                 delay(delayTime)
                 //todo toast
                 preEnable = false

@@ -6,6 +6,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
+import kotlinx.coroutines.Dispatchers
 
 internal val LocalApplication: ProvidableCompositionLocal<ApplicationScope?> = staticCompositionLocalOf { null }
 
