@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import com.erolc.mrouter.lifecycle.coroutineScope
 import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.isAndroid
 import com.erolc.mrouter.utils.isDesktop
 import com.erolc.mrouter.utils.loge
@@ -60,22 +61,14 @@ fun BackInterceptor(enabled: Boolean = true, onBack: BackPressedHandler.() -> Un
     }
 
     DisposableEffect(scope, interceptor) {
-        scope.getBackDispatcher().addBackInterceptor(interceptor)
-        onDispose {
-            interceptor.remove()
-        }
+        scope.addBackInterceptor(interceptor)
+        onDispose {}
     }
 
 }
 
 abstract class BackInterceptor(internal var isEnabled: Boolean) {
-    internal var router: Router? = null
-
     abstract fun onIntercept(callBack: BackPressedHandler)
-
-    internal fun remove() {
-        router?.removeBackInterceptor(this)
-    }
 }
 
 interface BackPressedHandler {
@@ -96,7 +89,11 @@ class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPressedHandle
  * @param doubleConfirm 为true时开启双重确认。目前android和desktop已生效
  */
 @Composable
-fun Exit(doubleConfirm: Boolean = false, delayTime: Duration = 1000.milliseconds, msg: String = "") {
+fun Exit(
+    doubleConfirm: Boolean = false,
+    delayTime: Duration = 1000.milliseconds,
+    msg: String = ""
+) {
     val scope = rememberPageCoroutineScope()
 //    val scope = rememberCoroutineScope()
     var enable by remember { mutableStateOf(false) }

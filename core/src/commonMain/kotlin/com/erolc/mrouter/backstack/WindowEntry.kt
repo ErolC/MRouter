@@ -1,8 +1,11 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import com.erolc.mrouter.Transforms
 import com.erolc.mrouter.lifecycle.Lifecycle
 import com.erolc.mrouter.model.Route
@@ -40,10 +43,33 @@ class WindowEntry(val options: WindowOptions, private val pageRouter: PageRouter
     }
 
     @Composable
-    override fun Content() {
+    override fun Content(modifier: Modifier) {
         PlatformWindow(options, this) {
+
             val backStacks by pageRouter.getBackStack().collectAsState()
-            Transforms(backStacks)
+            var size by remember { mutableStateOf(0) }
+            //是否是後退
+            val isBack = remember(backStacks) {
+                val stackSize = backStacks.size
+                val isBack = size > stackSize
+                size = stackSize
+                isBack
+            }
+            val (target, dialog) = remember(backStacks) {
+                val target = backStacks.lastOrNull()
+                if (target is DialogEntry)
+                    backStacks.takeLast(2).firstOrNull() to target
+                else target to null
+            }
+
+            Transforms(target, slideInHorizontally(tween()) {
+                if (isBack) -it else it
+            } togetherWith slideOutHorizontally(tween()) {
+                if (isBack) it else -1
+            })
+
+            dialog?.Content(modifier)
+
 //            val toastOptions by remember { getScope().toastOptions }
 //            if (toastOptions != null) {
 //                Toast(toastOptions!!)

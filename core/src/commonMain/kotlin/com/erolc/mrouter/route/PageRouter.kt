@@ -1,6 +1,7 @@
 package com.erolc.mrouter.route
 
 
+import com.erolc.mrouter.backstack.DialogEntry
 import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
@@ -24,22 +25,28 @@ class PageRouter(
     Router("windowBackStack") {
 
     internal var addresses: List<Address> = listOf()
-    private val interceptors = mutableListOf<BackInterceptor>()
     internal lateinit var windowEntry: WindowEntry
 
 
     /**
      * 在window内通过route获取后退栈条目
      */
-    internal fun route(route: Route, address: Address) {
-        if (address.config.launchSingleTop) backStack.findTopEntry()?.also { entry ->
-            bindRoute(entry, route)
-        } ?: bindRoute(
-            createEntry(getScope(parentScope), address), route, true
-        )
-        else bindRoute(
-            createEntry(getScope(parentScope), address), route, true
-        )
+    internal fun route(
+        route: Route,
+        address: Address,
+        target: StackEntry = createEntry(getScope(parentScope), address)
+    ) {
+        if (target is DialogEntry) {
+            bindRoute(target, route, true)
+        } else
+            if (address.config.launchSingleTop) backStack.findTopEntry()?.also { entry ->
+                bindRoute(entry, route)
+            } ?: bindRoute(
+                target, route, false
+            )
+            else bindRoute(
+                target, route, true
+            )
     }
 
     /**
@@ -61,12 +68,15 @@ class PageRouter(
      * 将路由上的数据绑定到下一个[entry]上。
      */
     private fun bindRoute(entry: StackEntry, route: Route, shouldAdd: Boolean = false) {
-        entry.scope.run {
-            argsFlow.value = route.args
-            router = this@PageRouter
-            onResult = route.onResult
-            name = route.address
-        }
+        if (entry is DialogEntry)
+            entry.buildScope(route, this)
+        else
+            entry.scope.run {
+                argsFlow.value = route.args
+                router = this@PageRouter
+                onResult = route.onResult
+                name = route.address
+            }
         if (shouldAdd) addEntry(entry)
     }
 
@@ -76,38 +86,41 @@ class PageRouter(
         require(address != null) {
             "can't find the address with ‘${route.path}’"
         }
-        if (route.windowOptions.id == windowEntry.address.path)
-            route(route, address)
-        else
-            windowRouter.route(route, address)
+        when {
+            route.dialogOptions != null -> {
+                route(
+                    route,
+                    address,
+                    DialogEntry(route.dialogOptions, createEntry(getScope(parentScope), address))
+                )
+            }
+
+            route.windowOptions.id == windowEntry.address.path -> route(
+                route,
+                address
+            )
+
+            else -> windowRouter.route(route, address)
+        }
     }
 
 
-    override fun backPressed() {
-        val enabled = interceptors.filter { it.isEnabled }.map {
-            it.onIntercept(BackPressedHandlerImpl {
+    override fun backPressed(notInterceptor: () -> Boolean) {
+        if (notInterceptor()){
+            val entry = backStack.findTopEntry()
+            if (entry is DialogEntry){
+                entry.dismiss()
+            }else{
                 backPressedImpl()
-            })
-        }.isEmpty()
-        if (enabled)
-            backPressedImpl()
-    }
-
-    private fun backPressedImpl() {
-        backStack.pop()
-    }
-
-    override fun addBackInterceptor(interceptor: BackInterceptor) {
-        interceptor.router = this
-        interceptors.add(interceptor)
-    }
-
-    override fun removeBackInterceptor(interceptor: BackInterceptor) {
-        interceptors.remove(interceptor)
+            }
+        }
     }
 
     override fun addEntry(entry: StackEntry) {
-        entry.scope.windowScope = windowEntry.getScope()
+        if (entry is DialogEntry)
+            entry.buildWindowScope(windowEntry.getScope())
+        else
+            entry.scope.windowScope = windowEntry.getScope()
         super.addEntry(entry)
     }
 }

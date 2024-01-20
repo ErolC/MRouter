@@ -54,7 +54,7 @@ fun GreetingPage() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.fillMaxSize().background(Color.Gray),
+        Modifier.background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
@@ -124,7 +124,8 @@ fun Home() {
         items(list) {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                 scope.route("greet?key=123") {
-                    window("second","第二窗体")
+                    dialog{
+                    }
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }

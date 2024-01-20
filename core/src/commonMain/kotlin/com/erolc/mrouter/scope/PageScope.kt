@@ -25,6 +25,8 @@ open class PageScope {
     private val values = mutableMapOf<String, Any>()
     internal lateinit var router: Router
     internal var onResult: RouteResult = {}
+    private val interceptors = mutableListOf<BackInterceptor>()
+
     var lifecycle: Lifecycle? = null
         internal set(value) {
             if (value != null) initLifeCycle(value)
@@ -35,6 +37,7 @@ open class PageScope {
         lifecycle.addEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_DESTROY) {
                 onResult(result)
+                interceptors.clear()
             }
         }
     }
@@ -86,10 +89,16 @@ open class PageScope {
      * 后退
      */
     fun backPressed() {
-        router.backPressed()
+        router.backPressed {
+            interceptors.filter { it.isEnabled }.map {
+                it.onIntercept(BackPressedHandlerImpl {
+                    it.isEnabled = false
+                })
+                it
+            }.none { it.isEnabled }
+        }
     }
 
-    internal fun getBackDispatcher() = router
 
     internal fun <T : Any> getValue(key: String): T? {
         return values[key] as? T
@@ -97,6 +106,10 @@ open class PageScope {
 
     internal fun saveValue(key: String, value: Any) {
         values[key] = value
+    }
+
+    fun addBackInterceptor(interceptor: BackInterceptor) {
+        interceptors.add(interceptor)
     }
 
 }

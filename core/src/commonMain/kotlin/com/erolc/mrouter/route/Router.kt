@@ -19,14 +19,15 @@ abstract class Router(val name: String) {
 
     /**
      * 后退方法，将回退到前一个页面
+     * @param notInterceptor 是否不拦截
      */
-    abstract fun backPressed()
-
-    abstract fun addBackInterceptor(interceptor: BackInterceptor)
-
-    abstract fun removeBackInterceptor(interceptor: BackInterceptor)
+    abstract fun backPressed(notInterceptor: () -> Boolean = { true })
 
     internal fun getBackStack() = backStack.backStack
+
+    internal fun backPressedImpl() {
+        backStack.pop()
+    }
 
     internal open fun addEntry(entry: StackEntry) {
         backStack.addEntry(entry)

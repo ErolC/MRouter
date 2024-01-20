@@ -1,21 +1,20 @@
 package com.erolc.mrouter.backstack
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.Modifier
 import com.erolc.mrouter.lifecycle.Lifecycle
 import com.erolc.mrouter.lifecycle.LifecycleOwner
 import com.erolc.mrouter.lifecycle.LifecycleRegistry
 import com.erolc.mrouter.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.SysBackPressed
-import com.erolc.mrouter.scope.GroupScope
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
@@ -42,10 +41,9 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
     private var shouldDestroy = false
 
     @Composable
-    open fun Content() {
+    open fun Content(modifier: Modifier = Modifier) {
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
-
             var event by remember { lifeEvent }
             SystemLifecycle {
                 if (it == Lifecycle.Event.ON_DESTROY)
@@ -57,36 +55,6 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
                         shouldStop = true
                     event = it
                 }
-
-//                when (it) {
-//                    Lifecycle.Event.ON_CREATE -> {
-//                        if (state == Lifecycle.State.INITIALIZED) event = it
-//                    }
-//
-//                    Lifecycle.Event.ON_START -> {
-//                        if (state == Lifecycle.State.CREATED) event = it
-//                    }
-//
-//                    Lifecycle.Event.ON_RESUME -> {
-//                        if (state == Lifecycle.State.STARTED) event = it
-//                    }
-//
-//                    Lifecycle.Event.ON_PAUSE -> {
-//                        if (state == Lifecycle.State.RESUMED) event = it
-//                    }
-//
-//                    Lifecycle.Event.ON_STOP -> {
-//                        shouldStop = true
-//                        if (state == Lifecycle.State.STARTED) event = it
-//                    }
-//
-//                    Lifecycle.Event.ON_DESTROY -> {
-//                        shouldDestroy = true
-//                    }
-//
-//                    else -> {}
-//                }
-
             }
 
             if (event != Lifecycle.Event.ON_ANY) dispatcher(event)
@@ -121,7 +89,9 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
                     negativeDispatcher(event)
                 }
             }
-            address.content()
+            Box(modifier) {
+                address.content()
+            }
         }
     }
 
@@ -189,48 +159,3 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
         shouldDestroy = true
     }
 }
-
-class DialogEntry internal constructor(scope: PageScope, private val entry: PageEntry) :
-    StackEntry(scope, entry.apply { this.scope.parentScope = scope }.address) {
-
-    @Composable
-    override fun Content() {
-        Dialog(onDismissRequest = {}) {
-            entry.Content()
-        }
-    }
-}
-
-class PageEntry internal constructor(scope: PageScope, address: Address) :
-    StackEntry(scope, address) {
-    lateinit var windowEntry: WindowEntry
-    override val lifecycle: Lifecycle
-        get() = registry
-}
-
-
-class GroupEntry internal constructor(scope: GroupScope, address: Address) :
-    StackEntry(scope, address) {
-
-    override val lifecycle: Lifecycle
-        get() = registry
-
-    private val stacks = mutableListOf<BackStack>()
-
-    @Composable
-    internal fun getBackStack(key: String) = BackStack(key).apply {
-        stacks.add(this)
-    }.backStack.collectAsState()
-
-
-    fun addEntry(key: String, entry: StackEntry) {
-        stacks.find { it.name == key }?.addEntry(entry)
-    }
-
-    @Composable
-    override fun Content() {
-
-    }
-
-}
-

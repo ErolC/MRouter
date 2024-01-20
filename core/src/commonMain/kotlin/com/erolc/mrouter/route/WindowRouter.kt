@@ -35,16 +35,16 @@ class WindowRouter(
         route(route, address)
     }
 
+    override fun backPressed(body: () -> Boolean) {
+
+    }
+
     internal fun route(route: Route, address: Address) {
         val windowEntry = backStack.findEntry(route.windowOptions.id) as? WindowEntry
         windowEntry?.run {
             pageRoute(route, address)
         } ?: createWindow(route, address)
     }
-
-    override fun backPressed() {}
-    override fun addBackInterceptor(interceptor: BackInterceptor) {}
-    override fun removeBackInterceptor(interceptor: BackInterceptor) {}
 
     /**
      * @return 是否需要退出应用

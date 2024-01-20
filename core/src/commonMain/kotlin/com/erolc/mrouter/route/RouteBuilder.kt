@@ -2,6 +2,7 @@ package com.erolc.mrouter.route
 
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.dialog.DialogBuilder
+import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.utils.isMobile
 import com.erolc.mrouter.model.WindowOptions
@@ -14,6 +15,7 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
 class RouteBuilder {
     private var onResult: (Args) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, "")
+    private var dialogOptions: DialogOptions? = null
 
     private val args = emptyArgs
 
@@ -45,7 +47,11 @@ class RouteBuilder {
      * @param id 窗口的id
      * @param builder 窗口的设置
      */
-    fun window(id: String = Constants.defaultWindow, title: String, builder: WindowOptionsBuilder.() -> Unit = {}) {
+    fun window(
+        id: String = Constants.defaultWindow,
+        title: String,
+        builder: WindowOptionsBuilder.() -> Unit = {}
+    ) {
         windowOptions = WindowOptionsBuilder().apply(builder)
             .build(if (isMobile) Constants.defaultWindow else id, title)
     }
@@ -54,8 +60,8 @@ class RouteBuilder {
      * 以弹框的形式打开该窗口，需要注意的是该方法和[window]方法是互斥的，且[window]方法优先级更高。
      *
      */
-    fun dialog(builder: DialogBuilder.() -> Unit) {
-
+    fun dialog(builder: DialogBuilder.() -> Unit = {}) {
+        dialogOptions = DialogBuilder().apply(builder).build()
     }
 
     internal fun build(route: String): Route {
@@ -72,7 +78,15 @@ class RouteBuilder {
             }.toMap().toArgs()
         }
         args += args
-        return Route(route, address, windowOptions, args, onResult = onResult, layoutKey = key)
+        return Route(
+            route,
+            address,
+            windowOptions,
+            dialogOptions,
+            args,
+            onResult = onResult,
+            layoutKey = key
+        )
     }
 
 

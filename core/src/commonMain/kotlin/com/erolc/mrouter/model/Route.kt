@@ -1,5 +1,6 @@
 package com.erolc.mrouter.model
 
+import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.route.Args
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.route.emptyArgs
@@ -17,6 +18,7 @@ data class Route internal constructor(
     val path: String,
     val address: String,
     val windowOptions: WindowOptions,
+    val dialogOptions: DialogOptions? = null,
     val args: Args = emptyArgs,
     val onResult: (Args) -> Unit = {},
     val layoutKey: String? = null
