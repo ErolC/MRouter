@@ -15,6 +15,7 @@ import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.PageRouter
 import com.erolc.mrouter.scope.DialogScope
 import com.erolc.mrouter.scope.WindowScope
+import com.erolc.mrouter.utils.loge
 
 class DialogEntry internal constructor(
     private val options: DialogOptions,
@@ -43,16 +44,22 @@ class DialogEntry internal constructor(
                 ) {
                     entry.Content(Modifier.align(options.alignment))
                 }
-//                DisposableEffect(Unit) {
-//                    onDispose {
-//                        entry.scope.router.backPressedImpl()
-//                    }
-//                }
+                DisposableEffect(Unit) {
+
+                    onDispose {
+                        if (!options.isShowDialog.value)
+                            entry.scope.router.parentRouter?.backPressedImpl()
+                    }
+                }
             }
         }
     }
 
     internal fun dismiss() {
         options.isShowDialog.value = false
+    }
+
+    override fun destroy() {
+        entry.destroy()
     }
 }

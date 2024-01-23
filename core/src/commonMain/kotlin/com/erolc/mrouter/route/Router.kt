@@ -6,6 +6,7 @@ import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.logi
 
 typealias RouteResult = (Args) -> Unit
 
@@ -26,8 +27,8 @@ abstract class Router(
 
     open fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
-        loge("dispatchRoute", "$this $isIntercept")
         if (!isIntercept) {
+            logi("dispatchRoute", "$this")
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
@@ -44,7 +45,7 @@ abstract class Router(
      * @return 是否拦截该路由，true-拦截，false-不拦截
      */
     open fun route(stackEntry: StackEntry) {
-        loge("route", "$this,${stackEntry.address.path}")
+        logi("route", "$this,${stackEntry.address.path}")
         backStack.addEntry(stackEntry)
     }
 
@@ -54,9 +55,11 @@ abstract class Router(
      */
     open fun backPressed(notInterceptor: () -> Boolean = { true }) {
         if (notInterceptor()) {
-            if (!backStack.pop()) parentRouter?.backPressed(notInterceptor)
+            if (!backPressedImpl()) parentRouter?.backPressed(notInterceptor)
         }
     }
 
     internal fun getBackStack() = backStack.backStack
+
+    internal fun backPressedImpl() = backStack.pop()
 }

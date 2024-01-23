@@ -23,8 +23,6 @@ class PageRouter(
 ) :
     Router("windowBackStack", windowRouter.addresses, windowRouter) {
 
-    internal lateinit var windowEntry: WindowEntry
-
     override fun route(stackEntry: StackEntry) {
         if (stackEntry.address.config.launchSingleTop)
             backStack.findTopEntry()?.also { entry ->
@@ -56,8 +54,7 @@ class PageRouter(
         ): PageEntry {
             return PageEntry(
                 getScope(),
-                address,
-                router
+                address
             ).apply {
                 scope.run {
                     argsFlow.value = route.args

@@ -18,7 +18,6 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
                 route.windowOptions
             ).also {
                 it.pageRouter = PageRouter(this).also { pageRouter ->
-                    pageRouter.windowEntry = it
                     pageRouter.route(
                         PageRouter.createPageEntry(
                             route,

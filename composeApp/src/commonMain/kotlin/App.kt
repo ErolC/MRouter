@@ -1,4 +1,7 @@
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -153,6 +156,8 @@ fun Home() {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                 scope.route("second?key=123") {
                     dialog{
+                        enter = slideInVertically()
+                        exit = slideOutVertically()
                     }
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")

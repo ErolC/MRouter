@@ -18,6 +18,7 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.logi
 import kotlin.math.abs
 
 
@@ -135,7 +136,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
     }
 
     open fun handleLifecycleEvent(event: Lifecycle.Event) {
-        loge("tag", "${this::class.simpleName} event:$event")
+        logi("tag", "$this event:$event")
         registry.handleLifecycleEvent(event)
     }
 
@@ -156,7 +157,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
         shouldStop = true
     }
 
-    internal fun destroy() {
+    open fun destroy() {
         shouldDestroy = true
     }
 }

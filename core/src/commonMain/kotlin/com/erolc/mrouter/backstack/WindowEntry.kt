@@ -18,9 +18,14 @@ import com.erolc.mrouter.scope.default
 import com.erolc.mrouter.utils.PlatformWindow
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
+
 class WindowEntry(val options: WindowOptions) :
     StackEntry(WindowScope().apply { name = options.id }, Address(options.id)) {
     internal lateinit var pageRouter: PageRouter
+
+    init {
+        getScope().onClose = { close() }
+    }
 
     override val lifecycle: Lifecycle
         get() = registry
@@ -47,7 +52,7 @@ class WindowEntry(val options: WindowOptions) :
             val target = remember(backStacks) {
                 backStacks.lastOrNull()
             }
-            CompositionLocalProvider(LocalWindowScope provides getScope()){
+            CompositionLocalProvider(LocalWindowScope provides getScope()) {
                 Transforms(target, slideInHorizontally(tween()) {
                     if (isBack) -it else it
                 } togetherWith slideOutHorizontally(tween()) {

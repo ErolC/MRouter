@@ -22,4 +22,13 @@ class DialogRouter(
         }
         return null
     }
+
+    override fun backPressed(notInterceptor: () -> Boolean) {
+        if (notInterceptor()) {
+            (backStack.findTopEntry() as? DialogEntry)?.dismiss() ?: parentRouter?.backPressed(
+                notInterceptor
+            )
+        }
+
+    }
 }

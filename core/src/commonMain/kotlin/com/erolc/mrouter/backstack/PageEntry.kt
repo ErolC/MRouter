@@ -12,8 +12,7 @@ import com.erolc.mrouter.scope.PageScope
 
 class PageEntry internal constructor(
     scope: PageScope,
-    address: Address,
-    internal val dialogRouter: DialogRouter
+    address: Address
 ) :
     StackEntry(scope, address) {
 
@@ -23,7 +22,7 @@ class PageEntry internal constructor(
     @Composable
     override fun Content(modifier: Modifier) {
         super.Content(modifier)
-        dialogRouter.getBackStack().collectAsState().let {
+        scope.router.getBackStack().collectAsState().let {
             val stack by remember { it }
             stack.forEach {
                 it.Content(modifier)
