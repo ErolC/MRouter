@@ -22,6 +22,8 @@ open class BackStack(val name: String) {
 
     fun isBottom() = size == 1
 
+    fun isEmpty() = size == 0
+
     /**
      * 后退
      * @return 是否后退成功，只有在无法后退时才会后退失败，也就是下面没有过更多的页面可以后退了。

@@ -14,7 +14,7 @@ import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
-internal fun getScope(parentScope: PageScope?) = default.apply { this.parentScope = parentScope }
+internal fun getScope() = default
 
 val LocalPageScope = staticCompositionLocalOf { default }
 
@@ -42,16 +42,6 @@ open class PageScope {
         }
     }
 
-    /**
-     * 当一个页面附着于一个dialog，一个group，那么就会有parentScope
-     */
-
-    var parentScope: PageScope? = null
-        internal set
-
-    lateinit var windowScope: WindowScope
-        internal set
-
 
     /**
      * 路由到下一个页面
@@ -60,7 +50,7 @@ open class PageScope {
      */
     open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
         val routeObj = routeBuild(route, builder)
-        router.route(routeObj)
+        router.dispatchRoute(routeObj)
     }
 
 

@@ -77,7 +77,7 @@ class RegisterBuilder internal constructor() {
     internal fun builder(startRoute: String): WindowRouter {
         //构建路由器并路由到初始页面
         return WindowRouter(addresses).apply {
-            route(routeBuild(startRoute))
+            dispatchRoute(routeBuild(startRoute))
         }
     }
 

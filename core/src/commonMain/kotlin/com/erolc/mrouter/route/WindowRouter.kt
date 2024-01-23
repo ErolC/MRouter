@@ -1,6 +1,8 @@
 package com.erolc.mrouter.route
 
+import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.BackStack
+import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
@@ -8,43 +10,23 @@ import com.erolc.mrouter.register.Address
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
  */
-class WindowRouter(
-    private val addresses: List<Address>
-) : Router("root") {
-    /**
-     * 路由到一个新的window上
-     */
-    private fun createWindow(route: Route, address: Address) {
-        val entry = WindowEntry(
-            route.windowOptions,
-            PageRouter(this, null).apply {
-                addresses = this@WindowRouter.addresses
-            })
+class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
 
-        backStack.addEntry(entry)
-
-        entry.pageRoute(route, address)
-    }
-
-
-    override fun route(route: Route) {
-        val address = addresses.find { it.path == route.address }
-        require(address != null) {
-            "can't find the address with ‘${route.path}’"
+    override fun createEntry(route: Route, address: Address): StackEntry? {
+        if (route.windowOptions.id != Constants.defaultWindow || backStack.isEmpty()) {
+            return WindowEntry(
+                route.windowOptions
+            ).also {
+                it.pageRouter = PageRouter(this).also { pageRouter ->
+                    pageRouter.windowEntry = it
+                    pageRouter.route(PageRouter.createPageEntry(route, address, DialogRouter(pageRouter)))
+                }
+            }
         }
-        route(route, address)
+        return null
     }
 
-    override fun backPressed(body: () -> Boolean) {
-
-    }
-
-    internal fun route(route: Route, address: Address) {
-        val windowEntry = backStack.findEntry(route.windowOptions.id) as? WindowEntry
-        windowEntry?.run {
-            pageRoute(route, address)
-        } ?: createWindow(route, address)
-    }
+    override fun backPressed(notInterceptor: () -> Boolean) {}
 
     /**
      * @return 是否需要退出应用
@@ -56,8 +38,6 @@ class WindowRouter(
             backStack.remove(entry.address.path)
             false
         }
-
     }
-
 
 }

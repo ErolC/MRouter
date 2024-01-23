@@ -18,15 +18,9 @@ import com.erolc.mrouter.scope.WindowScope
 
 class DialogEntry internal constructor(
     private val options: DialogOptions,
-    private val entry: StackEntry
+    private val entry: PageEntry
 ) :
     StackEntry(DialogScope(), Address("dialog")) {
-
-    init {
-        entry.also {
-            it.scope.parentScope = scope
-        }
-    }
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
@@ -49,30 +43,16 @@ class DialogEntry internal constructor(
                 ) {
                     entry.Content(Modifier.align(options.alignment))
                 }
-                DisposableEffect(Unit) {
-                    onDispose {
-                        scope.router.backPressedImpl()
-                    }
-                }
+//                DisposableEffect(Unit) {
+//                    onDispose {
+//                        entry.scope.router.backPressedImpl()
+//                    }
+//                }
             }
         }
     }
 
     internal fun dismiss() {
         options.isShowDialog.value = false
-    }
-
-    fun buildScope(route: Route, router: PageRouter) {
-        scope.router = router
-        entry.scope.run {
-            argsFlow.value = route.args
-            this.router = router
-            onResult = route.onResult
-            name = route.address
-        }
-    }
-
-    fun buildWindowScope(windowScope: WindowScope) {
-        entry.scope.windowScope = windowScope
     }
 }

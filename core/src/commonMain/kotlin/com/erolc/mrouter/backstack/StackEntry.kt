@@ -42,6 +42,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
 
     @Composable
     open fun Content(modifier: Modifier = Modifier) {
+        val windowScope = LocalWindowScope.current
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             var event by remember { lifeEvent }
@@ -65,7 +66,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
                     state = it.targetState
                 }
 
-                scope.windowScope.lifecycleEvent = {
+                windowScope.lifecycleEvent = {
                     when (it) {
                         Lifecycle.Event.ON_STOP -> {
                             if (state == Lifecycle.State.RESUMED) {

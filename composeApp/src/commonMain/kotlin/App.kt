@@ -39,6 +39,9 @@ fun App() {
             page("greet") {
                 GreetingPage()
             }
+            page("second"){
+                Second()
+            }
             page("home") {
                 Home()
             }
@@ -61,7 +64,7 @@ fun GreetingPage() {
             scope.setResult("result" to 1233)
             scope.backPressed()
         }) {
-            Text("back:${args.getData<Int>("key")}")
+            Text("back")
         }
         Button(onClick = {
             greetingText = "Compose: ${Greeting().greet()}"
@@ -74,6 +77,31 @@ fun GreetingPage() {
                 painterResource("compose-multiplatform.xml"),
                 null
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+fun Second() {
+    var greetingText by remember { mutableStateOf("Hello World!") }
+    val scope = LocalPageScope.current
+    val args = rememberArgs()
+    Column(
+        Modifier.background(Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            scope.setResult("result" to 1233)
+            scope.backPressed()
+        }) {
+            Text("back:${args.getData<Int>("key")}")
+        }
+        Button(onClick = {
+            scope.route("greet"){
+            }
+        }) {
+            Text(greetingText)
         }
     }
 }
@@ -123,7 +151,7 @@ fun Home() {
     ) {
         items(list) {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                scope.route("greet?key=123") {
+                scope.route("second?key=123") {
                     dialog{
                     }
                     onResult {
