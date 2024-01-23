@@ -19,14 +19,22 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
             ).also {
                 it.pageRouter = PageRouter(this).also { pageRouter ->
                     pageRouter.windowEntry = it
-                    pageRouter.route(PageRouter.createPageEntry(route, address, DialogRouter(pageRouter)))
+                    pageRouter.route(
+                        PageRouter.createPageEntry(
+                            route,
+                            address,
+                            DialogRouter(pageRouter)
+                        )
+                    )
                 }
             }
         }
         return null
     }
 
-    override fun backPressed(notInterceptor: () -> Boolean) {}
+    override fun backPressed(notInterceptor: () -> Boolean) {
+        // window 不能通过该方法关闭
+    }
 
     /**
      * @return 是否需要退出应用

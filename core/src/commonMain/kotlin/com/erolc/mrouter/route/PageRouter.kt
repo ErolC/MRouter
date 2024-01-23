@@ -48,17 +48,6 @@ class PageRouter(
     }
 
 
-    override fun backPressed(notInterceptor: () -> Boolean) {
-        if (notInterceptor()) {
-            val entry = backStack.findTopEntry()
-            if (entry is DialogEntry) {
-                entry.dismiss()
-            } else {
-                backPressedImpl()
-            }
-        }
-    }
-
     companion object {
         fun createPageEntry(
             route: Route,

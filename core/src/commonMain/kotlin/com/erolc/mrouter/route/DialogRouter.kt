@@ -9,6 +9,10 @@ class DialogRouter(
     pageRouter: Router
 ) : Router("dialogRouter", pageRouter.addresses, parentRouter = pageRouter) {
 
+    init {
+        backStack.threshold = 0
+    }
+
     override fun createEntry(route: Route, address: Address): StackEntry? {
         if (route.dialogOptions != null) {
             return DialogEntry(
@@ -17,9 +21,5 @@ class DialogRouter(
             )
         }
         return null
-    }
-
-    override fun backPressed(notInterceptor: () -> Boolean) {
-
     }
 }

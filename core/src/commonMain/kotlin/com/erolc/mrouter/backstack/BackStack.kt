@@ -14,6 +14,11 @@ open class BackStack(val name: String) {
 
     val backStack: StateFlow<List<StackEntry>> = _backstack.asStateFlow()
 
+    /**
+     * 阈值
+     */
+    internal var threshold = 1
+
     fun addEntry(entry: StackEntry) {
         _backstack.value += entry
     }
@@ -29,14 +34,14 @@ open class BackStack(val name: String) {
      * @return 是否后退成功，只有在无法后退时才会后退失败，也就是下面没有过更多的页面可以后退了。
      */
     fun pop(): Boolean {
-        return if (_backstack.value.size > 1) {
+        return if (_backstack.value.size > threshold) {
             _backstack.value -= _backstack.value.last().apply { destroy() }
             true
         } else false
     }
 
     fun remove(id: String): Boolean {
-        return if (_backstack.value.size > 1) {
+        return if (_backstack.value.size > threshold) {
             _backstack.value = _backstack.value.filter {
                 it.address.path != id
             }

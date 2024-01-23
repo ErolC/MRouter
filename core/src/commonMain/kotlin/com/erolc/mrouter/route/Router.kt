@@ -1,6 +1,7 @@
 package com.erolc.mrouter.route
 
 import com.erolc.mrouter.backstack.BackStack
+import com.erolc.mrouter.backstack.DialogEntry
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
@@ -25,7 +26,7 @@ abstract class Router(
 
     open fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
-        loge("dispatchRoute","$this $isIntercept")
+        loge("dispatchRoute", "$this $isIntercept")
         if (!isIntercept) {
             val address = addresses.find { it.path == route.address }
             require(address != null) {
@@ -43,27 +44,19 @@ abstract class Router(
      * @return 是否拦截该路由，true-拦截，false-不拦截
      */
     open fun route(stackEntry: StackEntry) {
-        loge("route","$this,${stackEntry.address.path}")
+        loge("route", "$this,${stackEntry.address.path}")
         backStack.addEntry(stackEntry)
-    }
-
-    open fun dispatchBackPressed() {
-
     }
 
     /**
      * 后退方法，将回退到前一个页面
      * @param notInterceptor 是否不拦截
      */
-    abstract fun backPressed(notInterceptor: () -> Boolean = { true })
+    open fun backPressed(notInterceptor: () -> Boolean = { true }) {
+        if (notInterceptor()) {
+            if (!backStack.pop()) parentRouter?.backPressed(notInterceptor)
+        }
+    }
 
     internal fun getBackStack() = backStack.backStack
-
-    internal fun backPressedImpl() {
-        backStack.pop()
-    }
-
-    internal open fun addEntry(entry: StackEntry) {
-        backStack.addEntry(entry)
-    }
 }
