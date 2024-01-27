@@ -41,7 +41,7 @@ actual fun PlatformWindow(
         mutableStateOf(WindowSize.calculateFromSize(state.size))
     }
 
-    val event = if (state.isMinimized) Lifecycle.Event.ON_STOP else Lifecycle.Event.ON_START
+    val event = if (state.isMinimized) Lifecycle.Event.ON_PAUSE else Lifecycle.Event.ON_RESUME
     entry.getScope().onLifeEvent(event)
     entry.getScope().windowSize.value = size
     val application =

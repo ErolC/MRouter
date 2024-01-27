@@ -9,10 +9,6 @@ import com.erolc.mrouter.scope.GroupScope
 
 class GroupEntry internal constructor(scope: GroupScope, address: Address) :
     StackEntry(scope, address) {
-
-    override val lifecycle: Lifecycle
-        get() = registry
-
     private val stacks = mutableListOf<BackStack>()
 
     @Composable

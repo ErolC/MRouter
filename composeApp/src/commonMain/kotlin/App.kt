@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.register.page
 import com.erolc.mrouter.route.BackInterceptor
@@ -60,7 +61,7 @@ fun GreetingPage() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White),
+        Modifier.background(Color.White).fillMaxSize().zIndex(20f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {

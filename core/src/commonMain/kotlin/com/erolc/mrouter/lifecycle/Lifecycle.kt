@@ -59,29 +59,19 @@ abstract class Lifecycle {
          */
         ON_CREATE,
 
-        /**
-         * Constant for onStart event of the [LifecycleOwner].
-         * 界面开始
-         */
-        ON_START,
 
         /**
          * Constant for onResume event of the [LifecycleOwner].
-         * 界面显示，并且可以交互
+         * 界面显示，
          */
         ON_RESUME,
 
         /**
          * Constant for onPause event of the [LifecycleOwner].
-         * 界面暂停，依旧可见，但无法交互（dialog，bottomSheet）
+         * 界面暂停，
          */
         ON_PAUSE,
 
-        /**
-         * Constant for onStop event of the [LifecycleOwner].
-         * 界面停止，但依旧在内存中，可以恢复
-         */
-        ON_STOP,
 
         /**
          * Constant for onDestroy event of the [LifecycleOwner].
@@ -106,8 +96,7 @@ abstract class Lifecycle {
         val targetState: State
             get() {
                 when (this) {
-                    ON_CREATE, ON_STOP -> return State.CREATED
-                    ON_START, ON_PAUSE -> return State.STARTED
+                    ON_CREATE,ON_PAUSE -> return State.CREATED
                     ON_RESUME -> return State.RESUMED
                     ON_DESTROY -> return State.DESTROYED
                     ON_ANY -> {}
@@ -128,7 +117,6 @@ abstract class Lifecycle {
             fun downFrom(state: State): Event? {
                 return when (state) {
                     State.CREATED -> ON_DESTROY
-                    State.STARTED -> ON_STOP
                     State.RESUMED -> ON_PAUSE
                     else -> null
                 }
@@ -145,8 +133,7 @@ abstract class Lifecycle {
             fun downTo(state: State): Event? {
                 return when (state) {
                     State.DESTROYED -> ON_DESTROY
-                    State.CREATED -> ON_STOP
-                    State.STARTED -> ON_PAUSE
+                    State.CREATED -> ON_PAUSE
                     else -> null
                 }
             }
@@ -162,8 +149,7 @@ abstract class Lifecycle {
             fun upFrom(state: State): Event? {
                 return when (state) {
                     State.INITIALIZED -> ON_CREATE
-                    State.CREATED -> ON_START
-                    State.STARTED -> ON_RESUME
+                    State.CREATED -> ON_RESUME
                     else -> null
                 }
             }
@@ -179,7 +165,6 @@ abstract class Lifecycle {
             fun upTo(state: State): Event? {
                 return when (state) {
                     State.CREATED -> ON_CREATE
-                    State.STARTED -> ON_START
                     State.RESUMED -> ON_RESUME
                     else -> null
                 }
@@ -215,16 +200,6 @@ abstract class Lifecycle {
          *
          */
         CREATED,
-
-        /**
-         * Started state for a LifecycleOwner. For an [android.app.Activity], this state
-         * is reached in two cases:
-         *
-         *  * after [onStart][android.app.Activity.onStart] call;
-         *  * **right before** [onPause][android.app.Activity.onPause] call.
-         *
-         */
-        STARTED,
 
         /**
          * Resumed state for a LifecycleOwner. For an [android.app.Activity], this state

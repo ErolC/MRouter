@@ -27,9 +27,6 @@ class WindowEntry(val options: WindowOptions) :
         getScope().onClose = { close() }
     }
 
-    override val lifecycle: Lifecycle
-        get() = registry
-
     internal fun getScope() = scope as WindowScope
 
     fun close(): Boolean {

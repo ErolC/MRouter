@@ -15,16 +15,14 @@ actual fun SystemLifecycle(call: (Lifecycle.Event) -> Unit) {
             override fun onStateChanged(
                 source: LifecycleOwner, event: androidx.lifecycle.Lifecycle.Event
             ) {
-                val lifeEvent = when (event) {
+                when (event) {
                     androidx.lifecycle.Lifecycle.Event.ON_CREATE -> Lifecycle.Event.ON_CREATE
-                    androidx.lifecycle.Lifecycle.Event.ON_START -> Lifecycle.Event.ON_START
                     androidx.lifecycle.Lifecycle.Event.ON_RESUME -> Lifecycle.Event.ON_RESUME
                     androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> Lifecycle.Event.ON_PAUSE
-                    androidx.lifecycle.Lifecycle.Event.ON_STOP -> Lifecycle.Event.ON_STOP
                     androidx.lifecycle.Lifecycle.Event.ON_DESTROY -> Lifecycle.Event.ON_DESTROY
                     androidx.lifecycle.Lifecycle.Event.ON_ANY -> Lifecycle.Event.ON_ANY
-                }
-                call(lifeEvent)
+                    else -> null
+                }?.let(call)
             }
 
         })
