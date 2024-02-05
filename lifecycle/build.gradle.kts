@@ -51,13 +51,12 @@ kotlin {
             implementation(libs.androidx.annotation)
             @OptIn(ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
-            implementation(project(":lifecycle"))
         }
     }
 }
 
 android {
-    namespace = "com.erolc.mrouter"
+    namespace = "com.erolc.lifecycle"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")

@@ -1,4 +1,4 @@
-package com.erolc.mrouter.lifecycle
+package com.erolc.lifecycle
 
 interface LifecycleEventObserver:LifecycleObserver {
 

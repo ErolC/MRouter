@@ -3,10 +3,9 @@ package com.erolc.mrouter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.window.ComposeUIViewController
-import com.erolc.mrouter.lifecycle.UIApplicationBackgroundDelegate
-import com.erolc.mrouter.lifecycle.localLifecycleDelegate
-import com.erolc.mrouter.lifecycle.UIViewControllerDelegate
-
+import com.erolc.lifecycle.UIApplicationBackgroundDelegate
+import com.erolc.lifecycle.localLifecycleDelegate
+import com.erolc.lifecycle.UIViewControllerDelegate
 
 fun MRouterUIViewController(
     backgroundDelegate: UIApplicationBackgroundDelegate,

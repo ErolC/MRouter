@@ -1,7 +1,6 @@
-package com.erolc.mrouter.lifecycle
+package com.erolc.lifecycle
 
 import androidx.annotation.VisibleForTesting
-import com.erolc.mrouter.utils.loge
 
 class LifecycleRegistry(private val lifecycleOwner: LifecycleOwner) : Lifecycle() {
 

@@ -2,7 +2,7 @@ package com.erolc.mrouter.backstack
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import com.erolc.mrouter.lifecycle.Lifecycle
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.scope.GroupScope
 

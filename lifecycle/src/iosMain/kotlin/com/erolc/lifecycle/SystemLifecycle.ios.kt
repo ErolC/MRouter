@@ -1,4 +1,4 @@
-package com.erolc.mrouter.lifecycle
+package com.erolc.lifecycle
 
 import androidx.compose.runtime.Composable
 

@@ -15,7 +15,7 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.LocalApplication
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
-import com.erolc.mrouter.lifecycle.Lifecycle
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.window.WindowSize

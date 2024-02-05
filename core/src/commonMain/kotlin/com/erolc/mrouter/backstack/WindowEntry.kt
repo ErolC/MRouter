@@ -7,7 +7,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.Transforms
-import com.erolc.mrouter.lifecycle.Lifecycle
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address

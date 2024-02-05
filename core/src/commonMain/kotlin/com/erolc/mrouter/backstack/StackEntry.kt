@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import com.erolc.mrouter.lifecycle.Lifecycle
-import com.erolc.mrouter.lifecycle.LifecycleOwner
-import com.erolc.mrouter.lifecycle.LifecycleRegistry
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.LifecycleOwner
+import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.scope.LocalPageScope

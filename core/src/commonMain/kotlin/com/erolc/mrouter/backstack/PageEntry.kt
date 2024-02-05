@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.erolc.mrouter.lifecycle.Lifecycle
-import com.erolc.mrouter.lifecycle.SystemLifecycle
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.logi

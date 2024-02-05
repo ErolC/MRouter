@@ -1,7 +1,7 @@
 package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
-import com.erolc.mrouter.lifecycle.Lifecycle
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.window.DefWindowSize
 
 class WindowScope() : PageScope() {

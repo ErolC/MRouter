@@ -6,16 +6,10 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import com.erolc.mrouter.lifecycle.coroutineScope
 import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
 import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.isAndroid
-import com.erolc.mrouter.utils.isDesktop
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration

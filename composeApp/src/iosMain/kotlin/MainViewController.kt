@@ -1,14 +1,14 @@
 import com.erolc.mrouter.MRouterUIViewController
-import com.erolc.mrouter.lifecycle.UIApplicationBackgroundDelegate
-import com.erolc.mrouter.lifecycle.UIApplicationBackgroundDelegateImpl
+import com.erolc.lifecycle.UIApplicationBackgroundDelegate
+import com.erolc.lifecycle.UIApplicationBackgroundDelegateImpl
 
 /**
  * 由于放到Mrouter里面将无法
  */
-object MyUIApplicationBackgroundDelegate :
+object SwitchBackgroundDelegate :
     UIApplicationBackgroundDelegate by UIApplicationBackgroundDelegateImpl
 
-fun MainViewController() = MRouterUIViewController(MyUIApplicationBackgroundDelegate) {
+fun MainViewController() = MRouterUIViewController(SwitchBackgroundDelegate) {
     App()
 }
 

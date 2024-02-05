@@ -48,6 +48,7 @@ kotlin {
             @OptIn(ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
             implementation(project(":core"))
+            implementation(project(":lifecycle"))
         }
     }
 }
