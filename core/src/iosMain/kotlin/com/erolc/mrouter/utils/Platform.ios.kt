@@ -1,8 +1,6 @@
 package com.erolc.mrouter.utils
 
 
-import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
@@ -14,6 +12,8 @@ import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.window.WindowSize
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import platform.UIKit.UIScreen
 
 @Composable
@@ -22,6 +22,7 @@ actual fun Platform(content: @Composable () -> Unit) {
 }
 
 
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun PlatformWindow(
     options: WindowOptions,
@@ -48,6 +49,7 @@ fun DialogOptions.asProperties(): DialogProperties {
         Color.Transparent
     )
 }
+
 @Composable
 actual fun PlatformDialog(
     onDismissRequest: () -> Unit,

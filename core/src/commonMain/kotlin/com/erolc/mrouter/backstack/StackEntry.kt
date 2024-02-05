@@ -3,23 +3,15 @@ package com.erolc.mrouter.backstack
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.lifecycle.Lifecycle
 import com.erolc.mrouter.lifecycle.LifecycleOwner
 import com.erolc.mrouter.lifecycle.LifecycleRegistry
-import com.erolc.mrouter.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
-import kotlin.math.abs
 
 
 /**

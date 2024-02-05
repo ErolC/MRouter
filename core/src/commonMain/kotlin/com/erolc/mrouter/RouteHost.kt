@@ -6,8 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
+import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.utils.log
 
 @Composable
 fun RouteHost(startRoute: String, builder: RegisterBuilder.() -> Unit) {
@@ -19,7 +22,9 @@ fun RouteHost(startRoute: String, builder: RegisterBuilder.() -> Unit) {
 @Composable
 fun RouteHost(router: MRouter) {
     val backStack by router.getRootBlackStack()
-    backStack.forEach { it.Content(Modifier) }
+    backStack.forEach {
+        (it as? WindowEntry)?.Content(Modifier)
+    }
 }
 
 
@@ -31,7 +36,7 @@ internal fun Transforms(target:StackEntry?,transform:ContentTransform) {
     val transition = updateTransition(targetState = target)
     //这里还需要做的就是根据isBack 去更改动画效果
     transition.AnimatedContent(transitionSpec = { transform }) {
-        it?.Content(Modifier)
+        (it as? PageEntry)?.Content(Modifier)
     }
 }
 

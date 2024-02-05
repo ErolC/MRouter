@@ -16,6 +16,7 @@ import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.scope.default
 import com.erolc.mrouter.utils.PlatformWindow
+import com.erolc.mrouter.utils.log
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 

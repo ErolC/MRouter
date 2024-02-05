@@ -3,6 +3,6 @@ package com.erolc.mrouter.lifecycle
 import androidx.compose.runtime.Composable
 
 @Composable
-fun SystemLifecycle(call:(Lifecycle.Event)->Unit){
-
+actual fun SystemLifecycle(call: (Lifecycle.Event) -> Unit) {
+    localLifecycleDelegate.current.onCall(call)
 }
