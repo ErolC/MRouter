@@ -20,9 +20,11 @@ import com.erolc.mrouter.utils.log
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
-class WindowEntry(val options: WindowOptions) :
+class WindowEntry(internal var options: WindowOptions) :
     StackEntry(WindowScope().apply { name = options.id }, Address(options.id)) {
     internal lateinit var pageRouter: PageRouter
+
+    internal val isCloseWindow = mutableStateOf(false)
 
     init {
         getScope().onClose = { close() }
@@ -32,7 +34,9 @@ class WindowEntry(val options: WindowOptions) :
 
     fun close(): Boolean {
         getScope().onLifeEvent(Lifecycle.Event.ON_DESTROY)
-        return (pageRouter.parentRouter as WindowRouter).close(this)
+        val isExit = (pageRouter.parentRouter as WindowRouter).close(this)
+        isCloseWindow.value = false
+        return isExit
     }
 
     @Composable

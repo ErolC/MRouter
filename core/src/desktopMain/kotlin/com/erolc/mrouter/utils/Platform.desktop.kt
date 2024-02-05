@@ -5,6 +5,8 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -20,6 +22,8 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.window.WindowSize
 import com.erolc.mrouter.window.toDimension
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 
@@ -44,26 +48,33 @@ actual fun PlatformWindow(
     val event = if (state.isMinimized) Lifecycle.Event.ON_PAUSE else Lifecycle.Event.ON_RESUME
     entry.getScope().onLifeEvent(event)
     entry.getScope().windowSize.value = size
+    entry.options = options.copy(position = DpOffset(state.position.x,state.position.y), size = state.size)
+    val scope = rememberCoroutineScope()
     val application =
         LocalApplication.current
             ?: throw RuntimeException("请使用mRouterApplication替代原本的application")
-    Window(
-        title = options.title,
-        icon = options.icon,
-        onCloseRequest = {
-            val isExit = entry.close()
-            if (isExit) application.exitApplication()
-        },
-        state = state
-    ) {
-        val minimumSize by rememberUpdatedState(options.minimumSize.toDimension())
-        val maximumSize by rememberUpdatedState(options.maximumSize)
-        window.minimumSize = minimumSize
-        if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
-        //todo 需要考虑menu
-        content()
-    }
-
+    var isCloseWindow by remember { entry.isCloseWindow }
+    if (!isCloseWindow)
+        Window(
+            title = options.title,
+            icon = options.icon,
+            onCloseRequest = {
+                isCloseWindow = true
+                scope.launch {
+                    delay(1000)
+                    val isExit = entry.close()
+                    if (isExit) application.exitApplication()
+                }
+            },
+            state = state
+        ) {
+            val minimumSize by rememberUpdatedState(options.minimumSize.toDimension())
+            val maximumSize by rememberUpdatedState(options.maximumSize)
+            window.minimumSize = minimumSize
+            if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
+            //todo 需要考虑menu
+            content()
+        }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

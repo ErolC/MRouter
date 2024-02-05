@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -43,7 +44,7 @@ fun App() {
             page("greet") {
                 GreetingPage()
             }
-            page("second"){
+            page("second") {
                 Second()
             }
             page("home") {
@@ -102,7 +103,7 @@ fun Second() {
             Text("back:${args.getData<Int>("key")}")
         }
         Button(onClick = {
-            scope.route("greet"){
+            scope.route("greet") {
             }
         }) {
             Text(greetingText)
@@ -156,9 +157,13 @@ fun Home() {
         items(list) {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                 scope.route("second?key=123") {
-                    dialog{
-                        enter = slideInVertically()
-                        exit = slideOutVertically()
+//                    dialog{
+//                        enter = slideInVertically()
+//                        exit = slideOutVertically()
+//                    }
+                    window("second", "second") {
+                        position = DpOffset(100.dp, 100.dp)
+                        alignment = null
                     }
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")

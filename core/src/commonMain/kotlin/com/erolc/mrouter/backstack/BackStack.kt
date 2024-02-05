@@ -50,6 +50,7 @@ open class BackStack(val name: String) {
         } else false
     }
 
+
     /**
      * 找对应的条目
      */
