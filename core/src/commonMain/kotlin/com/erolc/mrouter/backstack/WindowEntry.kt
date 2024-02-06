@@ -4,8 +4,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Transforms
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.Route
@@ -39,23 +43,25 @@ class WindowEntry(internal var options: WindowOptions) :
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalWindowScope provides getScope()) {
             PlatformWindow(options, this) {
-                val backStacks by pageRouter.getBackStack().collectAsState()
-                var size by remember { mutableStateOf(0) }
-                //是否是後退
-                val isBack = remember(backStacks) {
-                    val stackSize = backStacks.size
-                    val isBack = size > stackSize
-                    size = stackSize
-                    isBack
+                Box(modifier.fillMaxSize().background(Color.Black)){
+                    val backStacks by pageRouter.getBackStack().collectAsState()
+                    var size by remember { mutableStateOf(0) }
+                    //是否是後退
+                    val isBack = remember(backStacks) {
+                        val stackSize = backStacks.size
+                        val isBack = size > stackSize
+                        size = stackSize
+                        isBack
+                    }
+                    val target = remember(backStacks) {
+                        backStacks.lastOrNull()
+                    }
+                    Transforms(target, slideInHorizontally(tween()) {
+                        if (isBack) -it else it
+                    } togetherWith slideOutHorizontally(tween()) {
+                        if (isBack) it else -1
+                    })
                 }
-                val target = remember(backStacks) {
-                    backStacks.lastOrNull()
-                }
-                Transforms(target, slideInHorizontally(tween()) {
-                    if (isBack) -it else it
-                } togetherWith slideOutHorizontally(tween()) {
-                    if (isBack) it else -1
-                })
             }
         }
     }

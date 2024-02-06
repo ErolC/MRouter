@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
 import com.erolc.mrouter.route.Router
 
@@ -20,9 +21,9 @@ class MRouter private constructor() {
      */
 
     companion object {
-        internal fun getMRouter(startTarget: String, builder: RegisterBuilder.() -> Unit): MRouter {
+        internal fun getMRouter(startTarget: String,windowOptions: WindowOptions, builder: RegisterBuilder.() -> Unit): MRouter {
             return MRouter().apply {
-                router = RegisterBuilder().apply(builder).builder(startTarget)
+                router = RegisterBuilder().apply(builder).builder(startTarget,windowOptions)
             }
         }
     }

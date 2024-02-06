@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import com.erolc.mrouter.model.WindowState
 import java.awt.*
 import java.awt.event.ComponentListener
 import java.awt.event.WindowListener
@@ -254,3 +255,10 @@ fun DpSize.toDimension() = Dimension(width.value.toInt(), height.value.toInt())
 
 @Composable
 fun Size.toDimension() = Dimension(width.toInt(), height.toInt())
+
+
+fun WindowState.toPlacement() = when (this) {
+    WindowState.Floating -> WindowPlacement.Floating
+    WindowState.Maximized -> WindowPlacement.Maximized
+    WindowState.Fullscreen -> WindowPlacement.Fullscreen
+}

@@ -9,13 +9,25 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
 import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.window.WindowOptionsBuilder
 
+/**
+ * 路由起点
+ * @param startRoute 是路由的第一个页面
+ * @param windowOptions 是window的配置，只有桌面端才有用
+ * @param builder 用于注册的构建方法。[startRoute]对应的页面需要也在其中
+ */
 @Composable
-fun RouteHost(startRoute: String, builder: RegisterBuilder.() -> Unit) {
+fun RouteHost(
+    startRoute: String,
+    windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, ""),
+    builder: RegisterBuilder.() -> Unit
+) {
     RouteHost(remember(startRoute, builder) {
-        MRouter.getMRouter(startRoute, builder)
+        MRouter.getMRouter(startRoute, windowOptions, builder)
     })
 }
 
@@ -32,9 +44,8 @@ fun RouteHost(router: MRouter) {
  * 无手势版的页面切换
  */
 @Composable
-internal fun Transforms(target:StackEntry?,transform:ContentTransform) {
+internal fun Transforms(target: StackEntry?, transform: ContentTransform) {
     val transition = updateTransition(targetState = target)
-    //这里还需要做的就是根据isBack 去更改动画效果
     transition.AnimatedContent(transitionSpec = { transform }) {
         (it as? PageEntry)?.Content(Modifier)
     }

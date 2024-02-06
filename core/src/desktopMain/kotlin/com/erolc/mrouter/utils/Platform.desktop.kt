@@ -14,6 +14,7 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.scope.rememberInWindow
 import com.erolc.mrouter.window.WindowSize
 import com.erolc.mrouter.window.toDimension
+import com.erolc.mrouter.window.toPlacement
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -32,6 +33,7 @@ actual fun PlatformWindow(
 ) {
     val state = rememberInWindow(key = "windowState") {
         WindowState(
+            placement = options.state.toPlacement(),
             position = options.alignment?.let { WindowPosition(it) } ?: WindowPosition(
                 options.position.x,
                 options.position.y
@@ -71,7 +73,7 @@ actual fun PlatformWindow(
     else {
         entry.getScope().onLifeEvent(Lifecycle.Event.ON_DESTROY)
         LaunchedEffect(Unit) {
-            delay(100)
+            delay(10)
             entry.close()
         }
         if (entry.shouldExit())

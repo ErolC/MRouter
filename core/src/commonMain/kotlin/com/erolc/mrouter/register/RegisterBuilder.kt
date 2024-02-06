@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.model.PageConfig
+import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.Router
 import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.route.routeBuild
@@ -74,10 +75,10 @@ class RegisterBuilder internal constructor() {
     }
 
 
-    internal fun builder(startRoute: String): WindowRouter {
+    internal fun builder(startRoute: String, options: WindowOptions): WindowRouter {
         //构建路由器并路由到初始页面
         return WindowRouter(addresses).apply {
-            dispatchRoute(routeBuild(startRoute))
+            dispatchRoute(routeBuild(startRoute).copy(windowOptions = options))
         }
     }
 

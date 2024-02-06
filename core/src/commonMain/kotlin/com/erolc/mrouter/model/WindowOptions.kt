@@ -28,5 +28,6 @@ data class WindowOptions(
     val maximumSize: DpSize = DpSize.Unspecified,
     val size: DpSize = DpSize(800.dp, 720.dp),
     val position: DpOffset = DpOffset.Zero,
-    val alignment: Alignment? = Alignment.Center
+    val alignment: Alignment? = Alignment.Center,
+    val state: WindowState = WindowState.Floating
 )

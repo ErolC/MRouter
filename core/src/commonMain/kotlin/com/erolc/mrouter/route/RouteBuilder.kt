@@ -8,10 +8,15 @@ import com.erolc.mrouter.utils.isMobile
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.window.WindowOptionsBuilder
 
-
+/**
+ * 构建路由的方法
+ */
 fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Route =
     RouteBuilder().apply(optionsBuilder).build(route)
 
+/**
+ * 路由构建类，用于构建路由到下一个页面所需的一些参数其中包括：形态（window/dialog/page），参数，回调等。
+ */
 class RouteBuilder {
     private var onResult: (Args) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, "")
@@ -43,7 +48,7 @@ class RouteBuilder {
     /**
      * 以[id]对应的窗口打开，如果没有则创建一个新窗口打开，
      * 需要注意1：ios和android都只有一个窗口，所以目前可以以多窗口模式运行的只有desktop
-     * 需要注意2：由于目前的设计思路，窗口的关闭只能按照创建的反顺序关闭，否则会有意想不到的效果
+     * 在桌面端以外的场景，[window]是不起作用的
      * @param id 窗口的id
      * @param builder 窗口的设置
      */

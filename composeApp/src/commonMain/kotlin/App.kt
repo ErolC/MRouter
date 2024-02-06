@@ -1,5 +1,4 @@
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -22,13 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.register.page
-import com.erolc.mrouter.route.BackInterceptor
 import com.erolc.mrouter.route.Exit
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
@@ -157,14 +154,12 @@ fun Home() {
         items(list) {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                 scope.route("second?key=123") {
-//                    dialog{
+//                    dialog {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
 //                    }
-                    window("second", "second") {
-                        position = DpOffset(100.dp, 100.dp)
-                        alignment = null
-                    }
+//                    window("second", "second")
+
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }
