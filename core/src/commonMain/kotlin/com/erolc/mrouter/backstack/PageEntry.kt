@@ -10,6 +10,7 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 class PageEntry internal constructor(
@@ -80,8 +81,7 @@ class PageEntry internal constructor(
 
     fun onPause() {
         logi("tag", "$this onPause")
-        handleLifecycleEvent(currentEvent)
-
+        handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     }
 
     fun onDestroy() {
@@ -92,6 +92,7 @@ class PageEntry internal constructor(
     private fun create() {
         currentEvent = Lifecycle.Event.ON_CREATE
         onCreate()
+
     }
 
     private fun resume() {
@@ -103,8 +104,8 @@ class PageEntry internal constructor(
 
     private fun pause() {
         if (currentEvent.targetState == Lifecycle.State.RESUMED) {
-            currentEvent = Lifecycle.Event.ON_PAUSE
             onPause()
+            currentEvent = Lifecycle.Event.ON_PAUSE
         }
     }
 

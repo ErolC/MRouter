@@ -24,37 +24,33 @@ class WindowEntry(internal var options: WindowOptions) :
     StackEntry(WindowScope().apply { name = options.id }, Address(options.id)) {
     internal lateinit var pageRouter: PageRouter
 
-    internal val isCloseWindow = mutableStateOf(false)
-
-    init {
-        getScope().onClose = { close() }
-    }
-
     internal fun getScope() = scope as WindowScope
 
     fun close(): Boolean {
-        getScope().onLifeEvent(Lifecycle.Event.ON_DESTROY)
-        val isExit = (pageRouter.parentRouter as WindowRouter).close(this)
-        isCloseWindow.value = false
-        return isExit
+         (pageRouter.parentRouter as WindowRouter).close(this)
+        return shouldExit()
+    }
+
+    fun shouldExit(): Boolean {
+        return (pageRouter.parentRouter as WindowRouter).backStack.isBottom()
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
-        PlatformWindow(options, this) {
-            val backStacks by pageRouter.getBackStack().collectAsState()
-            var size by remember { mutableStateOf(0) }
-            //是否是後退
-            val isBack = remember(backStacks) {
-                val stackSize = backStacks.size
-                val isBack = size > stackSize
-                size = stackSize
-                isBack
-            }
-            val target = remember(backStacks) {
-                backStacks.lastOrNull()
-            }
-            CompositionLocalProvider(LocalWindowScope provides getScope()) {
+        CompositionLocalProvider(LocalWindowScope provides getScope()) {
+            PlatformWindow(options, this) {
+                val backStacks by pageRouter.getBackStack().collectAsState()
+                var size by remember { mutableStateOf(0) }
+                //是否是後退
+                val isBack = remember(backStacks) {
+                    val stackSize = backStacks.size
+                    val isBack = size > stackSize
+                    size = stackSize
+                    isBack
+                }
+                val target = remember(backStacks) {
+                    backStacks.lastOrNull()
+                }
                 Transforms(target, slideInHorizontally(tween()) {
                     if (isBack) -it else it
                 } togetherWith slideOutHorizontally(tween()) {

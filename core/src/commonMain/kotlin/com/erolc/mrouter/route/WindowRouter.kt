@@ -38,12 +38,9 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
     /**
      * @return 是否需要退出应用
      */
-    internal fun close(entry: WindowEntry): Boolean {
-        return if (backStack.isBottom())
-            true
-        else {
+    internal fun close(entry: WindowEntry) {
+        if (!backStack.isBottom()) {
             backStack.remove(entry.address.path)
-            false
         }
     }
 
