@@ -1,14 +1,14 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.DialogRouter
+import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
@@ -25,8 +25,16 @@ class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        super.Content(modifier)
+        val inDialog = scope.router.parentRouter is DialogRouter
+        CompositionLocalProvider(LocalPageScope provides scope) {
+            SysBackPressed { scope.backPressed() }
+            Box(modifier) {
+                address.content()
+            }
+        }
+
         Lifecycle()
+
         scope.router.getBackStack().collectAsState().let {
             val stack by remember { it }
             stack.forEach {

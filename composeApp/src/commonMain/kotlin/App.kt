@@ -21,6 +21,7 @@ import androidx.compose.ui.zIndex
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.LocalWindowScope
 import com.erolc.mrouter.register.page
+import com.erolc.mrouter.route.BackInterceptor
 import com.erolc.mrouter.route.Exit
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
@@ -79,7 +80,6 @@ fun GreetingPage() {
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun Second() {
     var greetingText by remember { mutableStateOf("Hello World!") }
@@ -154,7 +154,9 @@ fun Home() {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
 //                    }
-//                    window("second", "second")
+//                    window("second", "second"){
+//                        alwaysOnTop = true
+//                    }
 
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
@@ -164,8 +166,6 @@ fun Home() {
         }
     }
 }
-
-
 
 
 @OptIn(ExperimentalMaterialApi::class)

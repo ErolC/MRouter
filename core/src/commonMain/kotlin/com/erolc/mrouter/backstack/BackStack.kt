@@ -16,9 +16,9 @@ open class BackStack(val name: String) {
     val backStack: StateFlow<List<StackEntry>> = _backstack.asStateFlow()
 
     /**
-     * 阈值
+     * 阈值，这个值将指示当后退栈到达底部的时机
      */
-    internal var threshold = 1
+    var threshold = 1
 
     fun addEntry(entry: StackEntry) {
         _backstack.value += entry
@@ -26,7 +26,7 @@ open class BackStack(val name: String) {
 
     val size: Int get() = _backstack.value.size
 
-    fun isBottom() = size == 1
+    fun isBottom() = size == threshold
 
     fun isEmpty() = size == 0
 

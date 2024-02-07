@@ -43,13 +43,14 @@ fun BackInterceptor(enabled: Boolean = true, onBack: BackPressedHandler.() -> Un
     val scope = LocalPageScope.current
     val currentOnBack by rememberUpdatedState(onBack)
 
-    val interceptor = remember {
+    val interceptor = remember(enabled) {
         object : BackInterceptor(enabled) {
             override fun onIntercept(callBack: BackPressedHandler) {
                 currentOnBack(callBack)
             }
         }
     }
+
     SideEffect {
         interceptor.isEnabled = enabled
     }
@@ -66,13 +67,15 @@ abstract class BackInterceptor(internal var isEnabled: Boolean) {
 }
 
 interface BackPressedHandler {
+
     /**
      * 后退，该后退事件将不会再拦截
      */
     fun backPressed()
+
 }
 
-class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPressedHandler {
+internal class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPressedHandler {
     override fun backPressed() {
         onBack()
     }

@@ -28,6 +28,8 @@ class MRouter private constructor() {
         }
     }
 
+
+
     @Composable
     internal fun getRootBlackStack(): State<List<StackEntry>> {
         return router.getBackStack().collectAsState(listOf<WindowEntry>())

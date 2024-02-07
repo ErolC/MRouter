@@ -1,6 +1,8 @@
 package com.erolc.mrouter.backstack
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -19,6 +21,7 @@ import com.erolc.mrouter.route.PageRouter
 import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.scope.default
+import com.erolc.mrouter.utils.PageShow
 import com.erolc.mrouter.utils.PlatformWindow
 import com.erolc.mrouter.utils.log
 
@@ -31,7 +34,7 @@ class WindowEntry(internal var options: WindowOptions) :
     internal fun getScope() = scope as WindowScope
 
     fun close(): Boolean {
-         (pageRouter.parentRouter as WindowRouter).close(this)
+        (pageRouter.parentRouter as WindowRouter).close(this)
         return shouldExit()
     }
 
@@ -43,24 +46,10 @@ class WindowEntry(internal var options: WindowOptions) :
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalWindowScope provides getScope()) {
             PlatformWindow(options, this) {
-                Box(modifier.fillMaxSize().background(Color.Black)){
-                    val backStacks by pageRouter.getBackStack().collectAsState()
-                    var size by remember { mutableStateOf(0) }
-                    //是否是後退
-                    val isBack = remember(backStacks) {
-                        val stackSize = backStacks.size
-                        val isBack = size > stackSize
-                        size = stackSize
-                        isBack
-                    }
-                    val target = remember(backStacks) {
-                        backStacks.lastOrNull()
-                    }
-                    Transforms(target, slideInHorizontally(tween()) {
-                        if (isBack) -it else it
-                    } togetherWith slideOutHorizontally(tween()) {
-                        if (isBack) it else -1
-                    })
+                Box(modifier.fillMaxSize().background(Color.Black)) {
+                    val stack by pageRouter.getPlayStack().collectAsState(listOf())
+                    updateTransition(targetState = stack).PageShow()
+//                    Transforms()
                 }
             }
         }

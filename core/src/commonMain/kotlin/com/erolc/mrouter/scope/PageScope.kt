@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.Router
@@ -23,12 +24,13 @@ open class PageScope {
     internal lateinit var router: Router
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
-
-    var lifecycle: Lifecycle? = null
+    private lateinit var _lifecycle: Lifecycle
+    var lifecycle: Lifecycle
         internal set(value) {
-            if (value != null) initLifeCycle(value)
-            field = value
+            initLifeCycle(value)
+            _lifecycle = value
         }
+        get() = _lifecycle
 
     private fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
@@ -95,7 +97,7 @@ open class PageScope {
         values[key] = value
     }
 
-    fun addBackInterceptor(interceptor: BackInterceptor) {
+    internal fun addBackInterceptor(interceptor: BackInterceptor) {
         interceptors.add(interceptor)
     }
 
@@ -106,3 +108,15 @@ fun rememberArgs(): Args {
     val args by LocalPageScope.current.argsFlow.collectAsState()
     return args
 }
+
+@Composable
+fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+    val scope = LocalPageScope.current
+    scope.addEventObserver(body)
+}
+
+
+fun PageScope.addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+    lifecycle.addEventObserver(body)
+}
+

@@ -1,10 +1,9 @@
 package com.erolc.mrouter
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
@@ -44,11 +43,30 @@ fun RouteHost(router: MRouter) {
  * 无手势版的页面切换
  */
 @Composable
-internal fun Transforms(target: StackEntry?, transform: ContentTransform) {
+internal fun WindowEntry.Transforms() {
+    val backStacks by pageRouter.getBackStack().collectAsState()
+    var size by remember { mutableStateOf(0) }
+    //是否是後退
+    val isBack = remember(backStacks) {
+        val stackSize = backStacks.size
+        val isBack = size > stackSize
+        size = stackSize
+        isBack
+    }
+    val target = remember(backStacks) {
+        backStacks.lastOrNull()
+    }
     val transition = updateTransition(targetState = target)
-    transition.AnimatedContent(transitionSpec = { transform }) {
+    transition.AnimatedContent(transitionSpec = {
+        slideInHorizontally(tween()) {
+            if (isBack) -it else it
+        } togetherWith slideOutHorizontally(tween()) {
+            if (isBack) it else -1
+        }
+    }) {
         (it as? PageEntry)?.Content(Modifier)
     }
+
 }
 
 

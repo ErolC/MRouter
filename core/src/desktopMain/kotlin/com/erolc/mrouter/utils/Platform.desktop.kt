@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.*
-import com.erolc.mrouter.LocalApplication
+import com.erolc.mrouter.LocalApplicationScope
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.lifecycle.Lifecycle
@@ -51,13 +51,14 @@ actual fun PlatformWindow(
     entry.getScope().windowSize.value = size
     entry.options = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
     val application =
-        LocalApplication.current
-            ?: throw RuntimeException("请使用mRouterApplication替代原本的application")
+        LocalApplicationScope.current
     var isCloseWindow by rememberInWindow(key = "isCloseWindow") { entry.getScope().isCloseWindow }
     if (!isCloseWindow)
         Window(
             title = options.title,
             icon = options.icon,
+            alwaysOnTop = options.alwaysOnTop,
+            resizable = options.resizable,
             onCloseRequest = {
                 isCloseWindow = true
             },

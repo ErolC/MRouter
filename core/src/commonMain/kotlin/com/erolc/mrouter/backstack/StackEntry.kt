@@ -30,14 +30,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
         get() = registry
 
     @Composable
-    open fun Content(modifier: Modifier = Modifier) {
-        CompositionLocalProvider(LocalPageScope provides scope) {
-            SysBackPressed { scope.backPressed() }
-            Box(modifier) {
-                address.content()
-            }
-        }
-    }
+    open fun Content(modifier: Modifier = Modifier) {}
 
 
     open fun handleLifecycleEvent(event: Lifecycle.Event) {

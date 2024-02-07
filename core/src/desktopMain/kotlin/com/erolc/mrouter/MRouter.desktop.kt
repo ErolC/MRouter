@@ -6,15 +6,16 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import kotlinx.coroutines.Dispatchers
 
-internal val LocalApplication: ProvidableCompositionLocal<ApplicationScope?> = staticCompositionLocalOf { null }
+val LocalApplicationScope: ProvidableCompositionLocal<ApplicationScope> = staticCompositionLocalOf {
+    throw RuntimeException("请使用mRouterApplication替代原本的application")
+}
 
 
 fun mRouterApplication(content: @Composable () -> Unit) {
 //    FlatIntelliJLaf.setup()
     application {
-        CompositionLocalProvider(LocalApplication provides this) {
+        CompositionLocalProvider(LocalApplicationScope provides this) {
             content()
         }
     }
