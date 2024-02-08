@@ -49,7 +49,7 @@ class PageRouter(
     }
 
     fun getPlayStack() = backStack.backStack.map {
-        it.takeLast(3)
+        it.takeLast(2)
     }
 
 

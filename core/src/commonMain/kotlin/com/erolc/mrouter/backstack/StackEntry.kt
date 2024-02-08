@@ -26,8 +26,7 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
         scope.lifecycle = registry
     }
 
-    override val lifecycle: Lifecycle
-        get() = registry
+    override val lifecycle: Lifecycle get() = registry
 
     @Composable
     open fun Content(modifier: Modifier = Modifier) {}

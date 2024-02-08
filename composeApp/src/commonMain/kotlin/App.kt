@@ -1,4 +1,8 @@
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -86,7 +90,7 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White),
+        Modifier.fillMaxSize().background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {

@@ -103,14 +103,14 @@ class PageEntry internal constructor(
 
     }
 
-    private fun resume() {
+    internal fun resume() {
         if (currentEvent.targetState == Lifecycle.State.CREATED && shouldResume) {
             currentEvent = Lifecycle.Event.ON_RESUME
             onResume()
         }
     }
 
-    private fun pause() {
+    internal fun pause() {
         if (currentEvent.targetState == Lifecycle.State.RESUMED) {
             onPause()
             currentEvent = Lifecycle.Event.ON_PAUSE
