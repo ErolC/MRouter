@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.runtime.*
 
 
@@ -41,6 +42,41 @@ enum class PageState {
     Init,
     Opening,
 }
+
+
+@Composable
+fun Transition<List<StackEntry>>.PageTransition(modifier: Modifier = Modifier) {
+    val pageState = remember(targetState, currentState) {
+        if (currentState.isInit(targetState)) PageState.Init
+        else {
+            if (currentState.isBack(targetState)) PageState.Closing else PageState.Opening
+        }
+    }
+    val state = when(pageState){
+        PageState.Init -> 0
+        PageState.Opening -> 100
+        PageState.Closing -> -100
+    }
+    //当从100/-100变为0的阶段为重置，将不再执行tran
+    val tran = updateTransition(state)
+    tran.PageTransition({
+        targetState.firstOrNull()?.Content(modifier)
+    },{
+        targetState.lastOrNull()?.Content(modifier)
+    })
+}
+
+/**
+ * 这里将不在使用PageState，而是使用数字0～100为打开，0～-100为关闭。
+ */
+@Composable
+fun Transition<Int>.PageTransition(currentPage:@Composable ()->Unit,targetPage:@Composable ()->Unit) {
+    //当前界面，是当前显示的界面
+    currentPage()
+    //目标界面，如果pageState是opening，那么它将是未打开的界面，如果是closing，那么它将是在当前界面下的前页面。
+    targetPage()
+}
+
 
 /**
  *
