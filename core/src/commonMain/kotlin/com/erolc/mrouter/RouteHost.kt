@@ -11,6 +11,7 @@ import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
 import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.WindowOptionsBuilder
 
 /**
@@ -45,6 +46,7 @@ fun RouteHost(router: MRouter) {
 @Composable
 internal fun WindowEntry.Transforms() {
     val backStacks by pageRouter.getBackStack().collectAsState()
+    loge("tag","__ $backStacks")
     var size by remember { mutableStateOf(0) }
     //是否是後退
     val isBack = remember(backStacks) {

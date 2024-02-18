@@ -47,7 +47,7 @@ class WindowEntry(internal var options: WindowOptions) :
         CompositionLocalProvider(LocalWindowScope provides getScope()) {
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
-                    val stack by pageRouter.getPlayStack().collectAsState(listOf())
+                    val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
                     updateTransition(targetState = stack).PageShow()
 //                    Transforms()
                 }

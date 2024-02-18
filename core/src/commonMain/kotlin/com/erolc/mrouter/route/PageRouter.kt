@@ -1,18 +1,12 @@
 package com.erolc.mrouter.route
 
 
-import androidx.compose.runtime.collectAsState
-import com.erolc.mrouter.backstack.DialogEntry
 import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
-import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.scope.getScope
-import com.erolc.mrouter.utils.loge
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 
 /**
  * 路由器实现
