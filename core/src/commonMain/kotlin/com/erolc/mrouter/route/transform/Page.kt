@@ -56,71 +56,12 @@ internal data object Resume : TransformState(1f)
 /**
  * 暂停状态；代表后一个页面已经显示了，当前界面已经变为前一个页面，该页面暂停
  */
-internal data object PauseState : TransformState(1f)
+internal data object PauseState : TransformState(0f)
 
 /**
  * 过渡状态，上述三种状态的中间态，该数据类的使用一般在在于手势。
  */
 internal data class TransitionState(override val progress: Float) : TransformState(progress)
-
-/**
- * 只能用在页面切换中，这里之所以使用List<StackEntry>是由于我希望的是在一次显示中不单单只有当前界面，还会有当前页面的前一个页面，哪怕前一个页面完全被遮挡，
- * 因为有些场景下，前一个页面不会被完全遮挡掉的，比如modal，比如加上了手势操作之后的返回。在手势操作的返回下，就必须存在两个页面，否则拉开当前界面时，下面就是window的背景。
- */
-@Composable
-fun Transition<List<StackEntry>>.PageTransform(pageRouter: PageRouter, modifier: Modifier = Modifier) {
-
-    val pageState = remember(targetState, currentState) {
-        if (currentState.isInit(targetState)) PageState.Init
-        else if (currentState.isBack(targetState)) PageState.Close else PageState.Open
-    }
-
-
-
-    when (pageState) {
-        PageState.Init -> {
-            val resume = currentState.last() as PageEntry
-            if (currentState.size == 2) {
-                val current = currentState.first() as PageEntry
-                val state by remember { resume.transformState }
-                current.run {
-                    Content(modifier)
-                    when (state) {
-                        Resume -> transformState.value = PauseState
-                        is TransitionState -> transformState.value = TransitionState(1f - state.progress)
-                        PostExit -> transformState.value = Resume
-                        else -> {}
-                    }
-                }
-            }
-
-            resume.run {
-                //如果只有一个页面,且是退出状态，那么就是初始界面
-                scope.rememberTransform().apply {
-                    if (exitFinished)
-                        pageRouter.backStack.pop()
-                }
-                Content(modifier)
-                //先显示后设置状态是为了产生动画
-                transformState.value = Resume
-            }
-        }
-
-        PageState.Close -> {
-            val current = currentState.first() as PageEntry
-            current.Content(modifier)
-            current.transformState.value = Resume
-        }
-
-        PageState.Open -> {
-            val current = targetState.first() as PageEntry
-            val resume = targetState.last() as PageEntry
-            current.transform.value = current.transform.value.copy(prev = resume.transform.value.prev)
-            current.Content(modifier)
-            resume.Content(modifier)
-        }
-    }
-}
 
 
 @OptIn(ExperimentalTransitionApi::class)

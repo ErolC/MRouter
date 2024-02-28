@@ -24,9 +24,9 @@ fun normal() = Transform()
 @Stable
 fun fadeIn(
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
-    initialAlpha: Float = 0f
+    initialOffset: Float = 0f
 ): EnterTransition {
-    return EnterTransitionImpl(TransformData(fade = Fade(initialAlpha, animationSpec)))
+    return EnterTransitionImpl(TransformData(fade = Fade(initialOffset, animationSpec)))
 }
 
 @Stable
@@ -761,12 +761,13 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
 internal val InvalidSize = IntSize(Int.MIN_VALUE, Int.MIN_VALUE)
 
 internal fun ExitTransition.getAlignment(): Alignment? {
-    return data.changeSize?.let {
-        if (isReverse) {
-            val value = it.alignment as BiasAlignment
-            value.copy(value.horizontalBias * -1, value.verticalBias * -1)
-        } else it.alignment
-    }
+//    return data.changeSize?.let {
+//        if (isReverse) {
+//            val value = it.alignment as BiasAlignment
+//            value.copy(value.horizontalBias * -1, value.verticalBias * -1)
+//        } else it.alignment
+//    }
+    return data.changeSize?.alignment
 }
 
 internal fun interface GraphicsLayerBlockForTransform {
@@ -832,7 +833,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             when (it) {
                 Resume -> 1f
                 PreEnter -> enter.data.fade?.alpha ?: 1f
-                PostExit -> 0f
+                PostExit -> exit.data.fade?.alpha?: 1f
                 PauseState -> pause.data.fade?.alpha ?: 1f
                 else -> it.progress
             }
@@ -842,7 +843,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             transitionSpec = {
                 when {
                     PreEnter isTransitioningTo Resume -> enter.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    Resume isTransitioningTo PostExit -> exit.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
+                    Resume isTransitioningTo PostExit -> exit.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
                     Resume isTransitioningTo PauseState -> pause.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
                     PauseState isTransitioningTo Resume -> pause.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
                     else -> DefaultAlphaAndScaleSpring
@@ -852,11 +853,8 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             when (it) {
                 Resume -> 1f
                 PreEnter -> enter.data.scale?.scale ?: 1f
-                PostExit -> exit.data.scale?.let {
-                    if (exit.isReverse) 1f - it.scale else it.scale
-                } ?: 1f
-
-                PauseState -> pause.data.scale?.scale ?: 1f
+                PostExit -> exit.data.scale?.scale ?: 1f
+                PauseState -> pause.data.scale?.scale ?: 0f
                 else -> it.progress
             }
         }
@@ -885,6 +883,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
 
         val block: GraphicsLayerScope.() -> Unit = {
             this.alpha = alpha?.value ?: progressAlpha
+            loge("tag","alpha:${alpha?.value} __ $shouldAnimateAlpha")
             this.scaleX = scale?.value ?: progressScale
             this.scaleY = scale?.value ?: progressScale
             this.transformOrigin =

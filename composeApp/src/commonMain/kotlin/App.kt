@@ -93,7 +93,7 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.fillMaxSize().background(Color.White),
+        Modifier.background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
@@ -167,9 +167,9 @@ fun Home() {
                     transform {
 //                        enter = expandHorizontally()
 //                        exit = shrinkHorizontally()
-                        enter = fadeIn()
-//                        prev = fadeOut()
-                        exit = fadeOut()
+                        enter = scaleIn()
+                        prev = fadeOut()
+//                        exit = fadeOut()
                     }
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")

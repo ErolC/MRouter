@@ -40,8 +40,7 @@ class PageEntry internal constructor(
 
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
-//            val transform by remember { transform }
-//            if (transform == Transform.None)
+
             val state = remember(this) {
                 MutableTransitionState(transformState.value)
             }
@@ -56,7 +55,7 @@ class PageEntry internal constructor(
                 }
             }
             val transform by remember(this,transform) { transform }
-
+            if (transition.exitFinished) return@CompositionLocalProvider
             Box(transition.createModifier(transform, modifier, "Built-in")) {
                 address.content()
             }
@@ -124,7 +123,11 @@ class PageEntry internal constructor(
         }
         entry.transformState.value = when (state) {
             PreEnter, PostExit -> Resume
-            Resume, PauseState -> PauseState
+            Resume->{
+                entry.transform.value = entry.transform.value.copy(prev = transform.value.prev)
+                PauseState
+            }
+            PauseState -> PauseState
             is TransitionState -> TransitionState(1 - state.progress)
         }
         loge("TAG", "${state} shareLife ${entry.transformState.value}")
