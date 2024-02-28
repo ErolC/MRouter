@@ -1,29 +1,20 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.erolc.mrouter.Transforms
-import com.erolc.lifecycle.Lifecycle
-import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.PageRouter
 import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
-import com.erolc.mrouter.scope.default
-import com.erolc.mrouter.utils.PageShow
+import com.erolc.mrouter.route.transform.PageTransform
+import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
-import com.erolc.mrouter.utils.log
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
@@ -48,8 +39,15 @@ class WindowEntry(internal var options: WindowOptions) :
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
-                    updateTransition(targetState = stack).PageShow()
-//                    Transforms()
+//                     updateTransition(targetState = stack).PageTransform(pageRouter)
+                    if (stack.size == 1)
+                        (stack.first() as PageEntry).transformState.value = Resume
+                    else
+                        (stack.last() as PageEntry).ShareLife(stack.first() as PageEntry)
+
+                    stack.forEach {
+                        (it as PageEntry).Content(Modifier)
+                    }
                 }
             }
         }

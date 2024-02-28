@@ -1,6 +1,6 @@
 package com.erolc.mrouter.backstack
 
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.route.transform.PostExit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,9 +34,17 @@ open class BackStack(val name: String) {
      * 后退
      * @return 是否后退成功，只有在无法后退时才会后退失败，也就是下面没有过更多的页面可以后退了。
      */
-    fun pop(): Boolean {
+    internal fun pop(): Boolean {
         return if (_backstack.value.size > threshold) {
             _backstack.value -= _backstack.value.last().apply { destroy() }
+            true
+        } else false
+    }
+
+    fun back(): Boolean {
+        return if (_backstack.value.size > threshold) {
+            val resumePage = _backstack.value.last() as PageEntry
+            resumePage.transformState.value = PostExit
             true
         } else false
     }

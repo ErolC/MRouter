@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 
 
 class MainActivity : ComponentActivity() {
@@ -59,6 +60,7 @@ fun AnimatedScreen() {
     ) { offsetX ->
         offsetX/100
     }
+    androidx.compose.ui.res.stringResource(id = )
 
     val offsetXConstraint = if (offsetX == 0f) 0f else 200f
 
@@ -82,7 +84,7 @@ fun AnimatedScreen() {
                     detectDragGestures { change, dragAmount ->
                         val newOffsetX = offsetX + dragAmount.x
 
-                        if (newOffsetX in 0f .. offsetXConstraint) {
+                        if (newOffsetX in 0f..offsetXConstraint) {
                             offsetX = newOffsetX
                         }
                     }

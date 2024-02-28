@@ -1,7 +1,6 @@
 package com.erolc.mrouter.route
 
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.model.Route

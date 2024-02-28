@@ -27,12 +27,15 @@ import com.erolc.mrouter.backstack.LocalWindowScope
 import com.erolc.mrouter.register.page
 import com.erolc.mrouter.route.BackInterceptor
 import com.erolc.mrouter.route.Exit
+import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -77,7 +80,7 @@ fun GreetingPage() {
         }
         AnimatedVisibility(showImage) {
             Image(
-                painterResource("compose-multiplatform.xml"),
+                painterResource(DrawableResource("compose-multiplatform.xml")),
                 null
             )
         }
@@ -161,7 +164,13 @@ fun Home() {
 //                    window("second", "second"){
 //                        alwaysOnTop = true
 //                    }
-
+                    transform {
+//                        enter = expandHorizontally()
+//                        exit = shrinkHorizontally()
+                        enter = fadeIn()
+//                        prev = fadeOut()
+                        exit = fadeOut()
+                    }
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }

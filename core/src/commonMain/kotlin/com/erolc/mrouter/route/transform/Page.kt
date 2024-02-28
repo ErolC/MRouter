@@ -1,4 +1,4 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.route.transform
 
 import androidx.compose.animation.core.*
 import androidx.compose.ui.Modifier
@@ -6,7 +6,6 @@ import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
 import androidx.compose.runtime.*
 import com.erolc.mrouter.route.PageRouter
-import com.erolc.mrouter.route.transform.exitFinished
 import com.erolc.mrouter.scope.LocalPageScope
 
 
@@ -57,7 +56,7 @@ internal data object Resume : TransformState(1f)
 /**
  * 暂停状态；代表后一个页面已经显示了，当前界面已经变为前一个页面，该页面暂停
  */
-internal data object PauseState : TransformState(0f)
+internal data object PauseState : TransformState(1f)
 
 /**
  * 过渡状态，上述三种状态的中间态，该数据类的使用一般在在于手势。
@@ -75,6 +74,8 @@ fun Transition<List<StackEntry>>.PageTransform(pageRouter: PageRouter, modifier:
         if (currentState.isInit(targetState)) PageState.Init
         else if (currentState.isBack(targetState)) PageState.Close else PageState.Open
     }
+
+
 
     when (pageState) {
         PageState.Init -> {
@@ -95,20 +96,22 @@ fun Transition<List<StackEntry>>.PageTransform(pageRouter: PageRouter, modifier:
 
             resume.run {
                 //如果只有一个页面,且是退出状态，那么就是初始界面
-                if (currentState.size == 1 && transformState.value == PreEnter)
-                    transformState.value = Resume
-                scope.rememberTransition().apply {
+                scope.rememberTransform().apply {
                     if (exitFinished)
                         pageRouter.backStack.pop()
                 }
                 Content(modifier)
                 //先显示后设置状态是为了产生动画
-                if (transformState.value == PreEnter)
-                    transformState.value = Resume
+                transformState.value = Resume
             }
         }
 
-        PageState.Close -> currentState.first().Content(modifier)
+        PageState.Close -> {
+            val current = currentState.first() as PageEntry
+            current.Content(modifier)
+            current.transformState.value = Resume
+        }
+
         PageState.Open -> {
             val current = targetState.first() as PageEntry
             val resume = targetState.last() as PageEntry
@@ -127,12 +130,12 @@ fun <T> rememberTransformWithChild(
     transformToChildState: @Composable (parentState: TransformState) -> T
 ): Transition<T> {
     val pageScope = LocalPageScope.current
-    return pageScope.rememberTransition().createChildTransition(label, transformToChildState)
+    return pageScope.rememberTransform().createChildTransition(label, transformToChildState)
 }
 
 @Composable
 fun rememberTransform(): Transition<TransformState> {
     val pageScope = LocalPageScope.current
-    return pageScope.rememberTransition()
+    return pageScope.rememberTransform()
 }
 

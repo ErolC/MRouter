@@ -1,14 +1,17 @@
 package com.erolc.mrouter.scope
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.animation.core.ExperimentalTransitionApi
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.rememberTransition
+import androidx.compose.runtime.*
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.Router
+import com.erolc.mrouter.route.transform.*
+import com.erolc.mrouter.route.transform.PreEnter
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
@@ -25,6 +28,9 @@ open class PageScope {
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
+    internal val transformState = mutableStateOf<TransformState>(PreEnter)
+    internal lateinit var transformTransition: Transition<TransformState>
+
     var lifecycle: Lifecycle
         internal set(value) {
             initLifeCycle(value)
@@ -99,6 +105,11 @@ open class PageScope {
 
     internal fun addBackInterceptor(interceptor: BackInterceptor) {
         interceptors.add(interceptor)
+    }
+
+    @Composable
+    internal fun rememberTransform(): Transition<TransformState> {
+        return transformTransition
     }
 
 }

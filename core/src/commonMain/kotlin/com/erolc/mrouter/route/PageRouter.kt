@@ -5,6 +5,7 @@ import com.erolc.mrouter.backstack.PageEntry
 import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.transform.ExitTransition
 import com.erolc.mrouter.scope.getScope
 import kotlinx.coroutines.flow.*
 
@@ -46,6 +47,9 @@ class PageRouter(
         it.takeLast(2)
     }
 
+    override fun backPressedImpl(): Boolean {
+        return backStack.back()
+    }
 
     companion object {
         fun createPageEntry(
@@ -57,6 +61,8 @@ class PageRouter(
                 getScope(),
                 address
             ).apply {
+                route.transform.gesture.content = address.content
+                transform.value = route.transform
                 scope.run {
                     argsFlow.value = route.args
                     onResult = route.onResult

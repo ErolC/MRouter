@@ -61,5 +61,5 @@ abstract class Router(
 
     internal fun getBackStack() = backStack.backStack
 
-    internal fun backPressedImpl() = backStack.pop()
+    internal open fun backPressedImpl() = backStack.pop()
 }
