@@ -70,7 +70,7 @@ fun GreetingPage() {
             scope.setResult("result" to 1233)
             scope.backPressed()
         }) {
-            Text("back")
+            Text("back111")
         }
         Button(onClick = {
             greetingText = "Compose: ${Greeting().greet()}"
@@ -78,7 +78,8 @@ fun GreetingPage() {
         }) {
             Text(greetingText)
         }
-        AnimatedVisibility(showImage) {
+        AnimatedVisibility(showImage, modifier = Modifier,
+            enter = androidx.compose.animation.slideInHorizontally(), exit = androidx.compose.animation.slideOutHorizontally()) {
             Image(
                 painterResource(DrawableResource("compose-multiplatform.xml")),
                 null
@@ -93,14 +94,13 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally
+        Modifier.background(Color.White),horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
             scope.setResult("result" to 1233)
             scope.backPressed()
         }) {
-            Text("back:${args.getData<Int>("key")}")
+            Text("back")
         }
         Button(onClick = {
             scope.route("greet") {
@@ -164,13 +164,11 @@ fun Home() {
 //                    window("second", "second"){
 //                        alwaysOnTop = true
 //                    }
-                    transform {
-//                        enter = expandHorizontally()
-//                        exit = shrinkHorizontally()
-                        enter = fadeIn()
-//                        prev = scaleOut()
-//                        exit = fadeOut()
-                    }
+//                    transform {
+//                        enter = expandIn()
+//                        exit = shrinkOut()
+//                    }
+                    transform = modal()
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }

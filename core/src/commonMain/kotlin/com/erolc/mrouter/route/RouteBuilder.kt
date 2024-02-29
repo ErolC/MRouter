@@ -8,6 +8,7 @@ import com.erolc.mrouter.utils.isMobile
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.transform.Transform
 import com.erolc.mrouter.route.transform.TransformBuilder
+import com.erolc.mrouter.route.transform.buildTransform
 import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.window.WindowOptionsBuilder
 
@@ -27,10 +28,10 @@ class RouteBuilder {
 
     private val args = emptyArgs
 
-    var transform: Transform = normal()
+    var transform: Transform = Transform.None
 
     fun transform(body: TransformBuilder.() -> Unit) {
-        transform = TransformBuilder().apply(body).build()
+        transform = buildTransform(body)
     }
 
     fun arg(key: String, value: Any) {

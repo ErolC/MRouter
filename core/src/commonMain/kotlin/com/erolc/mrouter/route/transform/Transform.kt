@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.TransformOrigin
@@ -18,8 +17,19 @@ import androidx.compose.ui.unit.*
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
-fun modal() = Transform()
-fun normal() = Transform()
+fun modal() = buildTransform {
+    enter = slideInVertically{ it }
+    exit = slideOutVertically{ it }
+    prevPause = scaleOut(targetScale = 0.9f)
+    gesture = ModalGestureWrap
+}
+
+fun normal() = buildTransform{
+    enter = slideInHorizontally{ it }
+    exit = slideOutHorizontally{ it }
+    prevPause = slideOutHorizontally { -it/8 }
+    gesture = NormalGestureWrap
+}
 
 @Stable
 fun fadeIn(
@@ -286,11 +296,15 @@ private fun Alignment.Vertical.toAlignment() =
 class TransformBuilder {
     var enter: EnterTransition = EnterTransition.None
     var exit: ExitTransition = ExitTransition.None
-    var prev: ExitTransition = ExitTransition.None
-    var gesture: GestureWrap = GestureWrap.None
+    var prevPause: ExitTransition = ExitTransition.None
+    var gesture: GestureWrap = NoneGestureWrap
     internal fun build(): Transform {
-        return Transform(enter, exit, prev, gesture)
+        return Transform(enter, exit, prevPause, gesture)
     }
+}
+
+fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
+    return TransformBuilder().apply(body).build()
 }
 
 /**
@@ -298,16 +312,15 @@ class TransformBuilder {
  *
  * @param enter 本页面进入的变换
  * @param exit 本页面退出的变换,如果为空，那么退出时将会使用enter做逆向变换
- * @param prev 上一个页面在本次变换中的细微变换，对于该动画来说，其中的具体数值是没有作用的，
- * 比如说fade的alpha是没有作用的，该参数只是给框架提供动画形式和方向，具体变化细节无法干涉。是内部实现的。
+ * @param prevPause 上一个页面在本次变换中的细微变换
  * @param gesture 手势，可以自定义手势
  */
 @Immutable
 data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _exit: ExitTransition = ExitTransition.None,
-    internal val prev: ExitTransition = ExitTransition.None,
-    internal val gesture: GestureWrap = GestureWrap.None
+    internal val prevPause: ExitTransition = ExitTransition.None,
+    internal val gesture: GestureWrap = NoneGestureWrap
 ) {
 
     companion object {
@@ -325,7 +338,7 @@ data class Transform internal constructor(
                 Resume isTransitioningTo PostExit -> exit.data
                 Resume isTransitioningTo PauseState
                         || PauseState isTransitioningTo Resume
-                        || PauseState isTransitioningTo PauseState -> prev.data
+                        || PauseState isTransitioningTo PauseState -> prevPause.data
 
                 else -> TransformData.None
             }
@@ -497,6 +510,9 @@ internal val Transition<TransformState>.exitFinished
 internal val Transition<TransformState>.enterStart
     get() = currentState == PreEnter && targetState == PreEnter
 
+internal val Transition<TransformState>.pause
+    get() = currentState == PauseState && targetState == PauseState
+
 @OptIn(InternalAnimationApi::class)
 @Composable
 internal fun Transition<TransformState>.createModifier(
@@ -505,17 +521,10 @@ internal fun Transition<TransformState>.createModifier(
     modifier: Modifier,
     label: String
 ): Modifier {
+    val transformData = transform.trackActive(this)
 
-    val activeEnter = trackActiveEnter(enter = transform.enter)
-    val activeExit = trackActiveExit(exit = transform.exit, PostExit)
-    val activePause = trackActiveExit(exit = transform.prev, PauseState)
-
-
-    val shouldAnimateSlide =
-        activeEnter.data.slide != null || activeExit.data.slide != null || activePause.data.slide != null
-    val shouldAnimateSizeChange =
-        activeEnter.data.changeSize != null || activeExit.data.changeSize != null || activePause.data.changeSize != null
-
+    val shouldAnimateSlide = transformData.slide != null
+    val shouldAnimateSizeChange = transformData.changeSize != null
     val slideAnimation = if (shouldAnimateSlide) {
         createDeferredAnimation(IntOffset.VectorConverter, remember { "$label slide" })
     } else {
@@ -533,103 +542,50 @@ internal fun Transition<TransformState>.createModifier(
     } else null
 
     val graphicsLayerBlock =
-        createGraphicsLayerBlock(page, transform, activeEnter, activeExit, activePause, label)
+        createGraphicsLayerBlock(transform, transformData, label)
 
-    val disableClip = (activeEnter.data.changeSize?.clip == false ||
-            activeExit.data.changeSize?.clip == false) || !shouldAnimateSizeChange
+    val disableClip = transformData.changeSize?.clip == false || !shouldAnimateSizeChange
 
-    return modifier.graphicsLayer(clip = disableClip) then TransformElement(
+    return modifier.graphicsLayer(clip = !disableClip) then TransformElement(
         this,
-        transform,
-        activeEnter,
-        activeExit,
-        activePause,
+        transformData,
         sizeAnimation,
-        slideAnimation,
         offsetAnimation,
+        slideAnimation,
         graphicsLayerBlock, label
     )
 }
 
-
-@OptIn(InternalAnimationApi::class)
-@Composable
-internal fun Transition<TransformState>.trackActiveEnter(enter: EnterTransition): EnterTransition {
-    var activeEnter by remember(this) { mutableStateOf(enter) }
-    if (currentState == targetState && currentState == Resume) {
-        if (isSeeking) {
-            activeEnter = enter
-        } else {
-            activeEnter = EnterTransition.None
-        }
-    } else if (targetState == Resume) {
-        activeEnter += enter
-    }
-    return activeEnter
-}
-
-@OptIn(InternalAnimationApi::class)
-@Composable
-internal fun Transition<TransformState>.trackActiveExit(
-    exit: ExitTransition,
-    state: TransformState
-): ExitTransition {
-    // Active enter & active exit reference the enter and exit transition that is currently being
-    // used. It is important to preserve the active enter/exit that was previously used before
-    // changing target state, such that if the previous enter/exit is interrupted, we still hold
-    // reference to the enter/exit that define those animations and therefore could recover.
-    var activeExit by remember(this) { mutableStateOf(exit) }
-    if (currentState == targetState && currentState == state) {
-        if (isSeeking) {
-            // When seeking, the timing is different and there's no need to handle interruptions.
-            activeExit = exit
-        } else {
-            activeExit = ExitTransition.None
-        }
-    } else if (targetState == state) {
-        activeExit += exit
-    }
-    return activeExit
-}
-
 private data class TransformElement @OptIn(InternalAnimationApi::class) constructor(
     val transition: Transition<TransformState>,
-    val transform: Transform,
-    val enter: EnterTransition,
-    val exit: ExitTransition,
-    val pause: ExitTransition,
-    var sizeAnimation: Transition<TransformState>.DeferredAnimation<IntSize, AnimationVector2D>?,
-    var offsetAnimation:
-    Transition<TransformState>.DeferredAnimation<IntOffset, AnimationVector2D>?,
-    var slideAnimation: Transition<TransformState>.DeferredAnimation<IntOffset, AnimationVector2D>?,
-    var graphicsLayerBlock: GraphicsLayerBlockForTransform,
+    val transformData: TransformData,
+    val sizeAnimation: Transition<TransformState>.DeferredAnimation<IntSize, AnimationVector2D>?,
+    val offsetAnimation: Transition<TransformState>.DeferredAnimation<IntOffset, AnimationVector2D>?,
+    val slideAnimation: Transition<TransformState>.DeferredAnimation<IntOffset, AnimationVector2D>?,
+    val graphicsLayerBlock: GraphicsLayerBlockForTransform,
     val label: String
 ) : ModifierNodeElement<TransformModifierNode>() {
 
     @OptIn(InternalAnimationApi::class)
-    override fun create(): TransformModifierNode =
-        TransformModifierNode(
+    override fun create(): TransformModifierNode {
+        return TransformModifierNode(
             transition,
-            transform,
-            enter,
-            exit,
-            pause,
+            transformData,
             sizeAnimation,
             offsetAnimation,
             slideAnimation,
             graphicsLayerBlock, label
         )
+    }
+
 
     @OptIn(InternalAnimationApi::class)
     override fun update(node: TransformModifierNode) {
         node.transition = transition
-        node.transform = transform
         node.sizeAnimation = sizeAnimation
         node.offsetAnimation = offsetAnimation
         node.slideAnimation = slideAnimation
-        node.enter = enter
-        node.exit = exit
-        node.pause = pause
+        node.transformData = transformData
         node.graphicsLayerBlock = graphicsLayerBlock
         node.label = label
     }
@@ -638,23 +594,17 @@ private data class TransformElement @OptIn(InternalAnimationApi::class) construc
     override fun InspectorInfo.inspectableProperties() {
         name = "transform"
         properties["transition"] = transition
-        properties["transform"] = transform
         properties["sizeAnimation"] = sizeAnimation
         properties["offsetAnimation"] = offsetAnimation
         properties["slideAnimation"] = slideAnimation
-        properties["enter"] = enter
-        properties["exit"] = exit
-        properties["pause"] = pause
+        properties["transformData"] = transformData
         properties["graphicsLayerBlock"] = graphicsLayerBlock
     }
 }
 
 private class TransformModifierNode @OptIn(InternalAnimationApi::class) constructor(
     var transition: Transition<TransformState>,
-    var transform: Transform,
-    var enter: EnterTransition,
-    var exit: ExitTransition,
-    var pause: ExitTransition,
+    var transformData: TransformData,
     var sizeAnimation: Transition<TransformState>.DeferredAnimation<IntSize, AnimationVector2D>?,
     var offsetAnimation:
     Transition<TransformState>.DeferredAnimation<IntOffset, AnimationVector2D>?,
@@ -672,46 +622,22 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
         }
 
     var currentAlignment: Alignment? = null
-    val alignment: Alignment?
-        get() = with(transition.segment) {
-            when {
-                PreEnter isTransitioningTo Resume -> enter.data.changeSize?.alignment
-                Resume isTransitioningTo PostExit -> exit.getAlignment()
-                Resume isTransitioningTo PauseState -> pause.data.changeSize?.alignment
-                PauseState isTransitioningTo Resume -> pause.data.changeSize?.alignment
-                else -> transform.exit.data.changeSize?.alignment
-            }
-        }
+    val alignment: Alignment? get() = transformData.getAlignment()
 
-    val sizeTransitionSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntSize> =
-        {
-            when {
-                PreEnter isTransitioningTo Resume -> enter.data.changeSize?.animationSpec
-                    ?: DefaultSizeAnimationSpec
-
-                Resume isTransitioningTo PostExit -> exit.data.changeSize?.animationSpec
-                    ?: DefaultSizeAnimationSpec
-
-                Resume isTransitioningTo PauseState -> pause.data.changeSize?.animationSpec
-                    ?: DefaultSizeAnimationSpec
-
-                PauseState isTransitioningTo Resume -> pause.data.changeSize?.animationSpec
-                    ?: DefaultSizeAnimationSpec
-
-                else -> DefaultSizeAnimationSpec
-            }
-        }
-
-    fun sizeByState(targetState: TransformState, fullSize: IntSize): IntSize = when (targetState) {
-        Resume -> fullSize
-        PreEnter -> enter.data.changeSize?.size?.invoke(fullSize) ?: fullSize
-        PostExit -> exit.data.changeSize?.size?.invoke(fullSize) ?: fullSize
-        PauseState -> fullSize
-        else -> IntSize(
-            (fullSize.width * targetState.progress).roundToInt(),
-            (fullSize.height * targetState.progress).roundToInt()
-        )
+    val sizeTransitionSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntSize> = {
+        transformData.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
     }
+
+    fun sizeByState(targetState: TransformState, fullSize: IntSize): IntSize =
+        when (targetState) {
+            Resume -> fullSize
+            PreEnter, PostExit -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            PauseState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            else -> IntSize(
+                (fullSize.width * targetState.progress).roundToInt(),
+                (fullSize.height * targetState.progress).roundToInt()
+            )
+        }
 
     override fun onAttach() {
         super.onAttach()
@@ -727,7 +653,7 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             else -> when (targetState) {
                 Resume -> IntOffset.Zero
                 PreEnter -> IntOffset.Zero
-                PostExit -> exit.data.changeSize?.let {
+                PostExit -> transformData.changeSize?.let {
                     val endSize = it.size(fullSize)
                     val targetOffset = alignment!!.align(
                         fullSize,
@@ -747,22 +673,12 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             }
         }
 
-    fun getTransitionWithSize(fullSize: IntSize): IntSize {
-        val progress = transition.targetState.progress
-        return IntSize((fullSize.width * progress).toInt(), (fullSize.height * progress).toInt())
-    }
-
-    fun getTransitionWithOffset(fullSize: IntSize): IntOffset {
-        val progress = transition.targetState.progress
-        return IntOffset((fullSize.width * progress).toInt(), (fullSize.height * progress).toInt())
-    }
-
     @OptIn(InternalAnimationApi::class)
     override fun MeasureScope.measure(
         measurable: Measurable,
         constraints: Constraints
     ): MeasureResult {
-        if (transition.currentState == transition.targetState && !transition.enterStart) {
+        if (transition.currentState == transition.targetState && !transition.pause && !transition.enterStart) {
             currentAlignment = null
         } else if (currentAlignment == null) {
             currentAlignment = alignment ?: Alignment.TopStart
@@ -796,11 +712,11 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
                 targetOffsetByState(it, target)
             }?.value ?: IntOffset.Zero
             val slideOffset = slideAnimation?.animate(slideSpec) {
-                slideTargetValueByState(it, target)
+                val slide = slideTargetValueByState(it, target)
+                slide
             }?.value ?: IntOffset.Zero
             val offset = (currentAlignment?.align(target, currentSize, LayoutDirection.Ltr)
                 ?: IntOffset.Zero) + slideOffset
-
             return layout(currentSize.width, currentSize.height) {
                 placeable.placeWithLayer(
                     offset.x + offsetDelta.x, offset.y + offsetDelta.y, 0f, layerBlock
@@ -810,32 +726,15 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     }
 
     val slideSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntOffset> = {
-        when {
-            PreEnter isTransitioningTo Resume -> enter.data.slide?.animationSpec
-                ?: DefaultOffsetAnimationSpec
-
-            Resume isTransitioningTo PostExit -> exit.data.slide?.animationSpec
-                ?: DefaultOffsetAnimationSpec
-
-            Resume isTransitioningTo PauseState -> pause.data.slide?.animationSpec
-                ?: DefaultOffsetAnimationSpec
-
-            PauseState isTransitioningTo Resume -> pause.data.slide?.animationSpec
-                ?: DefaultOffsetAnimationSpec
-
-            else -> exit.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
-        }
+        transformData.slide?.animationSpec ?: DefaultOffsetAnimationSpec
     }
 
     fun slideTargetValueByState(targetState: TransformState, fullSize: IntSize): IntOffset {
-        val preEnter = enter.data.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-        val postExit = exit.data.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-        val pause = pause.data.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
         return when (targetState) {
-            Resume -> preEnter
-            PreEnter -> preEnter
-            PostExit -> postExit
-            PauseState -> pause
+            Resume -> IntOffset.Zero
+            PreEnter -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            PostExit -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            PauseState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
             else -> IntOffset.Zero
         }
     }
@@ -843,8 +742,6 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
 }
 
 internal val InvalidSize = IntSize(Int.MIN_VALUE, Int.MIN_VALUE)
-
-internal fun ExitTransition.getAlignment() = data.changeSize?.alignment
 internal fun TransformData.getAlignment() = changeSize?.alignment
 
 internal fun interface GraphicsLayerBlockForTransform {
@@ -854,34 +751,23 @@ internal fun interface GraphicsLayerBlockForTransform {
 @OptIn(InternalAnimationApi::class)
 @Composable
 private fun Transition<TransformState>.createGraphicsLayerBlock(
-    page: String,
     transform: Transform,
-    enter: EnterTransition,
-    exit: ExitTransition,
-    pause: ExitTransition,
+    transformData: TransformData,
     label: String
 ): GraphicsLayerBlockForTransform {
-
-//    val shouldAnimateAlpha =
-//        enter.data.fade != null || exit.data.fade != null || pause.data.fade != null
-//    val shouldAnimateScale =
-//        enter.data.scale != null || exit.data.scale != null || pause.data.scale != null
-
-    val transformData = remember(transform) { transform.trackActive(this) }
 
     val shouldAnimateAlpha = transformData.fade != null
     val shouldAnimateScale = transformData.scale != null
 
-
     var progressAlpha by remember { mutableStateOf(1f) }
     var progressScale by remember { mutableStateOf(1f) }
 
-    val alphaAnimation = if (shouldAnimateAlpha) {
+    val alphaAnimation = if (shouldAnimateAlpha)
         createDeferredAnimation(typeConverter = Float.VectorConverter,
             label = remember { "$label alpha" }
         )
-    } else {
-        progressAlpha = transform.prev.data.fade?.run { alpha * targetState.progress } ?: 1f
+    else {
+        progressAlpha = transform.prevPause.data.fade?.run { alpha * targetState.progress } ?: 1f
         null
     }
 
@@ -890,7 +776,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             label = remember { "$label scale" }
         )
     } else {
-        progressScale = enter.data.scale?.run { scale * targetState.progress } ?: 1f
+        progressScale = transformData.scale?.run { scale * targetState.progress } ?: 1f
         null
     }
 
@@ -907,75 +793,36 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
 
         val alpha = alphaAnimation?.animate(
             transitionSpec = {
-                when {
-                    PreEnter isTransitioningTo Resume -> enter.data.fade?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    Resume isTransitioningTo PostExit -> exit.data.fade?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    Resume isTransitioningTo PauseState -> pause.data.fade?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    PauseState isTransitioningTo Resume -> pause.data.fade?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    else -> exit.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
-                }
+                transformData.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
             },
         ) {
             when (it) {
                 Resume -> 1f
-                PreEnter -> enter.data.fade?.alpha ?: 1f
-                PostExit -> exit.data.fade?.alpha ?: 1f
+                PreEnter, PostExit,PauseState -> transformData.fade?.alpha ?: 1f
                 else -> it.progress
             }
         }
 
         val scale = scaleAnimation?.animate(
             transitionSpec = {
-                when {
-                    PreEnter isTransitioningTo Resume -> enter.data.scale?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    Resume isTransitioningTo PostExit -> exit.data.scale?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    Resume isTransitioningTo PauseState -> pause.data.scale?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    PauseState isTransitioningTo Resume -> pause.data.scale?.animationSpec
-                        ?: DefaultAlphaAndScaleSpring
-
-                    else -> DefaultAlphaAndScaleSpring
-                }
+                transformData.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
             }
         ) {
             when (it) {
                 Resume -> 1f
-                PreEnter -> enter.data.scale?.scale ?: 1f
-                PostExit -> exit.data.scale?.scale ?: 1f
+                PreEnter, PostExit,PauseState -> transformData.scale?.scale ?: 1f
                 else -> it.progress
             }
         }
 
-        val transformOriginWhenVisible =
-            if (currentState == PreEnter) {
-                enter.data.scale?.transformOrigin ?: exit.data.scale?.transformOrigin
-            } else if (targetState == PauseState) {
-                pause.data.scale?.transformOrigin ?: enter.data.scale?.transformOrigin
-            } else {
-                exit.data.scale?.transformOrigin ?: enter.data.scale?.transformOrigin
-            }
+        val transformOriginWhenVisible = transformData.scale?.transformOrigin
 
         // Animate transform origin if there's any change. If scale is only defined for enter or
         // exit, use the same transform origin for both.
         val transformOrigin = transformOriginAnimation?.animate({ spring() }) {
             when (it) {
                 Resume -> transformOriginWhenVisible
-                PreEnter -> enter.data.scale?.transformOrigin ?: exit.data.scale?.transformOrigin
-                PostExit -> exit.data.scale?.transformOrigin ?: enter.data.scale?.transformOrigin
-                PauseState -> pause.data.scale?.transformOrigin ?: enter.data.scale?.transformOrigin
+                PreEnter, PostExit, PauseState -> transformData.scale?.transformOrigin
                 else -> null
             } ?: TransformOrigin.Center
         }
@@ -983,12 +830,10 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
 
         val block: GraphicsLayerScope.() -> Unit = {
             this.alpha = alpha?.value ?: progressAlpha
-            loge("tag", "$page alpha:${alpha?.value} $currentState $targetState")
             this.scaleX = scale?.value ?: progressScale
             this.scaleY = scale?.value ?: progressScale
             this.transformOrigin =
-                transformOrigin?.value ?: transform.exit.data.scale?.transformOrigin
-                        ?: TransformOrigin.Center
+                transformOrigin?.value ?: TransformOrigin.Center
         }
         block
     }

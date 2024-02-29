@@ -1,12 +1,15 @@
 package com.erolc.mrouter.route.transform
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
 
 /**
  * 手势包裹层，是用于给页面的外部包裹一层手势
  */
 abstract class GestureWrap {
     internal var isUseContent = false
+    internal var pauseModifierPost = PauseModifierPost{ prevPauseModifier() }
 
     /**
      * 这是内容部分，应当被包裹的部分，必须调用
@@ -14,7 +17,7 @@ abstract class GestureWrap {
     var content: @Composable () -> Unit = {}
         internal set
         get() {
-            isUseContent = true
+            isUseContent  = true
             return field
         }
 
@@ -23,15 +26,21 @@ abstract class GestureWrap {
      * @param progress 进度，当产生手势操作时务必改变进度，以便更新界面，该进度为关闭页面进度，范围是[0-1]。
      */
     @Composable
-    abstract fun Wrap(progress: (Float) -> Unit)
+    abstract fun Wrap(modifier: Modifier, progress: (Float) -> Unit)
 
-    companion object {
-        val None = object : GestureWrap() {
-            @Composable
-            override fun Wrap(progress: (Float) -> Unit) {
-                content()
-            }
-        }
+    /**
+     * 前一个页面在暂停时的modifier
+     */
+    @Composable
+    abstract fun prevPauseModifier(): Modifier
+
+    internal class PauseModifierPost(private val body: @Composable () -> Modifier) {
+        @Composable
+        fun getModifier(): Modifier = body()
+    }
+
+    internal fun updatePauseModifier(pauseModifierPost: PauseModifierPost) {
+            this.pauseModifierPost = pauseModifierPost
     }
 }
 

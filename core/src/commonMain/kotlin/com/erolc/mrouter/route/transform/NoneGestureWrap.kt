@@ -8,22 +8,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 
-object ModalGestureWrap : GestureWrap() {
+object NoneGestureWrap : GestureWrap() {
     @Composable
-    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
-        Surface(modifier = modifier.padding(top = 40.dp)) {
+    override fun Wrap(modifier: Modifier,progress: (Float) -> Unit) {
+        Surface(modifier.fillMaxSize()) {
             content()
         }
     }
-
     @Composable
-    override fun prevPauseModifier(): Modifier {
-        val transform = rememberTransform()
-        val corner by transform.animateDp { if (it == PauseState) 10.dp else 0.dp }
-        return Modifier.clip(RoundedCornerShape(corner))
-    }
+    override fun prevPauseModifier() = Modifier
 }

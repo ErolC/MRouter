@@ -1,24 +1,26 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.animation.core.ExperimentalTransitionApi
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateIntOffset
-import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.dp
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.DialogRouter
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
+import com.erolc.mrouter.route.transform.TransitionState
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.*
-import kotlin.math.roundToInt
 
 class PageEntry internal constructor(
     scope: PageScope,
@@ -39,33 +41,19 @@ class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
-
-
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             val inDialog = scope.router.parentRouter is DialogRouter
-            if (inDialog) {
-                address.content()
-            } else
+            if (inDialog)
+                Box(modifier) {
+                    address.content()
+                }
+            else
                 OnlyPage(modifier)
-
-
-//            else
-//                transform.gesture.run {
-//                    Wrap {
-//                        transformState.value = when (it) {
-//                            0f -> PostExit
-//                            1f -> Resume
-//                            else -> TransitionState(it)
-//                        }
-//                    }
-//                    check(isUseContent) {
-//                        "必须在Wrap方法中使用content,请检查$this 的Wrap方法"
-//                    }
-//                }
-
         }
+
         Lifecycle()
+
         scope.router.getBackStack().collectAsState().let {
             val stack by remember { it }
             stack.forEach {
@@ -84,19 +72,21 @@ class PageEntry internal constructor(
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
-            if (enterStart) {
-                scope.transformTransition = this
-                transformState.value = Resume
-            }
-
+            if (enterStart) transformState.value = Resume
             if (exitFinished) scope.router.parentRouter!!.backStack.pop()
         }
+        if (scope.transformTransition == null) scope.transformTransition = transition
 
         val transform by remember(this, transform) { transform }
-        if (!transition.exitFinished)
-            Box(transition.createModifier(address.path,transform, modifier, "Built-in")) {
-                address.content()
+        Box(transition.createModifier(address.path, transform, modifier, "Built-in")) {
+            transform.gesture.run {
+                val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
+                Wrap(pageModifier) {
+
+                }
+                check(isUseContent) { "必须在Wrap方法中使用content,请检查$this 的Wrap方法" }
             }
+        }
     }
 
 
@@ -131,15 +121,17 @@ class PageEntry internal constructor(
 
     @Composable
     fun ShareLife(entry: PageEntry) {
-        val state by remember(this,transformState) {
+        val state by remember(this, transformState) {
             transformState
         }
         entry.transformState.value = when (state) {
             PreEnter, PostExit -> Resume
             Resume -> {
-                entry.transform.value = entry.transform.value.copy(prev = transform.value.prev)
+                entry.transform.value = entry.transform.value.copy(prevPause = transform.value.prevPause)
+                entry.transform.value.gesture.updatePauseModifier(transform.value.gesture.pauseModifierPost)
                 PauseState
             }
+
             PauseState -> PauseState
             is TransitionState -> TransitionState(1 - state.progress)
         }

@@ -37,9 +37,9 @@ class WindowEntry(internal var options: WindowOptions) :
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
-//                     updateTransition(targetState = stack).PageTransform(pageRouter)
-                    if (stack.size == 1)
+                    if (stack.size == 1){
                         (stack.first() as PageEntry).transformState.value = Resume
+                    }
                     else
                         (stack.last() as PageEntry).ShareLife(stack.first() as PageEntry)
 

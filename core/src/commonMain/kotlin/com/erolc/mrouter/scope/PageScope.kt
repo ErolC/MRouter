@@ -29,7 +29,7 @@ open class PageScope {
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
     internal val transformState = mutableStateOf<TransformState>(PreEnter)
-    internal lateinit var transformTransition: Transition<TransformState>
+    internal var transformTransition: Transition<TransformState>? = null
 
     var lifecycle: Lifecycle
         internal set(value) {
@@ -109,7 +109,7 @@ open class PageScope {
 
     @Composable
     internal fun rememberTransform(): Transition<TransformState> {
-        return transformTransition
+        return transformTransition!!
     }
 
 }
