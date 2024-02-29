@@ -67,7 +67,15 @@ fun scaleIn(
     initialScale: Float = 0f,
     transformOrigin: TransformOrigin = TransformOrigin.Center,
 ): EnterTransition {
-    return EnterTransitionImpl(TransformData(scale = Scale(initialScale, transformOrigin, animationSpec)))
+    return EnterTransitionImpl(
+        TransformData(
+            scale = Scale(
+                initialScale,
+                transformOrigin,
+                animationSpec
+            )
+        )
+    )
 }
 
 @Stable
@@ -76,7 +84,15 @@ fun scaleOut(
     targetScale: Float = 0f,
     transformOrigin: TransformOrigin = TransformOrigin.Center
 ): ExitTransition {
-    return ExitTransitionImpl(TransformData(scale = Scale(targetScale, transformOrigin, animationSpec)))
+    return ExitTransitionImpl(
+        TransformData(
+            scale = Scale(
+                targetScale,
+                transformOrigin,
+                animationSpec
+            )
+        )
+    )
 }
 
 @Stable
@@ -90,7 +106,16 @@ fun expandIn(
     clip: Boolean = true,
     initialSize: (fullSize: IntSize) -> IntSize = { IntSize(0, 0) },
 ): EnterTransition {
-    return EnterTransitionImpl(TransformData(changeSize = ChangeSize(expandFrom, initialSize, animationSpec, clip)))
+    return EnterTransitionImpl(
+        TransformData(
+            changeSize = ChangeSize(
+                expandFrom,
+                initialSize,
+                animationSpec,
+                clip
+            )
+        )
+    )
 }
 
 @Stable
@@ -104,7 +129,16 @@ fun shrinkOut(
     clip: Boolean = true,
     targetSize: (fullSize: IntSize) -> IntSize = { IntSize(0, 0) },
 ): ExitTransition {
-    return ExitTransitionImpl(TransformData(changeSize = ChangeSize(shrinkTowards, targetSize, animationSpec, clip)))
+    return ExitTransitionImpl(
+        TransformData(
+            changeSize = ChangeSize(
+                shrinkTowards,
+                targetSize,
+                animationSpec,
+                clip
+            )
+        )
+    )
 }
 
 @Stable
@@ -118,7 +152,11 @@ fun expandHorizontally(
     clip: Boolean = true,
     initialWidth: (fullWidth: Int) -> Int = { 0 },
 ): EnterTransition {
-    return expandIn(animationSpec, expandFrom.toAlignment(), clip = clip) { IntSize(initialWidth(it.width), it.height) }
+    return expandIn(
+        animationSpec,
+        expandFrom.toAlignment(),
+        clip = clip
+    ) { IntSize(initialWidth(it.width), it.height) }
 }
 
 @Stable
@@ -132,7 +170,12 @@ fun expandVertically(
     clip: Boolean = true,
     initialHeight: (fullHeight: Int) -> Int = { 0 },
 ): EnterTransition {
-    return expandIn(animationSpec, expandFrom.toAlignment(), clip) { IntSize(it.width, initialHeight(it.height)) }
+    return expandIn(animationSpec, expandFrom.toAlignment(), clip) {
+        IntSize(
+            it.width,
+            initialHeight(it.height)
+        )
+    }
 }
 
 @Stable
@@ -471,7 +514,8 @@ internal fun Transition<TransformState>.createModifier(
         )
     } else null
 
-    val graphicsLayerBlock = createGraphicsLayerBlock(transform, activeEnter, activeExit, activePause, label)
+    val graphicsLayerBlock =
+        createGraphicsLayerBlock(transform, activeEnter, activeExit, activePause, label)
 
     val disableClip = (activeEnter.data.changeSize?.clip == false ||
             activeExit.data.changeSize?.clip == false) || !shouldAnimateSizeChange
@@ -508,7 +552,10 @@ internal fun Transition<TransformState>.trackActiveEnter(enter: EnterTransition)
 
 @OptIn(InternalAnimationApi::class)
 @Composable
-internal fun Transition<TransformState>.trackActiveExit(exit: ExitTransition, state: TransformState): ExitTransition {
+internal fun Transition<TransformState>.trackActiveExit(
+    exit: ExitTransition,
+    state: TransformState
+): ExitTransition {
     // Active enter & active exit reference the enter and exit transition that is currently being
     // used. It is important to preserve the active enter/exit that was previously used before
     // changing target state, such that if the previous enter/exit is interrupted, we still hold
@@ -621,10 +668,18 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     val sizeTransitionSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntSize> =
         {
             when {
-                PreEnter isTransitioningTo Resume -> enter.data.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
-                Resume isTransitioningTo PostExit -> exit.data.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
-                Resume isTransitioningTo PauseState -> pause.data.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
-                PauseState isTransitioningTo Resume -> pause.data.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
+                PreEnter isTransitioningTo Resume -> enter.data.changeSize?.animationSpec
+                    ?: DefaultSizeAnimationSpec
+
+                Resume isTransitioningTo PostExit -> exit.data.changeSize?.animationSpec
+                    ?: DefaultSizeAnimationSpec
+
+                Resume isTransitioningTo PauseState -> pause.data.changeSize?.animationSpec
+                    ?: DefaultSizeAnimationSpec
+
+                PauseState isTransitioningTo Resume -> pause.data.changeSize?.animationSpec
+                    ?: DefaultSizeAnimationSpec
+
                 else -> DefaultSizeAnimationSpec
             }
         }
@@ -685,7 +740,10 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     }
 
     @OptIn(InternalAnimationApi::class)
-    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
         if (transition.currentState == transition.targetState && !transition.enterStart) {
             currentAlignment = null
         } else if (currentAlignment == null) {
@@ -724,7 +782,10 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             }?.value ?: IntOffset.Zero
             val offset = (currentAlignment?.align(target, currentSize, LayoutDirection.Ltr)
                 ?: IntOffset.Zero) + slideOffset
-            loge("tag", "$this $currentSize - $offset ${transition.currentState} ${transition.targetState}")
+            loge(
+                "tag",
+                "$this $currentSize - $offset ${transition.currentState} ${transition.targetState}"
+            )
             return layout(currentSize.width, currentSize.height) {
                 placeable.placeWithLayer(
                     offset.x + offsetDelta.x, offset.y + offsetDelta.y, 0f, layerBlock
@@ -735,10 +796,18 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
 
     val slideSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntOffset> = {
         when {
-            PreEnter isTransitioningTo Resume -> enter.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
-            Resume isTransitioningTo PostExit -> exit.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
-            Resume isTransitioningTo PauseState -> pause.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
-            PauseState isTransitioningTo Resume -> pause.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
+            PreEnter isTransitioningTo Resume -> enter.data.slide?.animationSpec
+                ?: DefaultOffsetAnimationSpec
+
+            Resume isTransitioningTo PostExit -> exit.data.slide?.animationSpec
+                ?: DefaultOffsetAnimationSpec
+
+            Resume isTransitioningTo PauseState -> pause.data.slide?.animationSpec
+                ?: DefaultOffsetAnimationSpec
+
+            PauseState isTransitioningTo Resume -> pause.data.slide?.animationSpec
+                ?: DefaultOffsetAnimationSpec
+
             else -> exit.data.slide?.animationSpec ?: DefaultOffsetAnimationSpec
         }
     }
@@ -784,8 +853,10 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
     label: String
 ): GraphicsLayerBlockForTransform {
 
-    val shouldAnimateAlpha = enter.data.fade != null || exit.data.fade != null || pause.data.fade != null
-    val shouldAnimateScale = enter.data.scale != null || exit.data.scale != null || pause.data.scale != null
+    val shouldAnimateAlpha =
+        enter.data.fade != null || exit.data.fade != null || pause.data.fade != null
+    val shouldAnimateScale =
+        enter.data.scale != null || exit.data.scale != null || pause.data.scale != null
 
     var progressAlpha by remember { mutableStateOf(1f) }
     var progressScale by remember { mutableStateOf(1f) }
@@ -795,7 +866,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             label = remember { "$label alpha" }
         )
     } else {
-        progressAlpha = transform.enter.data.fade?.run { alpha * targetState.progress } ?: 1f
+        progressAlpha = enter.data.fade?.run { alpha * targetState.progress } ?: 1f
         null
     }
 
@@ -804,7 +875,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             label = remember { "$label scale" }
         )
     } else {
-        progressScale = transform.enter.data.scale?.run { scale * targetState.progress } ?: 1f
+        progressScale = enter.data.scale?.run { scale * targetState.progress } ?: 1f
         null
     }
 
@@ -822,10 +893,18 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         val alpha = alphaAnimation?.animate(
             transitionSpec = {
                 when {
-                    PreEnter isTransitioningTo Resume -> enter.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    Resume isTransitioningTo PostExit -> exit.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    Resume isTransitioningTo PauseState -> pause.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    PauseState isTransitioningTo Resume -> pause.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
+                    PreEnter isTransitioningTo Resume -> enter.data.fade?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    Resume isTransitioningTo PostExit -> exit.data.fade?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    Resume isTransitioningTo PauseState -> pause.data.fade?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    PauseState isTransitioningTo Resume -> pause.data.fade?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
                     else -> exit.data.fade?.animationSpec ?: DefaultAlphaAndScaleSpring
                 }
             },
@@ -833,7 +912,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             when (it) {
                 Resume -> 1f
                 PreEnter -> enter.data.fade?.alpha ?: 1f
-                PostExit -> exit.data.fade?.alpha?: 1f
+                PostExit -> exit.data.fade?.alpha ?: 1f
                 PauseState -> pause.data.fade?.alpha ?: 1f
                 else -> it.progress
             }
@@ -842,10 +921,18 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         val scale = scaleAnimation?.animate(
             transitionSpec = {
                 when {
-                    PreEnter isTransitioningTo Resume -> enter.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    Resume isTransitioningTo PostExit -> exit.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    Resume isTransitioningTo PauseState -> pause.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
-                    PauseState isTransitioningTo Resume -> pause.data.scale?.animationSpec ?: DefaultAlphaAndScaleSpring
+                    PreEnter isTransitioningTo Resume -> enter.data.scale?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    Resume isTransitioningTo PostExit -> exit.data.scale?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    Resume isTransitioningTo PauseState -> pause.data.scale?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
+                    PauseState isTransitioningTo Resume -> pause.data.scale?.animationSpec
+                        ?: DefaultAlphaAndScaleSpring
+
                     else -> DefaultAlphaAndScaleSpring
                 }
             }
@@ -883,11 +970,12 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
 
         val block: GraphicsLayerScope.() -> Unit = {
             this.alpha = alpha?.value ?: progressAlpha
-            loge("tag","alpha:${alpha?.value} __ $shouldAnimateAlpha")
+            loge("tag", "alpha:${alpha?.value} __ $shouldAnimateAlpha")
             this.scaleX = scale?.value ?: progressScale
             this.scaleY = scale?.value ?: progressScale
             this.transformOrigin =
-                transformOrigin?.value ?: transform.exit.data.scale?.transformOrigin ?: TransformOrigin.Center
+                transformOrigin?.value ?: transform.exit.data.scale?.transformOrigin
+                        ?: TransformOrigin.Center
         }
         block
     }

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.IntOffset
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.DialogRouter
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
@@ -29,36 +30,26 @@ class PageEntry internal constructor(
     internal val transform = mutableStateOf(Transform.None)
     internal val transformState get() = scope.transformState
 
+    private var shouldDestroy = false
+    private var shouldResume: Boolean = false
+
     init {
         create()
     }
 
-    @OptIn(ExperimentalTransitionApi::class)
     @Composable
     override fun Content(modifier: Modifier) {
-//        val inDialog = scope.router.parentRouter is DialogRouter
+
 
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
-
-            val state = remember(this) {
-                MutableTransitionState(transformState.value)
-            }
-            state.targetState = transformState.value
-            val transition = rememberTransition(state).apply {
-                if (exitFinished) {
-                    scope.router.parentRouter!!.backStack.pop()
-                }
-                if (enterStart) {
-                    scope.transformTransition = this
-                    transformState.value = Resume
-                }
-            }
-            val transform by remember(this,transform) { transform }
-            if (transition.exitFinished) return@CompositionLocalProvider
-            Box(transition.createModifier(transform, modifier, "Built-in")) {
+            val inDialog = scope.router.parentRouter is DialogRouter
+            if (inDialog) {
                 address.content()
-            }
+            } else
+                OnlyPage(modifier)
+
+
 //            else
 //                transform.gesture.run {
 //                    Wrap {
@@ -83,8 +74,31 @@ class PageEntry internal constructor(
         }
     }
 
-    private var shouldDestroy = false
-    private var shouldResume: Boolean = false
+
+    @OptIn(ExperimentalTransitionApi::class)
+    @Composable
+    fun OnlyPage(modifier: Modifier) {
+        val state = remember(this) {
+            MutableTransitionState(transformState.value)
+        }
+        state.targetState = transformState.value
+
+        val transition = rememberTransition(state).apply {
+            if (exitFinished) {
+                scope.router.parentRouter!!.backStack.pop()
+            }
+            if (enterStart) {
+                scope.transformTransition = this
+                transformState.value = Resume
+            }
+        }
+
+        val transform by remember(this, transform) { transform }
+        if (!transition.exitFinished)
+            Box(transition.createModifier(transform, modifier, "Built-in")) {
+                address.content()
+            }
+    }
 
 
     @Composable
@@ -123,10 +137,11 @@ class PageEntry internal constructor(
         }
         entry.transformState.value = when (state) {
             PreEnter, PostExit -> Resume
-            Resume->{
+            Resume -> {
                 entry.transform.value = entry.transform.value.copy(prev = transform.value.prev)
                 PauseState
             }
+
             PauseState -> PauseState
             is TransitionState -> TransitionState(1 - state.progress)
         }
