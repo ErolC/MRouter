@@ -167,8 +167,8 @@ fun Home() {
                     transform {
 //                        enter = expandHorizontally()
 //                        exit = shrinkHorizontally()
-                        enter = scaleIn()
-                        prev = fadeOut()
+                        enter = fadeIn()
+//                        prev = scaleOut()
 //                        exit = fadeOut()
                     }
                     onResult {

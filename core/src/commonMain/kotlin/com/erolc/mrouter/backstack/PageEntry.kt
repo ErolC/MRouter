@@ -84,18 +84,17 @@ class PageEntry internal constructor(
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
-            if (exitFinished) {
-                scope.router.parentRouter!!.backStack.pop()
-            }
             if (enterStart) {
                 scope.transformTransition = this
                 transformState.value = Resume
             }
+
+            if (exitFinished) scope.router.parentRouter!!.backStack.pop()
         }
 
         val transform by remember(this, transform) { transform }
         if (!transition.exitFinished)
-            Box(transition.createModifier(transform, modifier, "Built-in")) {
+            Box(transition.createModifier(address.path,transform, modifier, "Built-in")) {
                 address.content()
             }
     }
@@ -132,7 +131,7 @@ class PageEntry internal constructor(
 
     @Composable
     fun ShareLife(entry: PageEntry) {
-        val state by remember(this) {
+        val state by remember(this,transformState) {
             transformState
         }
         entry.transformState.value = when (state) {
@@ -141,11 +140,9 @@ class PageEntry internal constructor(
                 entry.transform.value = entry.transform.value.copy(prev = transform.value.prev)
                 PauseState
             }
-
             PauseState -> PauseState
             is TransitionState -> TransitionState(1 - state.progress)
         }
-        loge("TAG", "${state} shareLife ${entry.transformState.value}")
     }
 
     fun onCreate() {

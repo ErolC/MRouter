@@ -298,7 +298,8 @@ class TransformBuilder {
  *
  * @param enter 本页面进入的变换
  * @param exit 本页面退出的变换,如果为空，那么退出时将会使用enter做逆向变换
- * @param prev 上一个页面在本次变换中的细微变换
+ * @param prev 上一个页面在本次变换中的细微变换，对于该动画来说，其中的具体数值是没有作用的，
+ * 比如说fade的alpha是没有作用的，该参数只是给框架提供动画形式和方向，具体变化细节无法干涉。是内部实现的。
  * @param gesture 手势，可以自定义手势
  */
 @Immutable
@@ -313,10 +314,23 @@ data class Transform internal constructor(
         val None = Transform()
     }
 
-    val exit
-        get() = if (_exit == ExitTransition.None) ExitTransitionImpl(enter.data).apply {
-            isReverse = true
-        } else _exit
+    val exit get() = if (_exit == ExitTransition.None) ExitTransitionImpl(enter.data) else _exit
+
+
+    internal fun trackActive(transition: Transition<TransformState>): TransformData {
+        return with(transition.segment) {
+            when {
+                PreEnter isTransitioningTo PreEnter -> enter.data
+                PreEnter isTransitioningTo Resume || Resume isTransitioningTo Resume -> enter.data
+                Resume isTransitioningTo PostExit -> exit.data
+                Resume isTransitioningTo PauseState
+                        || PauseState isTransitioningTo Resume
+                        || PauseState isTransitioningTo PauseState -> prev.data
+
+                else -> TransformData.None
+            }
+        }
+    }
 }
 
 @Immutable
@@ -325,7 +339,11 @@ internal data class TransformData(
     val slide: Slide? = null,
     val changeSize: ChangeSize? = null,
     val scale: Scale? = null
-)
+) {
+    companion object {
+        val None = TransformData()
+    }
+}
 
 @Immutable
 internal data class Fade(val alpha: Float, val animationSpec: FiniteAnimationSpec<Float>)
@@ -403,7 +421,7 @@ sealed class EnterTransition {
          *
          * @see [ExitTransition.None]
          */
-        val None: EnterTransition = EnterTransitionImpl(TransformData())
+        val None: EnterTransition = EnterTransitionImpl(TransformData.None)
     }
 }
 
@@ -411,7 +429,6 @@ sealed class EnterTransition {
 @Immutable
 sealed class ExitTransition {
     internal abstract val data: TransformData
-    internal var isReverse = false
 
     /**
      * Combines different exit transitions. The order of the [ExitTransition]s being combined
@@ -483,6 +500,7 @@ internal val Transition<TransformState>.enterStart
 @OptIn(InternalAnimationApi::class)
 @Composable
 internal fun Transition<TransformState>.createModifier(
+    page: String,
     transform: Transform,
     modifier: Modifier,
     label: String
@@ -515,7 +533,7 @@ internal fun Transition<TransformState>.createModifier(
     } else null
 
     val graphicsLayerBlock =
-        createGraphicsLayerBlock(transform, activeEnter, activeExit, activePause, label)
+        createGraphicsLayerBlock(page, transform, activeEnter, activeExit, activePause, label)
 
     val disableClip = (activeEnter.data.changeSize?.clip == false ||
             activeExit.data.changeSize?.clip == false) || !shouldAnimateSizeChange
@@ -782,10 +800,7 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             }?.value ?: IntOffset.Zero
             val offset = (currentAlignment?.align(target, currentSize, LayoutDirection.Ltr)
                 ?: IntOffset.Zero) + slideOffset
-            loge(
-                "tag",
-                "$this $currentSize - $offset ${transition.currentState} ${transition.targetState}"
-            )
+
             return layout(currentSize.width, currentSize.height) {
                 placeable.placeWithLayer(
                     offset.x + offsetDelta.x, offset.y + offsetDelta.y, 0f, layerBlock
@@ -829,15 +844,8 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
 
 internal val InvalidSize = IntSize(Int.MIN_VALUE, Int.MIN_VALUE)
 
-internal fun ExitTransition.getAlignment(): Alignment? {
-//    return data.changeSize?.let {
-//        if (isReverse) {
-//            val value = it.alignment as BiasAlignment
-//            value.copy(value.horizontalBias * -1, value.verticalBias * -1)
-//        } else it.alignment
-//    }
-    return data.changeSize?.alignment
-}
+internal fun ExitTransition.getAlignment() = data.changeSize?.alignment
+internal fun TransformData.getAlignment() = changeSize?.alignment
 
 internal fun interface GraphicsLayerBlockForTransform {
     fun init(): GraphicsLayerScope.() -> Unit
@@ -846,6 +854,7 @@ internal fun interface GraphicsLayerBlockForTransform {
 @OptIn(InternalAnimationApi::class)
 @Composable
 private fun Transition<TransformState>.createGraphicsLayerBlock(
+    page: String,
     transform: Transform,
     enter: EnterTransition,
     exit: ExitTransition,
@@ -853,10 +862,16 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
     label: String
 ): GraphicsLayerBlockForTransform {
 
-    val shouldAnimateAlpha =
-        enter.data.fade != null || exit.data.fade != null || pause.data.fade != null
-    val shouldAnimateScale =
-        enter.data.scale != null || exit.data.scale != null || pause.data.scale != null
+//    val shouldAnimateAlpha =
+//        enter.data.fade != null || exit.data.fade != null || pause.data.fade != null
+//    val shouldAnimateScale =
+//        enter.data.scale != null || exit.data.scale != null || pause.data.scale != null
+
+    val transformData = remember(transform) { transform.trackActive(this) }
+
+    val shouldAnimateAlpha = transformData.fade != null
+    val shouldAnimateScale = transformData.scale != null
+
 
     var progressAlpha by remember { mutableStateOf(1f) }
     var progressScale by remember { mutableStateOf(1f) }
@@ -866,7 +881,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             label = remember { "$label alpha" }
         )
     } else {
-        progressAlpha = enter.data.fade?.run { alpha * targetState.progress } ?: 1f
+        progressAlpha = transform.prev.data.fade?.run { alpha * targetState.progress } ?: 1f
         null
     }
 
@@ -913,7 +928,6 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
                 Resume -> 1f
                 PreEnter -> enter.data.fade?.alpha ?: 1f
                 PostExit -> exit.data.fade?.alpha ?: 1f
-                PauseState -> pause.data.fade?.alpha ?: 1f
                 else -> it.progress
             }
         }
@@ -941,7 +955,6 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
                 Resume -> 1f
                 PreEnter -> enter.data.scale?.scale ?: 1f
                 PostExit -> exit.data.scale?.scale ?: 1f
-                PauseState -> pause.data.scale?.scale ?: 0f
                 else -> it.progress
             }
         }
@@ -970,7 +983,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
 
         val block: GraphicsLayerScope.() -> Unit = {
             this.alpha = alpha?.value ?: progressAlpha
-            loge("tag", "alpha:${alpha?.value} __ $shouldAnimateAlpha")
+            loge("tag", "$page alpha:${alpha?.value} $currentState $targetState")
             this.scaleX = scale?.value ?: progressScale
             this.scaleY = scale?.value ?: progressScale
             this.transformOrigin =

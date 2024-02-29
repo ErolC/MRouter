@@ -39,36 +39,3 @@ fun RouteHost(router: MRouter) {
     }
 }
 
-
-/**
- * 无手势版的页面切换
- */
-@Composable
-internal fun WindowEntry.Transforms() {
-    val backStacks by pageRouter.getBackStack().collectAsState()
-    loge("tag","__ $backStacks")
-    var size by remember { mutableStateOf(0) }
-    //是否是後退
-    val isBack = remember(backStacks) {
-        val stackSize = backStacks.size
-        val isBack = size > stackSize
-        size = stackSize
-        isBack
-    }
-    val target = remember(backStacks) {
-        backStacks.lastOrNull()
-    }
-    val transition = updateTransition(targetState = target)
-    transition.AnimatedContent(transitionSpec = {
-        slideInHorizontally(tween()) {
-            if (isBack) -it else it
-        } togetherWith slideOutHorizontally(tween()) {
-            if (isBack) it else -1
-        }
-    }) {
-        (it as? PageEntry)?.Content(Modifier)
-    }
-
-}
-
-
