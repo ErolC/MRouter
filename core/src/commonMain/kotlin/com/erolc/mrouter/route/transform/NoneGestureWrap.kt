@@ -13,11 +13,9 @@ import androidx.compose.ui.unit.dp
 
 object NoneGestureWrap : GestureWrap() {
     @Composable
-    override fun Wrap(modifier: Modifier,progress: (Float) -> Unit) {
-        Surface(modifier.fillMaxSize()) {
+    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
+        Surface(modifier) {
             content()
         }
     }
-    @Composable
-    override fun prevPauseModifier() = Modifier
 }

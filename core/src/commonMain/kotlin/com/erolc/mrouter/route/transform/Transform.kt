@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
 fun modal() = buildTransform {
     enter = slideInVertically{ it }
     exit = slideOutVertically{ it }
-    prevPause = scaleOut(targetScale = 0.9f)
+    prevPause = scaleOut(targetScale = 0.95f)
     gesture = ModalGestureWrap
 }
 

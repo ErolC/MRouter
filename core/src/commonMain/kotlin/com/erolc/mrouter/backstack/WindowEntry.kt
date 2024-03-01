@@ -41,7 +41,7 @@ class WindowEntry(internal var options: WindowOptions) :
                         (stack.first() as PageEntry).transformState.value = Resume
                     }
                     else
-                        (stack.last() as PageEntry).ShareLife(stack.first() as PageEntry)
+                        (stack.last() as PageEntry).ShareTransform(stack.first() as PageEntry)
 
                     stack.forEach {
                         (it as PageEntry).Content(Modifier)

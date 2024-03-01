@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 object ModalGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
-        Surface(modifier = modifier.padding(top = 40.dp)) {
+        val transform = rememberTransform()
+        val corner by transform.animateDp { if (it == Resume) 10.dp else 0.dp }
+        Surface(modifier = modifier.padding(top = 30.dp), RoundedCornerShape(corner)) {
             content()
         }
     }

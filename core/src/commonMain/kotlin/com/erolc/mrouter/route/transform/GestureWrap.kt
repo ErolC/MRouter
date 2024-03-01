@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
  */
 abstract class GestureWrap {
     internal var isUseContent = false
-    internal var pauseModifierPost = PauseModifierPost{ prevPauseModifier() }
+    internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
 
     /**
      * 这是内容部分，应当被包裹的部分，必须调用
@@ -17,7 +17,7 @@ abstract class GestureWrap {
     var content: @Composable () -> Unit = {}
         internal set
         get() {
-            isUseContent  = true
+            isUseContent = true
             return field
         }
 
@@ -29,10 +29,10 @@ abstract class GestureWrap {
     abstract fun Wrap(modifier: Modifier, progress: (Float) -> Unit)
 
     /**
-     * 前一个页面在暂停时的modifier
+     * 前一个页面在暂停时的modifier,用于控制在跳转过程中，上一个页面的页面变化
      */
     @Composable
-    abstract fun prevPauseModifier(): Modifier
+    open fun prevPauseModifier(): Modifier = Modifier
 
     internal class PauseModifierPost(private val body: @Composable () -> Modifier) {
         @Composable
@@ -40,7 +40,7 @@ abstract class GestureWrap {
     }
 
     internal fun updatePauseModifier(pauseModifierPost: PauseModifierPost) {
-            this.pauseModifierPost = pauseModifierPost
+        this.pauseModifierPost = pauseModifierPost
     }
 }
 

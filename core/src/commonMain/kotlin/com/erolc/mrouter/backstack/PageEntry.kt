@@ -1,16 +1,10 @@
 package com.erolc.mrouter.backstack
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.unit.dp
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
@@ -30,6 +24,7 @@ class PageEntry internal constructor(
 
     //transform中的prev在下一个页面打开的时候才会被赋值
     internal val transform = mutableStateOf(Transform.None)
+    private var isUpdateTransform = false
     internal val transformState get() = scope.transformState
 
     private var shouldDestroy = false
@@ -82,7 +77,11 @@ class PageEntry internal constructor(
             transform.gesture.run {
                 val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
-
+                    state.targetState = when (it) {
+                        1f -> Resume
+                        0f -> PostExit
+                        else -> TransitionState(it)
+                    }
                 }
                 check(isUseContent) { "必须在Wrap方法中使用content,请检查$this 的Wrap方法" }
             }
@@ -120,21 +119,27 @@ class PageEntry internal constructor(
     }
 
     @Composable
-    fun ShareLife(entry: PageEntry) {
+    fun ShareTransform(entry: PageEntry) {
         val state by remember(this, transformState) {
             transformState
         }
         entry.transformState.value = when (state) {
             PreEnter, PostExit -> Resume
-            Resume -> {
-                entry.transform.value = entry.transform.value.copy(prevPause = transform.value.prevPause)
-                entry.transform.value.gesture.updatePauseModifier(transform.value.gesture.pauseModifierPost)
-                PauseState
-            }
-
+            Resume -> updatePrevTransform(entry)
             PauseState -> PauseState
             is TransitionState -> TransitionState(1 - state.progress)
         }
+    }
+
+    /**
+     * 更新上一个页面的transform
+     */
+    private fun updatePrevTransform(prev: PageEntry): TransformState {
+        if (prev.isUpdateTransform) return PauseState
+        prev.transform.value = prev.transform.value.copy(prevPause = transform.value.prevPause)
+        prev.transform.value.gesture.updatePauseModifier(transform.value.gesture.pauseModifierPost)
+        prev.isUpdateTransform = true
+        return PauseState
     }
 
     fun onCreate() {

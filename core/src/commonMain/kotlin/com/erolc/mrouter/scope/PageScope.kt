@@ -108,8 +108,8 @@ open class PageScope {
     }
 
     @Composable
-    internal fun rememberTransform(): Transition<TransformState> {
-        return transformTransition!!
+    internal fun rememberTransform(): Transition<TransformState>? {
+        return transformTransition
     }
 
 }

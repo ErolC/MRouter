@@ -33,8 +33,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-//            App()
-            AnimatedScreen()
+            App()
+//            AnimatedScreen()
         }
     }
 }
@@ -60,7 +60,6 @@ fun AnimatedScreen() {
     ) { offsetX ->
         offsetX/100
     }
-    androidx.compose.ui.res.stringResource(id = )
 
     val offsetXConstraint = if (offsetX == 0f) 0f else 200f
 

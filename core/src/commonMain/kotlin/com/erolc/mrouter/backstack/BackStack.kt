@@ -1,5 +1,6 @@
 package com.erolc.mrouter.backstack
 
+import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.transform.PostExit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,7 @@ open class BackStack(val name: String) {
             _backstack.value -= _backstack.value.last().apply { destroy() }
             true
         } else false
+
     }
 
     fun back(): Boolean {

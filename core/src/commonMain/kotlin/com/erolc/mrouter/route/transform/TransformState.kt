@@ -1,31 +1,8 @@
 package com.erolc.mrouter.route.transform
 
 import androidx.compose.animation.core.*
-import androidx.compose.ui.Modifier
-import com.erolc.mrouter.backstack.PageEntry
-import com.erolc.mrouter.backstack.StackEntry
 import androidx.compose.runtime.*
-import com.erolc.mrouter.route.PageRouter
 import com.erolc.mrouter.scope.LocalPageScope
-
-
-fun List<StackEntry>.isBack(current: List<StackEntry>): Boolean {
-    if (isEmpty()) return false
-    return if (current.size < this.size) true
-    else {
-        val last = current.last()
-        val first = first()
-        last.address.path == first.address.path
-    }
-}
-
-fun List<StackEntry>.equalsWith(current: List<StackEntry>): Boolean {
-    return firstOrNull()?.address?.path == current.firstOrNull()?.address?.path && size == current.size
-}
-
-fun List<StackEntry>.isInit(current: List<StackEntry>): Boolean {
-    return equalsWith(current)
-}
 
 /**
  * 描述界面变换的状态，以及进度。
@@ -60,17 +37,16 @@ internal data class TransitionState(override val progress: Float) : TransformSta
 
 @OptIn(ExperimentalTransitionApi::class)
 @Composable
-fun <T> rememberTransformWithChild(
-    label: String,
+fun <T> createChildTransform(
+    label: String = "ChildTransition",
     transformToChildState: @Composable (parentState: TransformState) -> T
-): Transition<T> {
-    val pageScope = LocalPageScope.current
-    return pageScope.rememberTransform().createChildTransition(label, transformToChildState)
-}
+): Transition<T> =
+    rememberTransform().createChildTransition(label, transformToChildState)
+
 
 @Composable
 fun rememberTransform(): Transition<TransformState> {
     val pageScope = LocalPageScope.current
-    return pageScope.rememberTransform()
+    return pageScope.rememberTransform() ?: updateTransition(Resume)
 }
 
