@@ -130,4 +130,3 @@ fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
 fun PageScope.addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     lifecycle.addEventObserver(body)
 }
-

@@ -1,6 +1,8 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.ExperimentalTransitionApi
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -11,10 +13,9 @@ import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.DialogRouter
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.route.transform.TransitionState
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.*
+import com.erolc.mrouter.utils.logi
 
 class PageEntry internal constructor(
     scope: PageScope,
@@ -77,13 +78,13 @@ class PageEntry internal constructor(
             transform.gesture.run {
                 val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
-                    state.targetState = when (it) {
-                        1f -> Resume
-                        0f -> PostExit
-                        else -> TransitionState(it)
+                    transformState.value = when (it) {
+                        0f -> Resume
+                        1f -> PostExit
+                        else -> TransitionState(1-it)
                     }
                 }
-                check(isUseContent) { "必须在Wrap方法中使用content,请检查$this 的Wrap方法" }
+                check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
         }
     }
@@ -127,7 +128,9 @@ class PageEntry internal constructor(
             PreEnter, PostExit -> Resume
             Resume -> updatePrevTransform(entry)
             PauseState -> PauseState
-            is TransitionState -> TransitionState(1 - state.progress)
+            else -> Reverse(1-state.progress)
+
+
         }
     }
 

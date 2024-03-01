@@ -1,19 +1,22 @@
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -79,8 +82,12 @@ fun GreetingPage() {
         }) {
             Text(greetingText)
         }
-        AnimatedVisibility(showImage, modifier = Modifier,
-            enter = androidx.compose.animation.slideInHorizontally(), exit = androidx.compose.animation.slideOutHorizontally()) {
+        AnimatedVisibility(
+            showImage,
+            modifier = Modifier,
+            enter = androidx.compose.animation.slideInHorizontally(),
+            exit = androidx.compose.animation.slideOutHorizontally()
+        ) {
             Image(
                 painterResource(DrawableResource("compose-multiplatform.xml")),
                 null
@@ -95,7 +102,7 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.Red),horizontalAlignment = Alignment.CenterHorizontally
+        Modifier.background(Color.White), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
             scope.setResult("result" to 1233)
@@ -151,13 +158,13 @@ fun Home() {
             "47"
         )
     }
-    LazyColumn(
-        state = rememberLazyListState(),
-        modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
-    ) {
-        items(list) {
-            Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                scope.route("second?key=123") {
+        LazyColumn(
+            state = rememberLazyListState(),
+            modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
+        ) {
+            items(list) {
+                Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
+                    scope.route("second?key=123") {
 //                    dialog {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
@@ -169,49 +176,12 @@ fun Home() {
 //                        enter = expandIn()
 //                        exit = shrinkOut()
 //                    }
-                    transform = modal()
-                    onResult {
-                        log("ATG", "data:${it.getDataOrNull<Int>("result")}")
+                        transform = modal()
+                        onResult {
+                            log("ATG", "data:${it.getDataOrNull<Int>("result")}")
+                        }
                     }
-                }
-            }, fontSize = 20.sp)
+                }, fontSize = 20.sp)
+            }
         }
-    }
-}
-
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-internal fun PageTemplate(onBack: (() -> Unit)?, content: @Composable () -> Unit) {
-    val squareSize = LocalWindowScope.current.windowSize.value.width.size
-    val swipeableState = rememberSwipeableState(0) {
-        onBack != null
-    }
-    DisposableEffect(swipeableState.currentValue) {
-        if (swipeableState.currentValue == 1) {
-            onBack?.invoke()
-        }
-        onDispose {}
-    }
-    val sizePx = with(LocalDensity.current) { squareSize.toPx() }
-    val anchors = mapOf(0f to 0, sizePx to 1) // Maps anchor points (in px) to states
-    Box {
-        Box(
-            modifier = Modifier.fillMaxHeight().width(10.dp).swipeable(
-                state = swipeableState,
-                anchors = anchors,
-                thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                orientation = Orientation.Horizontal
-            )
-        )
-        Box(modifier = Modifier.offset {
-            if (onBack != null)
-                IntOffset(swipeableState.offset.value.roundToInt(), 0)
-            else
-                IntOffset.Zero
-
-        }) {
-            content()
-        }
-    }
 }

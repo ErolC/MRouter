@@ -18,16 +18,16 @@ import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
 fun modal() = buildTransform {
-    enter = slideInVertically{ it }
-    exit = slideOutVertically{ it }
+    enter = slideInVertically { it }
+    exit = slideOutVertically { it }
     prevPause = scaleOut(targetScale = 0.9f)
     gesture = ModalGestureWrap
 }
 
-fun normal() = buildTransform{
-    enter = slideInHorizontally{ it }
-    exit = slideOutHorizontally{ it }
-    prevPause = slideOutHorizontally { -it/8 }
+fun normal() = buildTransform {
+    enter = slideInHorizontally { it }
+    exit = slideOutHorizontally { it }
+    prevPause = slideOutHorizontally { -it / 7 }
     gesture = NormalGestureWrap
 }
 
@@ -340,6 +340,8 @@ data class Transform internal constructor(
                         || PauseState isTransitioningTo Resume
                         || PauseState isTransitioningTo PauseState -> prevPause.data
 
+                targetState is Reverse || initialState is Reverse -> prevPause.data
+//                targetState is TransitionState || initialState is TransitionState -> exit.data
                 else -> TransformData.None
             }
         }
@@ -631,8 +633,26 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     fun sizeByState(targetState: TransformState, fullSize: IntSize): IntSize =
         when (targetState) {
             Resume -> fullSize
-            PreEnter, PostExit -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
-            PauseState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            PreEnter, PostExit, PauseState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            is Reverse -> {
+                val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+                startValue.compute(targetState.progress, fullSize)
+            }
+
+            is TransitionState -> {
+                val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+                var newWidth = startValue.width * 1.0f
+                var newHeight = startValue.height * 1.0f
+                if (startValue.height == fullSize.height) {
+                    newWidth = targetState.progress * (fullSize.width - startValue.width) + startValue.width
+                }
+                if (startValue.width == fullSize.width) {
+                    newHeight = targetState.progress * (fullSize.height - startValue.height) + startValue.height
+
+                }
+                IntSize(newWidth.roundToInt(), newHeight.roundToInt())
+            }
+
             else -> IntSize(
                 (fullSize.width * targetState.progress).roundToInt(),
                 (fullSize.height * targetState.progress).roundToInt()
@@ -645,6 +665,39 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
         lookaheadSize = InvalidSize
     }
 
+
+    fun slideTargetValueByState(targetState: TransformState, fullSize: IntSize): IntOffset {
+        return when (targetState) {
+            Resume -> IntOffset.Zero
+            PreEnter -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            PostExit -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            PauseState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            is Reverse -> {
+                val start = transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+                start.compute(targetState.progress)
+            }
+
+            is TransitionState -> {
+                val start = transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+                start.compute(targetState.progress)
+            }
+
+            else -> IntOffset.Zero
+        }
+    }
+
+    private fun IntOffset.compute(progress: Float): IntOffset {
+        val newX = progress * (0 - x) + x
+        val newY = progress * (0 - y) + y
+        return IntOffset(newX.roundToInt(), newY.roundToInt())
+    }
+
+    private fun IntSize.compute(progress: Float, fullSize: IntSize): IntSize {
+        val newWidth = progress * (fullSize.width - width) + width
+        val newHeight = progress * (fullSize.height - height) + height
+        return IntSize(newWidth.roundToInt(), newHeight.roundToInt())
+    }
+
     fun targetOffsetByState(targetState: TransformState, fullSize: IntSize): IntOffset =
         when {
             currentAlignment == null -> IntOffset.Zero
@@ -653,7 +706,7 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             else -> when (targetState) {
                 Resume -> IntOffset.Zero
                 PreEnter -> IntOffset.Zero
-                PostExit -> transformData.changeSize?.let {
+                PostExit, PauseState -> transformData.changeSize?.let {
                     val endSize = it.size(fullSize)
                     val targetOffset = alignment!!.align(
                         fullSize,
@@ -668,17 +721,18 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
                     targetOffset - currentOffset
                 } ?: IntOffset.Zero
 
-                PauseState -> IntOffset.Zero
-                is TransitionState -> IntOffset.Zero
+                else -> IntOffset.Zero
+
             }
         }
+
 
     @OptIn(InternalAnimationApi::class)
     override fun MeasureScope.measure(
         measurable: Measurable,
         constraints: Constraints
     ): MeasureResult {
-        if (transition.currentState == transition.targetState && !transition.pause && !transition.enterStart) {
+        if (transition.currentState == transition.targetState) {
             currentAlignment = null
         } else if (currentAlignment == null) {
             currentAlignment = alignment ?: Alignment.TopStart
@@ -729,15 +783,6 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
         transformData.slide?.animationSpec ?: DefaultOffsetAnimationSpec
     }
 
-    fun slideTargetValueByState(targetState: TransformState, fullSize: IntSize): IntOffset {
-        return when (targetState) {
-            Resume -> IntOffset.Zero
-            PreEnter -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            PostExit -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            PauseState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            else -> IntOffset.Zero
-        }
-    }
 
 }
 
@@ -798,8 +843,12 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         ) {
             when (it) {
                 Resume -> 1f
-                PreEnter, PostExit,PauseState -> transformData.fade?.alpha ?: 1f
-                else -> it.progress
+                PreEnter, PostExit, PauseState -> transformData.fade?.alpha ?: 1f
+                is TransitionState -> it.progress
+                else -> {
+                    val startValue = transformData.fade?.alpha ?: 1f
+                    it.progress * (1 - startValue) + startValue
+                }
             }
         }
 
@@ -810,8 +859,12 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         ) {
             when (it) {
                 Resume -> 1f
-                PreEnter, PostExit,PauseState -> transformData.scale?.scale ?: 1f
-                else -> it.progress
+                PreEnter, PostExit, PauseState -> transformData.scale?.scale ?: 1f
+                is TransitionState -> it.progress
+                else -> {
+                    val startValue = transformData.scale?.scale ?: 1f
+                    it.progress * (1 - startValue) + startValue
+                }
             }
         }
 
