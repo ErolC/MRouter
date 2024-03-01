@@ -16,6 +16,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -94,7 +95,7 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White),horizontalAlignment = Alignment.CenterHorizontally
+        Modifier.background(Color.Red),horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
             scope.setResult("result" to 1233)
@@ -152,7 +153,7 @@ fun Home() {
     }
     LazyColumn(
         state = rememberLazyListState(),
-        modifier = Modifier.fillMaxSize().background(Color.Green)
+        modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
     ) {
         items(list) {
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {

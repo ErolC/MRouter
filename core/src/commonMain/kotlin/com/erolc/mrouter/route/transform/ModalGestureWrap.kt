@@ -17,7 +17,7 @@ object ModalGestureWrap : GestureWrap() {
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
         val transform = rememberTransform()
         val corner by transform.animateDp { if (it == Resume) 10.dp else 0.dp }
-        Surface(modifier = modifier.padding(top = 30.dp), RoundedCornerShape(corner)) {
+        Surface(modifier = modifier.padding(top = 47.dp), RoundedCornerShape(corner)) {
             content()
         }
     }
