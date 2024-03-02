@@ -14,6 +14,7 @@ import com.erolc.mrouter.route.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
 import com.erolc.mrouter.utils.PageCache
+import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()

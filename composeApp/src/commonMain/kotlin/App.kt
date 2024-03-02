@@ -45,6 +45,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import kotlin.time.Duration
 
 @Composable
 fun App() {
@@ -106,11 +107,12 @@ fun Second() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     scope.lifecycle.addEventObserver { source, event ->
-        when(event){
-            Lifecycle.Event.ON_DESTROY ->{
+        when (event) {
+            Lifecycle.Event.ON_DESTROY -> {
                 scope.setResult("result" to 1233)
             }
-            else ->{}
+
+            else -> {}
         }
     }
     Column(
@@ -130,13 +132,20 @@ fun Second() {
         }) {
             Text(greetingText)
         }
+
+        Exit {
+            Button(onClick = {
+                scope.backPressed()
+            }) {
+                Text("是否后退")
+            }
+        }
     }
 }
 
 
 @Composable
 fun Home() {
-    Exit(true)
     val scope = LocalPageScope.current
     val list = remember {
         listOf(
@@ -172,14 +181,14 @@ fun Home() {
             "47"
         )
     }
-        LazyColumn(
-            state = rememberLazyListState(),
-            modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
-        ) {
-            items(list) {
+    LazyColumn(
+        state = rememberLazyListState(),
+        modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
+    ) {
+        items(list) {
 
-                Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                    scope.route("second?key=123") {
+            Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
+                scope.route("second?key=123") {
 //                    dialog {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
@@ -190,11 +199,11 @@ fun Home() {
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
 //                        transform = normal()
-                        onResult {
-                            log("ATG", "data:${it.getDataOrNull<Int>("result")}")
-                        }
+                    onResult {
+                        log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }
-                }, fontSize = 20.sp)
-            }
+                }
+            }, fontSize = 20.sp)
         }
+    }
 }

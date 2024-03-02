@@ -1,18 +1,13 @@
 package com.erolc.mrouter.route
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -43,7 +38,7 @@ fun BackInterceptor(enabled: Boolean = true, onBack: BackPressedHandler.() -> Un
     val scope = LocalPageScope.current
     val currentOnBack by rememberUpdatedState(onBack)
 
-    val interceptor = remember(enabled) {
+    val interceptor = remember {
         object : BackInterceptor(enabled) {
             override fun onIntercept(callBack: BackPressedHandler) {
                 currentOnBack(callBack)
@@ -66,6 +61,7 @@ abstract class BackInterceptor(internal var isEnabled: Boolean) {
     abstract fun onIntercept(callBack: BackPressedHandler)
 }
 
+
 interface BackPressedHandler {
 
     /**
@@ -83,29 +79,28 @@ internal class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPres
 
 /**
  * 退出
- * @param doubleConfirm 为true时开启双重确认。目前android和desktop已生效
+ * @param enable 是否启动拦截
+ * @param delayTime 延迟若干时间后重新拦截监听，如果为[Duration.ZERO]那么将不会重新拦截，除非手动将enable重置为true
+ * @param block 当进入非拦截期间，会显现该compose。
  */
 @Composable
 fun Exit(
-    doubleConfirm: Boolean = false,
+    enable: MutableState<Boolean> = mutableStateOf(true),
     delayTime: Duration = 1000.milliseconds,
-    msg: String = ""
+    block: @Composable () -> Unit = {}
 ) {
     val scope = rememberPageCoroutineScope()
-//    val scope = rememberCoroutineScope()
-    var enable by remember { mutableStateOf(false) }
-    var preEnable by remember { mutableStateOf(false) }
-    BackInterceptor {
-        if (doubleConfirm) {
-            if (preEnable) enable = true
-            preEnable = true
-            scope?.launch {
-                delay(delayTime)
-                //todo toast
-                preEnable = false
-            }
-        } else enable = true
-    }
-    if (enable) ExitImpl()
+    var interceptEnable by remember(enable) { enable }
 
+    BackInterceptor(interceptEnable) {
+        scope?.launch {
+            loge("tag", "$interceptEnable -----")
+            interceptEnable = false
+            if (delayTime != ZERO) {
+                delay(delayTime)
+                interceptEnable = true
+            }
+        }
+    }
+    if (!interceptEnable) block()
 }
