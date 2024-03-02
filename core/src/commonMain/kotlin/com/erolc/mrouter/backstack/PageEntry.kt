@@ -11,6 +11,7 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.DialogRouter
+import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
@@ -34,8 +35,10 @@ class PageEntry internal constructor(
     private val shouldDestroy = mutableStateOf(false)
     private val shouldResume = mutableStateOf(false)
     internal val isSecond = mutableStateOf(false)
+    private val isExit = mutableStateOf(false)
+    private val isIntercept get() = scope.isIntercept
 
-    internal val listener = object : LifecycleEventListener {
+    private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
             when {
                 event == Lifecycle.Event.ON_RESUME -> resume()
@@ -80,11 +83,16 @@ class PageEntry internal constructor(
         val state = remember(this) {
             MutableTransitionState(transformState.value)
         }
+        var isExit by remember(this) { isExit }
+        val isIntercept by remember(this) { isIntercept }
+
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
-            if (exitFinished) scope.router.parentRouter!!.backStack.pop()
+            if (exitFinished && !scope.router.parentRouter!!.backStack.pop()) {
+                isExit = true
+            }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
@@ -103,6 +111,7 @@ class PageEntry internal constructor(
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
         }
+        if (isExit && !isIntercept) ExitImpl()
     }
 
 
@@ -121,7 +130,7 @@ class PageEntry internal constructor(
                 it == Lifecycle.Event.ON_DESTROY -> destroy()
             }
         }
-        DisposableEffect(this,isSecond) {
+        DisposableEffect(this, isSecond) {
             if (!isSecond) {
                 shouldResume = true
                 resume()

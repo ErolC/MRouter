@@ -39,6 +39,7 @@ import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.utils.loge
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -183,9 +184,7 @@ fun Home() {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
 //                    }
-                    window("second", "second"){
-                        alwaysOnTop = true
-                    }
+                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }

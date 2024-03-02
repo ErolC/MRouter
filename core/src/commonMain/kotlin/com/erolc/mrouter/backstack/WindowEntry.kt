@@ -23,7 +23,7 @@ class WindowEntry(internal var options: WindowOptions) :
 
     internal fun getScope() = scope as WindowScope
 
-    fun close(): Boolean {
+    internal fun close(): Boolean {
         (pageRouter.parentRouter as WindowRouter).close(this)
         return shouldExit()
     }

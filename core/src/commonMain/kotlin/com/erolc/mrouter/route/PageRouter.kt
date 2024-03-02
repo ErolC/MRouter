@@ -61,7 +61,6 @@ class PageRouter(
                 getScope(),
                 address
             ).apply {
-//                route.transform.gesture.setContent { address.content() }
                 transform.value = route.transform
                 scope.run {
                     argsFlow.value = route.args

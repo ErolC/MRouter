@@ -5,6 +5,8 @@ import com.erolc.mrouter.backstack.StackEntry
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.scope.WindowScope
+import com.erolc.mrouter.scope.getScope
 
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
@@ -30,9 +32,6 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
         return null
     }
 
-    override fun backPressed(notInterceptor: () -> Boolean) {
-        // window 不能通过该方法关闭
-    }
 
     /**
      * @return 是否需要退出应用

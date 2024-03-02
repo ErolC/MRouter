@@ -32,6 +32,7 @@ open class PageScope {
     private lateinit var _lifecycle: Lifecycle
     internal val transformState = mutableStateOf<TransformState>(PreEnter)
     internal var transformTransition: Transition<TransformState>? = null
+    internal val isIntercept = mutableStateOf(false)
 
     var lifecycle: Lifecycle
         internal set(value) {
@@ -87,12 +88,14 @@ open class PageScope {
      */
     fun backPressed() {
         router.backPressed {
-            interceptors.filter { it.isEnabled }.map {
+            val notInterceptor = interceptors.filter { it.isEnabled }.map {
                 it.onIntercept(BackPressedHandlerImpl {
                     it.isEnabled = false
                 })
                 it
             }.none { it.isEnabled }
+            isIntercept.value = !notInterceptor
+            notInterceptor
         }
     }
 
