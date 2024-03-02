@@ -38,6 +38,7 @@ abstract class GestureWrap {
      * 这是内容部分，应当被包裹的部分，必须调用
      */
     internal var content: @Composable () -> Unit = {}
+        private set
         get() {
             isUseContent = true
             return field
@@ -71,6 +72,10 @@ abstract class GestureWrap {
      */
     @Composable
     open fun prevPauseModifier(): Modifier = Modifier
+
+    internal fun setContent(content: @Composable () -> Unit) {
+        this.content = content
+    }
 
     internal class PauseModifierPost(private val body: @Composable () -> Modifier) {
         @Composable

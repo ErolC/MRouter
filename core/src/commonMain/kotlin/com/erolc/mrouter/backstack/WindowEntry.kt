@@ -13,6 +13,7 @@ import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
+import com.erolc.mrouter.utils.loge
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
@@ -43,8 +44,14 @@ class WindowEntry(internal var options: WindowOptions) :
                     else
                         (stack.last() as PageEntry).ShareTransform(stack.first() as PageEntry)
 
-                    stack.forEach {
-                        (it as PageEntry).Content(Modifier)
+                    stack.forEachIndexed { index, stackEntry ->
+                        (stackEntry as PageEntry).run {
+                            if (index == 0 && stack.size == 2) pause(true)
+                            else{
+                                isSecond.value = false
+                            }
+                            Content(Modifier)
+                        }
                     }
                 }
             }

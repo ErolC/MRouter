@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.SystemLifecycle
+import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.LocalWindowScope
 import com.erolc.mrouter.register.page
@@ -71,7 +74,7 @@ fun GreetingPage() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
-            scope.setResult("result" to 1233)
+            scope.setResult("result" to 3444)
             scope.backPressed()
         }) {
             Text("back111")
@@ -101,17 +104,27 @@ fun Second() {
     var greetingText by remember { mutableStateOf("Hello World!") }
     val scope = LocalPageScope.current
     val args = rememberArgs()
+    scope.lifecycle.addEventObserver { source, event ->
+        when(event){
+            Lifecycle.Event.ON_DESTROY ->{
+                scope.setResult("result" to 1233)
+            }
+            else ->{}
+        }
+    }
     Column(
         Modifier.background(Color.White), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
-            scope.setResult("result" to 1233)
             scope.backPressed()
         }) {
-            Text("back")
+            Text("back:${args.getDataOrNull<Int>("key")}")
         }
         Button(onClick = {
             scope.route("greet") {
+                onResult {
+                    log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
+                }
             }
         }) {
             Text(greetingText)
@@ -163,20 +176,21 @@ fun Home() {
             modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
         ) {
             items(list) {
+
                 Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                     scope.route("second?key=123") {
 //                    dialog {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
 //                    }
-//                    window("second", "second"){
-//                        alwaysOnTop = true
-//                    }
+                    window("second", "second"){
+                        alwaysOnTop = true
+                    }
 //                    transform {
-//                        enter = expandIn()
-//                        exit = shrinkOut()
+//                        enter = fadeIn()+ slideInHorizontally()
+//                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
-                        transform = normal()
+//                        transform = normal()
                         onResult {
                             log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                         }

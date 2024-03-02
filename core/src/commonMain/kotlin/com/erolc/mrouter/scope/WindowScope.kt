@@ -6,13 +6,20 @@ import com.erolc.mrouter.window.DefWindowSize
 
 class WindowScope : PageScope() {
     val windowSize = mutableStateOf(DefWindowSize)
-
-    var lifecycleEvent: ((Lifecycle.Event) -> Unit)? = null
+    private val listeners = mutableSetOf<LifecycleEventListener>()
 
     internal val isCloseWindow = mutableStateOf(false)
 
     internal fun onLifeEvent(event: Lifecycle.Event) {
-        lifecycleEvent?.invoke(event)
+        listeners.forEach { it.call(event) }
+    }
+
+    internal fun addLifecycleEventListener(listener: LifecycleEventListener) {
+        listeners.add(listener)
+    }
+
+    internal fun removeLifeCycleEventListener(listener: LifecycleEventListener) {
+        listeners.remove(listener)
     }
 
     /**

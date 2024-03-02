@@ -21,7 +21,7 @@ fun modal(scale: Float = 0.9f) = buildTransform {
     enter = slideInVertically { it }
     exit = slideOutVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    gesture = ModalGestureWrap(scale+0.04f)
+    gesture = ModalGestureWrap(scale + 0.04f)
 }
 
 fun normal() = buildTransform {
@@ -29,6 +29,13 @@ fun normal() = buildTransform {
     exit = slideOutHorizontally { it }
     prevPause = slideOutHorizontally { -it / 7 }
     gesture = NormalGestureWrap
+}
+
+fun none() = buildTransform {
+    enter = slideInHorizontally { it }
+    exit = slideOutHorizontally { it }
+    prevPause = slideOutHorizontally { -it / 7 }
+    gesture = NoneGestureWrap
 }
 
 @Stable
@@ -508,6 +515,10 @@ private class EnterTransitionImpl(override val data: TransformData) : EnterTrans
 
 internal val Transition<TransformState>.exitFinished
     get() = currentState == PostExit && targetState == PostExit
+
+internal val Transition<TransformState>.resume
+    get() = currentState == Resume && targetState == Resume
+
 
 internal val Transition<TransformState>.enterStart
     get() = currentState == PreEnter && targetState == PreEnter

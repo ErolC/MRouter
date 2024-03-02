@@ -5,6 +5,7 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
@@ -12,6 +13,7 @@ import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
+import com.erolc.mrouter.utils.PageCache
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
@@ -23,8 +25,8 @@ open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
     internal var name: String = ""
     private val result = emptyArgs
-    private val values = mutableMapOf<String, Any>()
     internal lateinit var router: Router
+    val pageCache = PageCache()
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
@@ -92,15 +94,6 @@ open class PageScope {
                 it
             }.none { it.isEnabled }
         }
-    }
-
-
-    internal fun <T : Any> getValue(key: String): T? {
-        return values[key] as? T
-    }
-
-    internal fun saveValue(key: String, value: Any) {
-        values[key] = value
     }
 
     internal fun addBackInterceptor(interceptor: BackInterceptor) {

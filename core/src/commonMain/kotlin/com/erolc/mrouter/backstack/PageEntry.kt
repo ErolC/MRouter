@@ -13,6 +13,7 @@ import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.DialogRouter
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
+import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.log
@@ -30,8 +31,20 @@ class PageEntry internal constructor(
     private var isUpdateTransform = false
     internal val transformState get() = scope.transformState
 
-    private var shouldDestroy = false
-    private var shouldResume: Boolean = false
+    private val shouldDestroy = mutableStateOf(false)
+    private val shouldResume = mutableStateOf(false)
+    internal val isSecond = mutableStateOf(false)
+
+    internal val listener = object : LifecycleEventListener {
+        override fun call(event: Lifecycle.Event) {
+            when {
+                event == Lifecycle.Event.ON_RESUME -> resume()
+                event == Lifecycle.Event.ON_PAUSE -> pause()
+                event == Lifecycle.Event.ON_DESTROY -> destroy()
+            }
+        }
+
+    }
 
     init {
         create()
@@ -39,6 +52,7 @@ class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
+
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             val inDialog = scope.router.parentRouter is DialogRouter
@@ -51,7 +65,6 @@ class PageEntry internal constructor(
         }
 
         Lifecycle()
-
         scope.router.getBackStack().collectAsState().let {
             val stack by remember { it }
             stack.forEach {
@@ -78,12 +91,13 @@ class PageEntry internal constructor(
         val transform by remember(this, transform) { transform }
         Box(transition.createModifier(address.path, transform, modifier, "Built-in")) {
             transform.gesture.run {
+                remember(this) { setContent(address.content) }
                 val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
                         0f -> Resume
                         1f -> PostExit
-                        else -> TransitionState(1-it)
+                        else -> TransitionState(1 - it)
                     }
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
@@ -95,6 +109,11 @@ class PageEntry internal constructor(
     @Composable
     fun Lifecycle() {
         val windowScope = LocalWindowScope.current
+
+        val shouldDestroy by remember(this) { shouldDestroy }
+        var shouldResume by remember(this) { shouldResume }
+        val isSecond by remember(this) { isSecond }
+
         SystemLifecycle {
             when {
                 it == Lifecycle.Event.ON_RESUME -> resume()
@@ -102,18 +121,15 @@ class PageEntry internal constructor(
                 it == Lifecycle.Event.ON_DESTROY -> destroy()
             }
         }
-        DisposableEffect(Unit) {
-            shouldResume = true
-            resume()
-            windowScope.lifecycleEvent = {
-                when {
-                    it == Lifecycle.Event.ON_RESUME -> resume()
-                    it == Lifecycle.Event.ON_PAUSE -> pause()
-                    it == Lifecycle.Event.ON_DESTROY -> destroy()
-                }
+        DisposableEffect(this,isSecond) {
+            if (!isSecond) {
+                shouldResume = true
+                resume()
+                windowScope.addLifecycleEventListener(listener)
             }
             onDispose {
                 if (shouldDestroy) {
+                    windowScope.removeLifeCycleEventListener(listener)
                     onPause()
                     onDestroy()
                 }
@@ -130,7 +146,7 @@ class PageEntry internal constructor(
             PreEnter, PostExit -> Resume
             Resume -> updatePrevTransform(entry)
             PauseState -> PauseState
-            else -> Reverse(1-state.progress)
+            else -> Reverse(1 - state.progress)
 
 
         }
@@ -148,23 +164,23 @@ class PageEntry internal constructor(
     }
 
     fun onCreate() {
-        logi("tag", "$this onCreate $currentEvent")
+        logi("tag", "$this onCreate ${address.path}")
         handleLifecycleEvent(currentEvent)
     }
 
     fun onResume() {
-        logi("tag", "$this onResume")
+        logi("tag", "$this onResume ${address.path}")
         handleLifecycleEvent(currentEvent)
 
     }
 
     fun onPause() {
-        logi("tag", "$this onPause")
+        logi("tag", "$this onPause ${address.path}")
         handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     }
 
     fun onDestroy() {
-        logi("tag", "$this onDestroy")
+        logi("tag", "$this onDestroy ${address.path}")
         handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }
 
@@ -175,13 +191,14 @@ class PageEntry internal constructor(
     }
 
     internal fun resume() {
-        if (currentEvent.targetState == Lifecycle.State.CREATED && shouldResume) {
+        if (currentEvent.targetState == Lifecycle.State.CREATED && shouldResume.value) {
             currentEvent = Lifecycle.Event.ON_RESUME
             onResume()
         }
     }
 
-    internal fun pause() {
+    internal fun pause(isSecond: Boolean = false) {
+        this.isSecond.value = isSecond
         if (currentEvent.targetState == Lifecycle.State.RESUMED) {
             onPause()
             currentEvent = Lifecycle.Event.ON_PAUSE
@@ -190,7 +207,7 @@ class PageEntry internal constructor(
 
     override fun destroy() {
         super.destroy()
-        shouldDestroy = true
+        shouldDestroy.value = true
     }
 }
 
