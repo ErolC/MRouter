@@ -1,20 +1,29 @@
 package com.erolc.mrouter.route.transform
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
+import com.erolc.mrouter.backstack.LocalWindowScope
+import kotlin.math.roundToInt
 
 
 /**
@@ -44,11 +53,9 @@ abstract class GestureWrap {
     }
 
     @Composable
-    fun rememberProgress(draggableProgress: Float): Float {
-        val state by scope.progress.collectAsState()
-        LaunchedEffect(draggableProgress) {
-                scope.progress.emit(draggableProgress)
-        }
+    fun getProgress(draggableProgress: Float): Float {
+        var state by scope.progress
+        state = draggableProgress
         return state
     }
 
@@ -76,6 +83,51 @@ abstract class GestureWrap {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun GestureWrap.rememberDraggableModifier(
+    initialValue: Dp,
+    orientation: Orientation = Orientation.Horizontal,
+    progress: (Float) -> Unit,
+    proportion: Float = 1f,
+    paddingValue: Dp? = null
+): Pair<Modifier, Modifier> {
+    val squareSize = with(LocalWindowScope.current.windowSize.value) {
+        if (orientation == Orientation.Horizontal) width.size else height.size
+    }
+    val size = with(LocalDensity.current) { squareSize.toPx() }
+    val initial = with(LocalDensity.current) { initialValue.toPx() }
+    val paddingTop = paddingValue ?: ((1 - proportion) * squareSize)
+    val top = with(LocalDensity.current) { paddingTop.toPx() }
+    val max = size - top
+    val anchorsDraggableState = rememberAnchoredDraggableState(initial, DraggableAnchors {
+        1f at max
+        0f at 0f
+    })
+
+    val offset = anchorsDraggableState.requireOffset()
+    val offsetProgress = getProgress(offset / max) //0-1
+    remember(offsetProgress) {
+        //1-postExit;0-resume
+        progress(offsetProgress)
+    }
+    val modifier =
+        if (orientation == Orientation.Horizontal) Modifier.fillMaxHeight().width(15.dp) else Modifier.fillMaxWidth()
+            .height(15.dp)
+    return modifier
+        .anchoredDraggable(
+            state = anchorsDraggableState,
+            orientation = orientation,
+        ) to Modifier.padding(top = paddingTop)
+        .offset {
+            if (orientation == Orientation.Vertical) IntOffset(
+                0,
+                (max * offsetProgress).roundToInt()
+            ) else IntOffset((max * offsetProgress).roundToInt(), 0)
+        }
+}
+
+
 /**
  * @param initialValue 初始值
  * @param animationSpec 动画spec
@@ -87,7 +139,6 @@ abstract class GestureWrap {
 @Composable
 fun <T : Any> rememberAnchoredDraggableState(
     initialValue: T,
-    targetValue: T,
     anchors: DraggableAnchors<T>,
     animationSpec: AnimationSpec<Float> = spring(),
     positionalThreshold: (distance: Float) -> Float = { it * 0.5f },
@@ -95,7 +146,6 @@ fun <T : Any> rememberAnchoredDraggableState(
     confirmValueChange: (T) -> Boolean = { true },
 ): AnchoredDraggableState<T> {
     return rememberSaveable(
-        targetValue,
         saver = AnchoredDraggableState.Saver(
             animationSpec,
             positionalThreshold,

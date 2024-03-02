@@ -176,7 +176,7 @@ fun Home() {
 //                        enter = expandIn()
 //                        exit = shrinkOut()
 //                    }
-                        transform = modal()
+                        transform = normal()
                         onResult {
                             log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                         }

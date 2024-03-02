@@ -15,6 +15,8 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 class PageEntry internal constructor(

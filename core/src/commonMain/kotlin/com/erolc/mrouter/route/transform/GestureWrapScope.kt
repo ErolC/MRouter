@@ -1,7 +1,7 @@
 package com.erolc.mrouter.route.transform
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
-import kotlinx.coroutines.flow.MutableStateFlow
 
 val LocalGestureWrapScope = staticCompositionLocalOf { GestureWrapScope() }
 
@@ -10,7 +10,7 @@ val LocalGestureWrapScope = staticCompositionLocalOf { GestureWrapScope() }
  */
 class GestureWrapScope {
     /**
-     * 控制手势的进度，0-1
+     * 控制手势的进度，0-1:关闭的进度
      */
-    val progress = MutableStateFlow(0f)
+    val progress = mutableStateOf(0f)
 }

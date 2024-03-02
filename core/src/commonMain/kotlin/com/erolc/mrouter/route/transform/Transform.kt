@@ -17,11 +17,11 @@ import androidx.compose.ui.unit.*
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
-fun modal() = buildTransform {
+fun modal(scale: Float = 0.9f) = buildTransform {
     enter = slideInVertically { it }
     exit = slideOutVertically { it }
-    prevPause = scaleOut(targetScale = 0.9f)
-    gesture = ModalGestureWrap
+    prevPause = scaleOut(targetScale = scale)
+    gesture = ModalGestureWrap(scale+0.04f)
 }
 
 fun normal() = buildTransform {
