@@ -8,19 +8,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.window.WindowSize
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.UIKit.UIScreen
-
-@Composable
-actual fun Platform(content: @Composable () -> Unit) {
-    content()
-}
-
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable

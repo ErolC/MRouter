@@ -5,6 +5,7 @@ val emptyArgs get() = Args()
 val emptyArg get() = Arg("", "")
 
 /**
+ * 变量，用于在界面跳转间传递数据
  * @author erolc
  * @since 2023/10/26 15:07
  */

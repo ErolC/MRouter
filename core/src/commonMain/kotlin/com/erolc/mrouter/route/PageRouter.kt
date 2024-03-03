@@ -1,11 +1,10 @@
 package com.erolc.mrouter.route
 
 
-import com.erolc.mrouter.backstack.PageEntry
-import com.erolc.mrouter.backstack.StackEntry
+import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.route.transform.ExitTransition
 import com.erolc.mrouter.scope.getScope
 import kotlinx.coroutines.flow.*
 
@@ -16,11 +15,8 @@ import kotlinx.coroutines.flow.*
  * @param backStack 分析后退栈才能实现某些启动比如：singleTop
  * @param addresses 存放着该库所注册的所有地址。
  */
-class PageRouter(
-    windowRouter: WindowRouter
-) :
+class PageRouter(windowRouter: WindowRouter) :
     Router("windowBackStack", windowRouter.addresses, windowRouter) {
-
     override fun route(stackEntry: StackEntry) {
         if (stackEntry.address.config.launchSingleTop)
             backStack.findTopEntry()?.also { entry ->
@@ -43,15 +39,21 @@ class PageRouter(
         return null
     }
 
+    /**
+     * 获取展示的stack
+     */
     fun getPlayStack() = backStack.backStack.map {
         it.takeLast(2)
     }
 
     override fun backPressedImpl(): Boolean {
-        return backStack.back()
+        return backStack.preBack()
     }
 
     companion object {
+        /**
+         * 创建一个pageEntry
+         */
         fun createPageEntry(
             route: Route,
             address: Address,

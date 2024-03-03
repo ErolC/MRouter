@@ -1,52 +1,30 @@
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.lifecycle.addEventObserver
-import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.RouteHost
-import com.erolc.mrouter.backstack.LocalWindowScope
 import com.erolc.mrouter.register.page
-import com.erolc.mrouter.route.BackInterceptor
-import com.erolc.mrouter.route.Exit
-import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
-import com.erolc.mrouter.utils.loge
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
-import kotlin.time.Duration
 
 @Composable
 fun App() {
@@ -73,7 +51,7 @@ fun GreetingPage() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White).fillMaxSize().zIndex(20f),
+        Modifier.background(Color.White).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
@@ -116,6 +94,7 @@ fun Second() {
             else -> {}
         }
     }
+    var value by remember { mutableStateOf("") }
     Column(
         Modifier.background(Color.White), horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -125,8 +104,23 @@ fun Second() {
             Text("back:${args.getDataOrNull<Int>("key")}")
         }
         Button(onClick = {
+            scope.backPressed()
+        }) {
+            Text("back:${args.getDataOrNull<Int>("key")}")
+        }
+        Button(onClick = {
+            scope.backPressed()
+        }) {
+            Text("back:${args.getDataOrNull<Int>("key")}")
+        }
+
+        TextField(value, onValueChange = {
+            value = it
+        })
+        Button(onClick = {
             scope.route("greet") {
-                window(defaultWindow, "greet")
+//                window(defaultWindow, "greet")
+                dialog()
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                 }
@@ -183,11 +177,11 @@ fun Home() {
 
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                 scope.route("second?key=123") {
-//                    dialog {
-//                        enter = slideInVertically()
-//                        exit = slideOutVertically()
-//                    }
-                    window("second", "second")
+                    dialog {
+                        enter = slideInVertically()
+                        exit = slideOutVertically()
+                    }
+//                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }

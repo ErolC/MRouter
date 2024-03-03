@@ -28,12 +28,6 @@ import com.erolc.mrouter.window.calculateWindowSizeClass
 import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 
-
-@Composable
-actual fun Platform(content: @Composable () -> Unit) {
-
-}
-
 @Composable
 actual fun PlatformWindow(
     options: WindowOptions, entry: WindowEntry, content: @Composable () -> Unit

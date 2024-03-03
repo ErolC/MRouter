@@ -1,18 +1,13 @@
 package com.erolc.mrouter
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.erolc.mrouter.backstack.PageEntry
-import com.erolc.mrouter.backstack.StackEntry
-import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
-import com.erolc.mrouter.utils.log
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.window.WindowOptionsBuilder
+import com.erolc.mrouter.scope.LocalPageScope
 
 /**
  * 路由起点
@@ -26,16 +21,15 @@ fun RouteHost(
     windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, ""),
     builder: RegisterBuilder.() -> Unit
 ) {
-    RouteHost(remember(startRoute, builder) {
+    RouteHost(remember(startRoute, builder, windowOptions) {
         MRouter.getMRouter(startRoute, windowOptions, builder)
     })
 }
 
 @Composable
-fun RouteHost(router: MRouter) {
+internal fun RouteHost(router: MRouter) {
     val backStack by router.getRootBlackStack()
     backStack.forEach {
         (it as? WindowEntry)?.Content(Modifier)
     }
 }
-

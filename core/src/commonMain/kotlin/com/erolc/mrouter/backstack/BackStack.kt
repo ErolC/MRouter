@@ -1,8 +1,8 @@
 package com.erolc.mrouter.backstack
 
-import com.erolc.mrouter.route.ExitImpl
+import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.transform.PostExit
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +18,7 @@ open class BackStack(val name: String) {
     val backStack: StateFlow<List<StackEntry>> = _backstack.asStateFlow()
 
     /**
-     * 阈值，这个值将指示当后退栈到达底部的时机
+     * 阈值，这个值将指示后退栈到达底部的时机
      */
     var threshold = 1
 
@@ -44,7 +44,11 @@ open class BackStack(val name: String) {
 
     }
 
-    fun back(): Boolean {
+    /**
+     * 预后退，page在后退时不可以直接[pop]，因为[pop]是无法做动画的。这里需要先预后退，通知框架需要后退。
+     * 待切换动画完成之后再[pop]
+     */
+    fun preBack(): Boolean {
         return if (_backstack.value.size > threshold) {
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit

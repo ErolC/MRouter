@@ -1,17 +1,18 @@
 package com.erolc.mrouter.route
 
 import com.erolc.mrouter.backstack.BackStack
-import com.erolc.mrouter.backstack.DialogEntry
-import com.erolc.mrouter.backstack.StackEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 typealias RouteResult = (Args) -> Unit
 
 /**
  * 路由器，用于管理页面的前进和后退,不同的页面对象有不同的路由器:[WindowRouter]、[PageRouter]、[DialogRouter]
+ * @param name 路由器的名字
+ * @param addresses 地址列表，表示该路由器可以通过path在列表中找到对应的页面
+ * @param parentRouter 父路由，页面进行路由或者后退时，都需要经过[parentRouter]具体逻辑可自行查阅[dispatchRoute]和[backPressed]方法。
  */
 abstract class Router(
     val name: String,
@@ -25,6 +26,9 @@ abstract class Router(
      */
     abstract fun createEntry(route: Route, address: Address): StackEntry?
 
+    /**
+     * 分配路由，将地址分配给不同的路由器并打开
+     */
     open fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
         if (!isIntercept) {
@@ -42,7 +46,6 @@ abstract class Router(
     /**
      * 路由方法，将路由到一个新的页面，
      * @param route 路由参数
-     * @return 是否拦截该路由，true-拦截，false-不拦截
      */
     open fun route(stackEntry: StackEntry) {
         logi("route", "$this,${stackEntry.address.path}")

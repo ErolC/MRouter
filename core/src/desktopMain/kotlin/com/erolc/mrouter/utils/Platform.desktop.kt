@@ -7,24 +7,16 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.*
 import com.erolc.mrouter.LocalApplicationScope
-import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.scope.getScope
 import com.erolc.mrouter.scope.rememberInWindow
 import com.erolc.mrouter.window.WindowSize
 import com.erolc.mrouter.window.toDimension
 import com.erolc.mrouter.window.toPlacement
 import kotlinx.coroutines.delay
 import java.util.Locale
-
-
-@Composable
-actual fun Platform(content: @Composable () -> Unit) {
-
-}
-
 
 @Composable
 actual fun PlatformWindow(
@@ -35,10 +27,9 @@ actual fun PlatformWindow(
     val state = rememberInWindow {
         WindowState(
             placement = options.state.toPlacement(),
-            position = options.alignment?.let { WindowPosition(it) } ?: WindowPosition(
-                options.position.x,
-                options.position.y
-            ), size = options.size
+            position = options.alignment?.let { WindowPosition(it) }
+                ?: WindowPosition(options.position.x, options.position.y),
+            size = options.size
         )
     }
 
@@ -51,10 +42,8 @@ actual fun PlatformWindow(
     entry.getScope().onLifeEvent(event)
     entry.getScope().windowSize.value = size
     entry.options.value = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
-    val application =
-        LocalApplicationScope.current
+    val application = LocalApplicationScope.current
     val isCloseWindow by rememberInWindow { entry.getScope().isCloseWindow }
-    loge("tag","window: ----- ${options.title}")
     if (!isCloseWindow)
         Window(
             title = options.title,

@@ -7,7 +7,7 @@ import com.erolc.mrouter.scope.LocalPageScope
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun rememberPageCoroutineScope(): CoroutineScope?{
+fun rememberPageCoroutineScope(): CoroutineScope{
     val scope = LocalPageScope.current
-    return remember(scope.lifecycle) { scope.lifecycle?.coroutineScope }
+    return remember(scope.lifecycle) { scope.lifecycle.coroutineScope }
 }

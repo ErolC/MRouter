@@ -2,37 +2,40 @@ package com.erolc.mrouter.route
 
 import androidx.compose.runtime.mutableStateOf
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.backstack.StackEntry
-import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
+import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.scope.WindowScope
-import com.erolc.mrouter.scope.getScope
-import com.erolc.mrouter.utils.logi
 
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
+ * window的路由器管理的是window，对于移动端来说，只有一个window：[Constants.defaultWindow].
+ * 而对于桌面端来说，可以有多个窗口。
+ * @param addresses 所注册的所有地址
  */
 class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
 
     override fun createEntry(route: Route, address: Address): StackEntry? {
-        if (route.windowOptions.id != Constants.defaultWindow || backStack.isEmpty()) {
-            return WindowEntry(mutableStateOf(route.windowOptions)).also {
+        return if (shouldCreateWindow(route))
+            WindowEntry(mutableStateOf(route.windowOptions)).also {
                 it.newPageRouter(route, address)
             }
-        }
-        return null
+        else null
+    }
+
+    private fun shouldCreateWindow(route: Route): Boolean {
+        return backStack.isEmpty() || backStack.findEntry(route.windowOptions.id) == null
     }
 
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
         if (!isIntercept) {
-            logi("dispatchRoute", "$this")
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
             }
             val oldEntry = backStack.findEntry(route.windowOptions.id)
+                ?.takeIf { (it as WindowEntry).getScope().isCloseWindow.value }
             val entry =
                 oldEntry?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(route, address)
                 ?: return false

@@ -45,18 +45,11 @@ internal data class TransitionState(override val progress: Float) : TransformSta
 @Immutable
 internal data class Reverse(override val progress: Float) : TransformState(progress)
 
-
-@OptIn(ExperimentalTransitionApi::class)
+/**
+ * 获取变换的transition
+ */
 @Composable
-fun <T> createChildTransform(
-    label: String = "ChildTransition",
-    transformToChildState: @Composable (parentState: TransformState) -> T
-): Transition<T> =
-    rememberTransform().createChildTransition(label, transformToChildState)
-
-
-@Composable
-fun rememberTransform(): Transition<TransformState> {
+fun rememberTransformTransition(): Transition<TransformState> {
     val pageScope = LocalPageScope.current
     return pageScope.rememberTransform() ?: updateTransition(Resume)
 }

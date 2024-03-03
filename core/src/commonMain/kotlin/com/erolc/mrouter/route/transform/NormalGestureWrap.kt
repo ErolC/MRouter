@@ -10,7 +10,6 @@ object NormalGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
         val (gestureModifier, pageModifier) = rememberDraggableModifier(
-            0.dp,
             Orientation.Horizontal,
             progress
         )

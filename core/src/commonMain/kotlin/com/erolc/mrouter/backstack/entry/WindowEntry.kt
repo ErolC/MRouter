@@ -1,4 +1,4 @@
-package com.erolc.mrouter.backstack
+package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
@@ -15,7 +14,6 @@ import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
-import com.erolc.mrouter.utils.loge
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
@@ -40,7 +38,7 @@ class WindowEntry(val options:MutableState<WindowOptions> = mutableStateOf(Windo
                     if (stack.size == 1) {
                         (stack.first() as PageEntry).transformState.value = Resume
                     } else
-                        (stack.last() as PageEntry).ShareTransform(stack.first() as PageEntry)
+                        (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
 
                     stack.forEachIndexed { index, stackEntry ->
                         (stackEntry as PageEntry).run {

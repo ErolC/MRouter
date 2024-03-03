@@ -1,4 +1,4 @@
-package com.erolc.mrouter.backstack
+package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,7 +18,7 @@ import com.erolc.mrouter.utils.logi
 
 
 /**
- * 后退栈的一个条目。
+ * 后退栈的一个条目。代表一个页面/window/dialog
  */
 sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleOwner {
    private val registry: LifecycleRegistry = LifecycleRegistry(this)
@@ -28,6 +28,9 @@ sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleO
 
     override val lifecycle: Lifecycle get() = registry
 
+    /**
+     * 界面内容
+     */
     @Composable
     open fun Content(modifier: Modifier = Modifier) {}
 

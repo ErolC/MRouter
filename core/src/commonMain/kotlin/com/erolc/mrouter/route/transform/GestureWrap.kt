@@ -10,19 +10,17 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.erolc.mrouter.backstack.LocalWindowScope
+import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import kotlin.math.roundToInt
 
 
@@ -87,11 +85,12 @@ abstract class GestureWrap {
     }
 }
 
-
+/**
+ * 由拖拽手势生成的两个modifier，具体可参考[ModalGestureWrap]和[NormalGestureWrap]
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GestureWrap.rememberDraggableModifier(
-    initialValue: Dp,
     orientation: Orientation = Orientation.Horizontal,
     progress: (Float) -> Unit,
     proportion: Float = 1f,
@@ -100,36 +99,39 @@ fun GestureWrap.rememberDraggableModifier(
     val squareSize = with(LocalWindowScope.current.windowSize.value) {
         if (orientation == Orientation.Horizontal) width.size else height.size
     }
-    val size = with(LocalDensity.current) { squareSize.toPx() }
-    val initial = with(LocalDensity.current) { initialValue.toPx() }
     val paddingTop = paddingValue ?: ((1 - proportion) * squareSize)
-    val top = with(LocalDensity.current) { paddingTop.toPx() }
-    val max = size - top
-    val anchorsDraggableState = rememberAnchoredDraggableState(initial, DraggableAnchors {
+
+    val max = with(LocalDensity.current) {
+        squareSize.toPx() - paddingTop.toPx()
+    }
+
+    val anchorsDraggableState = rememberAnchoredDraggableState(0f, DraggableAnchors {
         1f at max
         0f at 0f
     })
 
     val offset = anchorsDraggableState.requireOffset()
+
     val offsetProgress = getProgress(offset / max) //0-1
     remember(offsetProgress) {
         //1-postExit;0-resume
         progress(offsetProgress)
     }
     val modifier =
-        if (orientation == Orientation.Horizontal) Modifier.fillMaxHeight().width(15.dp) else Modifier.fillMaxWidth()
-            .height(15.dp)
-    return modifier
-        .anchoredDraggable(
-            state = anchorsDraggableState,
-            orientation = orientation,
-        ) to Modifier.padding(top = paddingTop)
-        .offset {
-            if (orientation == Orientation.Vertical) IntOffset(
-                0,
-                (max * offsetProgress).roundToInt()
-            ) else IntOffset((max * offsetProgress).roundToInt(), 0)
-        }
+        if (orientation == Orientation.Horizontal)
+            Modifier.fillMaxHeight().width(15.dp)
+        else
+            Modifier.fillMaxWidth().height(15.dp)
+
+    return modifier.anchoredDraggable(
+        state = anchorsDraggableState,
+        orientation = orientation,
+    ) to Modifier.padding(top = paddingTop).offset {
+        if (orientation == Orientation.Vertical)
+            IntOffset(0, (max * offsetProgress).roundToInt())
+        else
+            IntOffset((max * offsetProgress).roundToInt(), 0)
+    }
 }
 
 

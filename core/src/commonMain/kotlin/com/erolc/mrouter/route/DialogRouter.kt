@@ -1,7 +1,7 @@
 package com.erolc.mrouter.route
 
-import com.erolc.mrouter.backstack.DialogEntry
-import com.erolc.mrouter.backstack.StackEntry
+import com.erolc.mrouter.backstack.entry.DialogEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 

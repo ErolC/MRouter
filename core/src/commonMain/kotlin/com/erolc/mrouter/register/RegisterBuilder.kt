@@ -7,18 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.route.Router
 import com.erolc.mrouter.route.WindowRouter
 import com.erolc.mrouter.route.routeBuild
-import com.erolc.mrouter.scope.GroupScope
 
+/**
+ * 空白的页面配置
+ */
 val emptyConfig = PageConfig()
 
 /**
- * 注册普通页面
+ * 注册页面
  * @param path 页面的地址，是一个不包含‘/’的字符串
  * @param config 页面配置
  * @param content 页面
@@ -37,7 +37,7 @@ fun RegisterBuilder.page(
 /**
  * @author erolc
  * @since 2023/11/6 16:15
- * 注册范围，在注册范围中可以对页面进行注册
+ * 注册范围构建，在注册范围中可以对页面进行注册
  */
 @SinceKotlin("1.0")
 class RegisterBuilder internal constructor() {
@@ -45,8 +45,7 @@ class RegisterBuilder internal constructor() {
 
     init {
         addAddress(Address(Constants.defaultPage, emptyConfig) {
-            Box(Modifier.background(Color.White).fillMaxSize()) {
-            }
+            Box(Modifier.background(Color.White).fillMaxSize())
         })
     }
 
@@ -62,7 +61,9 @@ class RegisterBuilder internal constructor() {
         if (index == -1) list += entry else list[index] = entry
     }
 
-
+    /**
+     * 构建，window路由器，并分配第一个路由
+     */
     internal fun builder(startRoute: String, options: WindowOptions): WindowRouter {
         //构建路由器并路由到初始页面
         return WindowRouter(addresses).apply {

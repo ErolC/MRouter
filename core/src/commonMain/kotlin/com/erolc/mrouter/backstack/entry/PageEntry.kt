@@ -1,8 +1,10 @@
-package com.erolc.mrouter.backstack
+package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.rememberTransition
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -17,8 +19,6 @@ import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.log
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 class PageEntry internal constructor(
@@ -54,19 +54,30 @@ class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
-
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             val inDialog = scope.router.parentRouter is DialogRouter
-            if (inDialog)
-                Box(modifier) {
+            if (inDialog) {
+                //由于pageEntry除了会以window作为宿主之外，还会以dialog作为宿主
+                Box(
+                    modifier.clickable(
+                        indication = null,
+                        interactionSource = MutableInteractionSource(),
+                        onClick = {})
+                ) {
                     address.content()
                 }
-            else
+
+            } else
                 OnlyPage(modifier)
         }
 
-        Lifecycle()
+        lifecycle()
+
+    }
+
+    @Composable
+    private fun dialog() {
         scope.router.getBackStack().collectAsState().let {
             val stack by remember { it }
             stack.forEach {
@@ -109,13 +120,14 @@ class PageEntry internal constructor(
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
+            dialog()
         }
         if (isExit && !isIntercept) ExitImpl()
     }
 
 
     @Composable
-    fun Lifecycle() {
+    fun lifecycle() {
         val windowScope = LocalWindowScope.current
 
         val shouldDestroy by remember(this) { shouldDestroy }
@@ -146,7 +158,7 @@ class PageEntry internal constructor(
     }
 
     @Composable
-    fun ShareTransform(entry: PageEntry) {
+    fun shareTransform(entry: PageEntry) {
         val state by remember(this, transformState) {
             transformState
         }

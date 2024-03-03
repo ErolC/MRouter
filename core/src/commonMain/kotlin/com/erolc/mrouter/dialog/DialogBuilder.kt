@@ -27,7 +27,7 @@ class DialogBuilder {
 
     var exit: ExitTransition = fadeOut()
 
-    //注意，以下两个属性只对android有效
+    //注意，以下两个属性只对android有效，由于目前的dialog并没有使用平台dialog，所以这些都展示没用
     var decorFitsSystemWindows: Boolean = true
 
     //true = 开，false-关，null，其对应着androidx.compose.ui.window.SecureFlagPolicy

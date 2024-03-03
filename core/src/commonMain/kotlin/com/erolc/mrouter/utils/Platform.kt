@@ -1,14 +1,9 @@
 package com.erolc.mrouter.utils
 
-import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.DialogProperties
-import com.erolc.mrouter.backstack.WindowEntry
+import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.WindowOptions
-
-@Composable
-expect fun Platform(content: @Composable () -> Unit)
 
 @Composable
 expect fun PlatformWindow(

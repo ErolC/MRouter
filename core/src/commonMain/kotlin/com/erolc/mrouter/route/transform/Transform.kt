@@ -17,6 +17,11 @@ import androidx.compose.ui.unit.*
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
+/**
+ * 转换动画，从一个页面到另外一个页面可设置相应的动画效果，其中的[fadeIn]，[fadeOut]等一众方法都与系统提供的一致，可直接使用，无学习成本
+ * 并在此之上增加了[Transform]，该类描述了一次转换所需要的动画以及手势
+ */
+
 fun modal(scale: Float = 0.9f) = buildTransform {
     enter = slideInVertically { it }
     exit = slideOutVertically { it }
@@ -317,9 +322,9 @@ fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
 /**
  * 一个transform代表的是一次页面变换
  *
- * @param enter 本页面进入的变换
- * @param exit 本页面退出的变换,如果为空，那么退出时将会使用enter做逆向变换
- * @param prevPause 上一个页面在本次变换中的细微变换
+ * @param enter 本页面进入的动画
+ * @param exit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
+ * @param prevPause 上一个页面在本次变换中的动画
  * @param gesture 手势，可以自定义手势
  */
 @Immutable

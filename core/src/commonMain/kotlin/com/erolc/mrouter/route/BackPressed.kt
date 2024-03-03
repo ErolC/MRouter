@@ -10,12 +10,14 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 
-
+/**
+ * 平台的后退实现
+ */
 @Composable
 expect fun SysBackPressed(body: () -> Unit)
 
 /**
- * 执行到立马退出
+ * 平台的退出实现
  */
 @Composable
 internal expect fun ExitImpl()
@@ -93,7 +95,7 @@ fun Exit(
     var interceptEnable by remember(enable) { enable }
 
     BackInterceptor(interceptEnable) {
-        scope?.launch {
+        scope.launch {
             loge("tag", "$interceptEnable -----")
             interceptEnable = false
             if (delayTime != ZERO) {
