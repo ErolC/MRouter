@@ -35,7 +35,7 @@ class PageEntry internal constructor(
     private val shouldDestroy = mutableStateOf(false)
     private val shouldResume = mutableStateOf(false)
     internal val isSecond = mutableStateOf(false)
-    private val isExit = mutableStateOf(false)
+    internal val isExit = mutableStateOf(false)
     private val isIntercept get() = scope.isIntercept
 
     private val listener = object : LifecycleEventListener {
@@ -46,7 +46,6 @@ class PageEntry internal constructor(
                 event == Lifecycle.Event.ON_DESTROY -> destroy()
             }
         }
-
     }
 
     init {
@@ -83,15 +82,15 @@ class PageEntry internal constructor(
         val state = remember(this) {
             MutableTransitionState(transformState.value)
         }
-        var isExit by remember(this) { isExit }
+        val isExit by remember(this) { isExit }
         val isIntercept by remember(this) { isIntercept }
 
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
-            if (exitFinished && !scope.router.parentRouter!!.backStack.pop()) {
-                isExit = true
+            if (exitFinished) {
+                scope.router.parentRouter!!.backStack.pop()
             }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition

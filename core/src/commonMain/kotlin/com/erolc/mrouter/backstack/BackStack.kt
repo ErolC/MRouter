@@ -2,6 +2,7 @@ package com.erolc.mrouter.backstack
 
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.transform.PostExit
+import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,18 +49,13 @@ open class BackStack(val name: String) {
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit
             true
-        } else false
-    }
-
-    fun remove(id: String): Boolean {
-        return if (_backstack.value.size > threshold) {
-            _backstack.value = _backstack.value.filter {
-                it.address.path != id
+        } else{
+            _backstack.value.forEach {
+                (it as? PageEntry)?.isExit?.value = true
             }
-            true
-        } else false
+            false
+        }
     }
-
 
     /**
      * 找对应的条目

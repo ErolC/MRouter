@@ -2,6 +2,7 @@ package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
 import com.erolc.lifecycle.Lifecycle
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.DefWindowSize
 
 class WindowScope : PageScope() {
@@ -26,6 +27,7 @@ class WindowScope : PageScope() {
      * 关闭该window
      */
     fun close() {
+        onLifeEvent(Lifecycle.Event.ON_DESTROY)
         isCloseWindow.value = true
     }
 

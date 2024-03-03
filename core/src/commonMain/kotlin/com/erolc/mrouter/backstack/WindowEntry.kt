@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.PageRouter
@@ -17,37 +19,33 @@ import com.erolc.mrouter.utils.loge
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
-class WindowEntry(internal var options: WindowOptions) :
-    StackEntry(WindowScope().apply { name = options.id }, Address(options.id)) {
+class WindowEntry(val options:MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow,""))) :
+    StackEntry(WindowScope().apply { name = options.value.id }, Address(options.value.id)) {
     internal lateinit var pageRouter: PageRouter
 
     internal fun getScope() = scope as WindowScope
 
-    internal fun close(): Boolean {
-        (pageRouter.parentRouter as WindowRouter).close(this)
-        return shouldExit()
-    }
-
     fun shouldExit(): Boolean {
-        return (pageRouter.parentRouter as WindowRouter).backStack.isBottom()
+        return (pageRouter.parentRouter as WindowRouter)
+            .backStack.backStack.value.none { !(it.scope as WindowScope).isCloseWindow.value }
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalWindowScope provides getScope()) {
+            val options by remember(options) { options }
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
-                    if (stack.size == 1){
+                    if (stack.size == 1) {
                         (stack.first() as PageEntry).transformState.value = Resume
-                    }
-                    else
+                    } else
                         (stack.last() as PageEntry).ShareTransform(stack.first() as PageEntry)
 
                     stack.forEachIndexed { index, stackEntry ->
                         (stackEntry as PageEntry).run {
                             if (index == 0 && stack.size == 2) pause(true)
-                            else{
+                            else {
                                 isSecond.value = false
                             }
                             Content(Modifier)

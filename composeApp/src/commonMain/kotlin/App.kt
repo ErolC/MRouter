@@ -29,6 +29,7 @@ import androidx.compose.ui.zIndex
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.lifecycle.addEventObserver
+import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.LocalWindowScope
 import com.erolc.mrouter.register.page
@@ -125,20 +126,13 @@ fun Second() {
         }
         Button(onClick = {
             scope.route("greet") {
+                window(defaultWindow, "greet")
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                 }
             }
         }) {
             Text(greetingText)
-        }
-
-        Exit {
-            Button(onClick = {
-                scope.backPressed()
-            }) {
-                Text("是否后退")
-            }
         }
     }
 }

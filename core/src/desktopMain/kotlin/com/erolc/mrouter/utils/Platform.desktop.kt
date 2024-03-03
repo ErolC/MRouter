@@ -11,6 +11,7 @@ import com.erolc.mrouter.backstack.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.WindowOptions
+import com.erolc.mrouter.scope.getScope
 import com.erolc.mrouter.scope.rememberInWindow
 import com.erolc.mrouter.window.WindowSize
 import com.erolc.mrouter.window.toDimension
@@ -49,10 +50,11 @@ actual fun PlatformWindow(
     val event = if (state.isMinimized) Lifecycle.Event.ON_PAUSE else Lifecycle.Event.ON_RESUME
     entry.getScope().onLifeEvent(event)
     entry.getScope().windowSize.value = size
-    entry.options = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
+    entry.options.value = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
     val application =
         LocalApplicationScope.current
-    var isCloseWindow by rememberInWindow { entry.getScope().isCloseWindow }
+    val isCloseWindow by rememberInWindow { entry.getScope().isCloseWindow }
+    loge("tag","window: ----- ${options.title}")
     if (!isCloseWindow)
         Window(
             title = options.title,
@@ -60,7 +62,7 @@ actual fun PlatformWindow(
             alwaysOnTop = options.alwaysOnTop,
             resizable = options.resizable,
             onCloseRequest = {
-                isCloseWindow = true
+                entry.getScope().close()
             },
             state = state
         ) {
@@ -72,10 +74,8 @@ actual fun PlatformWindow(
             content()
         }
     else {
-        entry.getScope().onLifeEvent(Lifecycle.Event.ON_DESTROY)
         LaunchedEffect(Unit) {
             delay(10)
-            entry.close()
         }
         if (entry.shouldExit())
             application.exitApplication()

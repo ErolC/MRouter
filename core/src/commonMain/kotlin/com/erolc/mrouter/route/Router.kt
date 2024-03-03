@@ -54,9 +54,8 @@ abstract class Router(
      * @param notInterceptor 是否不拦截
      */
     open fun backPressed(notInterceptor: () -> Boolean = { true }) {
-        if (notInterceptor()) {
-            if (!backPressedImpl()) parentRouter?.backPressed(notInterceptor)
-        }
+        if (notInterceptor() && !backPressedImpl())
+            parentRouter?.backPressed(notInterceptor)
     }
 
     internal fun getBackStack() = backStack.backStack
