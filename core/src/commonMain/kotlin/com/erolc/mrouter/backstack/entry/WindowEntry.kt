@@ -17,20 +17,20 @@ import com.erolc.mrouter.utils.PlatformWindow
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
-class WindowEntry(val options:MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow,""))) :
-    StackEntry(WindowScope().apply { name = options.value.id }, Address(options.value.id)) {
+class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, ""))) :
+    StackEntry(Address(options.value.id)) {
     internal lateinit var pageRouter: PageRouter
 
-    internal fun getScope() = scope as WindowScope
+    val scope = WindowScope()
 
     fun shouldExit(): Boolean {
         return (pageRouter.parentRouter as WindowRouter)
-            .backStack.backStack.value.none { !(it.scope as WindowScope).isCloseWindow.value }
+            .backStack.backStack.value.none { !scope.isCloseWindow.value }
     }
 
     @Composable
     override fun Content(modifier: Modifier) {
-        CompositionLocalProvider(LocalWindowScope provides getScope()) {
+        CompositionLocalProvider(LocalWindowScope provides scope) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {

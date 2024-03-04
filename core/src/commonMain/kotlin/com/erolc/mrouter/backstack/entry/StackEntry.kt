@@ -20,25 +20,11 @@ import com.erolc.mrouter.utils.logi
 /**
  * 后退栈的一个条目。代表一个页面/window/dialog
  */
-sealed class StackEntry(val scope: PageScope, val address: Address) : LifecycleOwner {
-   private val registry: LifecycleRegistry = LifecycleRegistry(this)
-    init {
-        scope.lifecycle = registry
-    }
-
-    override val lifecycle: Lifecycle get() = registry
-
+sealed class StackEntry(val address: Address){
     /**
      * 界面内容
      */
     @Composable
     open fun Content(modifier: Modifier = Modifier) {}
-
-
-    open fun handleLifecycleEvent(event: Lifecycle.Event) {
-        logi("tag", "$this event:$event")
-        registry.handleLifecycleEvent(event)
-    }
-
     open fun destroy() {}
 }

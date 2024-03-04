@@ -39,11 +39,11 @@ actual fun PlatformWindow(
     }
 
     val event = if (state.isMinimized) Lifecycle.Event.ON_PAUSE else Lifecycle.Event.ON_RESUME
-    entry.getScope().onLifeEvent(event)
-    entry.getScope().windowSize.value = size
+    entry.scope.onLifeEvent(event)
+    entry.scope.windowSize.value = size
     entry.options.value = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
     val application = LocalApplicationScope.current
-    val isCloseWindow by rememberInWindow { entry.getScope().isCloseWindow }
+    val isCloseWindow by rememberInWindow { entry.scope.isCloseWindow }
     if (!isCloseWindow)
         Window(
             title = options.title,
@@ -51,7 +51,7 @@ actual fun PlatformWindow(
             alwaysOnTop = options.alwaysOnTop,
             resizable = options.resizable,
             onCloseRequest = {
-                entry.getScope().close()
+                entry.scope.close()
             },
             state = state
         ) {

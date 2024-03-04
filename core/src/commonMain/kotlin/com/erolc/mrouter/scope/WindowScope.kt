@@ -2,14 +2,17 @@ package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
 import com.erolc.lifecycle.Lifecycle
+import com.erolc.mrouter.route.PageRouter
+import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.DefWindowSize
 
-class WindowScope : PageScope() {
+class WindowScope {
     val windowSize = mutableStateOf(DefWindowSize)
     private val listeners = mutableSetOf<LifecycleEventListener>()
 
     internal val isCloseWindow = mutableStateOf(false)
+    val pageCache = PageCache()
 
     internal fun onLifeEvent(event: Lifecycle.Event) {
         listeners.forEach { it.call(event) }

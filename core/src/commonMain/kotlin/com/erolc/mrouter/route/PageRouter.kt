@@ -18,8 +18,10 @@ import kotlinx.coroutines.flow.*
 class PageRouter(windowRouter: WindowRouter) :
     Router("windowBackStack", windowRouter.addresses, windowRouter) {
     override fun route(stackEntry: StackEntry) {
+        stackEntry as PageEntry
         if (stackEntry.address.config.launchSingleTop)
             backStack.findTopEntry()?.also { entry ->
+                entry as PageEntry
                 entry.scope.run {
                     argsFlow.value = stackEntry.scope.argsFlow.value
                     router = stackEntry.scope.router

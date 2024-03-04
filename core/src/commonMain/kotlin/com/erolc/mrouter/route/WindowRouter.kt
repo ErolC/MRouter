@@ -35,7 +35,7 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
                 "can't find the address with ‘${route.path}’"
             }
             val oldEntry = backStack.findEntry(route.windowOptions.id)
-                ?.takeIf { (it as WindowEntry).getScope().isCloseWindow.value }
+                ?.takeIf { (it as WindowEntry).scope.isCloseWindow.value }
             val entry =
                 oldEntry?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(route, address)
                 ?: return false
@@ -59,7 +59,7 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
     private fun updateEntry(oldEntry: WindowEntry, route: Route, address: Address) {
         oldEntry.options.value = route.windowOptions
         oldEntry.newPageRouter(route, address)
-        oldEntry.getScope().isCloseWindow.value = false
+        oldEntry.scope.isCloseWindow.value = false
     }
 
     override fun route(stackEntry: StackEntry) {

@@ -23,7 +23,7 @@ actual fun PlatformWindow(
     entry: WindowEntry,
     content: @Composable () -> Unit
 ) {
-    entry.getScope().windowSize.value = UIScreen.mainScreen.bounds.useContents {
+    entry.scope.windowSize.value = UIScreen.mainScreen.bounds.useContents {
         with(LocalDensity.current) {
             val size = DpSize(size.width.toFloat().toDp(), size.height.toFloat().toDp())
             WindowSize.calculateFromSize(size)

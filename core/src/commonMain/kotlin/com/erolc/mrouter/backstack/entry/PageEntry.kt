@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.LifecycleOwner
+import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.DialogRouter
@@ -22,9 +24,15 @@ import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.logi
 
 class PageEntry internal constructor(
-    scope: PageScope,
+    val scope: PageScope,
     address: Address
-) : StackEntry(scope, address) {
+) : StackEntry(address), LifecycleOwner {
+    private val registry: LifecycleRegistry = LifecycleRegistry(this)
+
+    init {
+        scope.lifecycle = registry
+    }
+
     private var currentEvent = Lifecycle.Event.ON_ANY
 
     //transform中的prev在下一个页面打开的时候才会被赋值
@@ -37,6 +45,9 @@ class PageEntry internal constructor(
     internal val isSecond = mutableStateOf(false)
     internal val isExit = mutableStateOf(false)
     private val isIntercept get() = scope.isIntercept
+
+    override val lifecycle: Lifecycle get() = registry
+
 
     private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
@@ -223,6 +234,11 @@ class PageEntry internal constructor(
             onPause()
             currentEvent = Lifecycle.Event.ON_PAUSE
         }
+    }
+
+    open fun handleLifecycleEvent(event: Lifecycle.Event) {
+        logi("tag", "$this event:$event")
+        registry.handleLifecycleEvent(event)
     }
 
     override fun destroy() {

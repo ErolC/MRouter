@@ -14,8 +14,7 @@ import com.erolc.mrouter.scope.DialogScope
 class DialogEntry internal constructor(
     private val options: DialogOptions,
     private val entry: PageEntry
-) :
-    StackEntry(DialogScope(), Address("dialog")) {
+) : StackEntry(Address("dialog")) {
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable

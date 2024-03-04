@@ -33,7 +33,7 @@ actual fun PlatformWindow(
     options: WindowOptions, entry: WindowEntry, content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    entry.getScope().windowSize.value = calculateWindowSizeClass(context = context)
+    entry.scope.windowSize.value = calculateWindowSizeClass(context = context)
     content()
 }
 
