@@ -16,7 +16,7 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
     RouteBuilder().apply(optionsBuilder).build(route)
 
 /**
- * 路由构建类，用于构建路由到下一个页面所需的一些参数其中包括：形态（window/dialog/page），参数，回调等。
+ * 路由构建类，用于构建路由到下一个页面所需的一些数据：参数，回调等。
  */
 class RouteBuilder {
     private var onResult: (Args) -> Unit = {}
@@ -106,8 +106,8 @@ class RouteBuilder {
     private fun getPaths(path: String): Pair<String?, String> {
         var key: String? = null
         var address = path
-        if (path.contains("/")) {
-            val paths = path.split("/")
+        if (path.contains("://")) {
+            val paths = path.split("://")
             key = paths[0]
             address = paths[1]
         }

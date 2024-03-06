@@ -18,6 +18,8 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.register.page
+import com.erolc.mrouter.route.transform.modal
+import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
@@ -30,10 +32,10 @@ import org.jetbrains.compose.resources.painterResource
 fun App() {
     MaterialTheme {
         RouteHost("home") {
-            page("greet") {
+            page("root/greet") {
                 GreetingPage()
             }
-            page("second") {
+            page("root/second") {
                 Second()
             }
             page("home") {
@@ -51,7 +53,7 @@ fun GreetingPage() {
     val scope = LocalPageScope.current
     val args = rememberArgs()
     Column(
-        Modifier.background(Color.White).fillMaxSize(),
+        Modifier.background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
@@ -118,9 +120,10 @@ fun Second() {
             value = it
         })
         Button(onClick = {
-            scope.route("greet") {
+            scope.route("root/greet") {
 //                window(defaultWindow, "greet")
-                dialog()
+//                dialog()
+                transform = normal()
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                 }
@@ -176,17 +179,17 @@ fun Home() {
         items(list) {
 
             Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                scope.route("second?key=123") {
-                    dialog {
-                        enter = slideInVertically()
-                        exit = slideOutVertically()
-                    }
+                scope.route("root/second?key=123") {
+//                    dialog {
+//                        enter = slideInVertically()
+//                        exit = slideOutVertically()
+//                    }
 //                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
-//                        transform = normal()
+                        transform = modal()
                     onResult {
                         log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                     }

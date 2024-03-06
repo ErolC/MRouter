@@ -30,6 +30,7 @@ import kotlin.math.roundToInt
 abstract class GestureWrap {
     internal var isUseContent = false
     internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
+
     private val scope = GestureWrapScope()
 
     /**
@@ -44,7 +45,10 @@ abstract class GestureWrap {
 
     @Composable
     fun PageContent(modifier: Modifier) {
-        Surface(modifier.clickable(MutableInteractionSource(), null) { }.fillMaxSize(), color = Color.Transparent) {
+        Surface(
+            modifier.clickable(MutableInteractionSource(), null) { }.fillMaxSize(),
+            color = Color.Transparent
+        ) {
             CompositionLocalProvider(LocalGestureWrapScope provides scope) {
                 content()
             }

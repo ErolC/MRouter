@@ -22,6 +22,7 @@ import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.logi
+import com.erolc.mrouter.utils.rememberInPage
 
 class PageEntry internal constructor(
     val scope: PageScope,
@@ -117,7 +118,7 @@ class PageEntry internal constructor(
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
-        val transform by remember(this, transform) { transform }
+        val transform by rememberInPage (this, transform) { transform }
         Box(transition.createModifier(address.path, transform, modifier, "Built-in")) {
             transform.gesture.run {
                 remember(this) { setContent(address.content) }
@@ -159,6 +160,7 @@ class PageEntry internal constructor(
                 windowScope.addLifecycleEventListener(listener)
             }
             onDispose {
+                scope.transformTransition = null
                 if (shouldDestroy) {
                     windowScope.removeLifeCycleEventListener(listener)
                     onPause()
@@ -236,7 +238,7 @@ class PageEntry internal constructor(
         }
     }
 
-    open fun handleLifecycleEvent(event: Lifecycle.Event) {
+    fun handleLifecycleEvent(event: Lifecycle.Event) {
         logi("tag", "$this event:$event")
         registry.handleLifecycleEvent(event)
     }

@@ -19,7 +19,7 @@ val emptyConfig = PageConfig()
 
 /**
  * 注册页面
- * @param path 页面的地址，是一个不包含‘/’的字符串
+ * @param path 页面的地址
  * @param config 页面配置
  * @param content 页面
  */
@@ -27,12 +27,7 @@ fun RegisterBuilder.page(
     path: String,
     config: PageConfig = emptyConfig,
     content: @Composable () -> Unit
-) {
-    require(!path.contains("/")) {
-        "path can not have '/'"
-    }
-    addAddress(Address(path, config, content))
-}
+) { addAddress(Address(path, config, content)) }
 
 /**
  * @author erolc
