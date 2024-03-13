@@ -3,13 +3,16 @@ package com.erolc.mrouter.register
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.route.WindowRouter
+import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.routeBuild
 
 /**
@@ -27,7 +30,9 @@ fun RegisterBuilder.page(
     path: String,
     config: PageConfig = emptyConfig,
     content: @Composable () -> Unit
-) { addAddress(Address(path, config, content)) }
+) {
+    addAddress(Address(path, config, content))
+}
 
 /**
  * @author erolc
@@ -40,7 +45,9 @@ class RegisterBuilder internal constructor() {
 
     init {
         addAddress(Address(Constants.defaultPage, emptyConfig) {
-            Box(Modifier.background(Color.White).fillMaxSize())
+            Box(Modifier.background(Color.White).fillMaxSize()) {
+                Text("default panel", fontSize = 15.sp, modifier = Modifier.align(Alignment.Center))
+            }
         })
     }
 

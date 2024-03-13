@@ -9,16 +9,18 @@ import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.route.PageRouter
-import com.erolc.mrouter.route.WindowRouter
+import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
-class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, ""))) :
-    StackEntry(Address(options.value.id)) {
+class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, "")),
+                  override val address: Address = Address(options.value.id)
+) :
+    StackEntry {
     internal lateinit var pageRouter: PageRouter
 
     val scope = WindowScope()
@@ -53,5 +55,7 @@ class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(Wind
             }
         }
     }
+
+    override fun destroy() {}
 
 }

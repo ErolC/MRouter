@@ -9,12 +9,14 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.dialog.DialogWrap
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.router.DialogRouter
 import com.erolc.mrouter.scope.DialogScope
 
 class DialogEntry internal constructor(
     private val options: DialogOptions,
-    private val entry: PageEntry
-) : StackEntry(Address("dialog")) {
+    private val entry: PageEntry,
+    override val address: Address = Address("dialog")
+) : StackEntry {
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
@@ -32,7 +34,7 @@ class DialogEntry internal constructor(
                 DisposableEffect(Unit) {
                     onDispose {
                         if (!options.isShowDialog.value)
-                            entry.scope.router.parentRouter?.backPressedImpl()
+                            (entry.scope.router.parentRouter as? DialogRouter)?.backPressedImpl()
                     }
                 }
             }

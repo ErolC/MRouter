@@ -87,6 +87,10 @@ abstract class GestureWrap {
     internal fun updatePauseModifier(pauseModifierPost: PauseModifierPost) {
         this.pauseModifierPost = pauseModifierPost
     }
+
+    internal fun releasePauseModifier() {
+        pauseModifierPost = PauseModifierPost { prevPauseModifier() }
+    }
 }
 
 /**

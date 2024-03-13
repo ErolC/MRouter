@@ -14,20 +14,23 @@ import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.route.DialogRouter
+import com.erolc.mrouter.route.router.DialogRouter
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.route.router.MergeRouter
+import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
 class PageEntry internal constructor(
     val scope: PageScope,
-    address: Address
-) : StackEntry(address), LifecycleOwner {
+    override val address: Address
+) : StackEntry, LifecycleOwner {
     private val registry: LifecycleRegistry = LifecycleRegistry(this)
 
     init {
@@ -90,7 +93,7 @@ class PageEntry internal constructor(
 
     @Composable
     private fun dialog() {
-        scope.router.getBackStack().collectAsState().let {
+        (scope.router as? MergeRouter)?.getDialogBackStack()?.collectAsState()?.let {
             val stack by remember { it }
             stack.forEach {
                 (it as? DialogEntry)?.Content(Modifier)
@@ -102,6 +105,7 @@ class PageEntry internal constructor(
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     fun OnlyPage(modifier: Modifier) {
+        loge("tag", "page:${address.path} -- ${scope.router}")
         val state = remember(this) {
             MutableTransitionState(transformState.value)
         }
@@ -113,13 +117,13 @@ class PageEntry internal constructor(
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
             if (exitFinished) {
-                scope.router.parentRouter!!.backStack.pop()
+                (scope.router.parentRouter as PageRouter).backStack.pop()
             }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
-        val transform by rememberInPage (this, transform) { transform }
-        Box(transition.createModifier(address.path, transform, modifier, "Built-in")) {
+        val transform by rememberInPage(this, transform) { transform }
+        Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
                 remember(this) { setContent(address.content) }
                 val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
@@ -176,7 +180,15 @@ class PageEntry internal constructor(
             transformState
         }
         entry.transformState.value = when (state) {
-            PreEnter, PostExit -> Resume
+            PreEnter -> Resume
+            PostExit -> {
+                entry.run {
+                    transform.value.gesture.releasePauseModifier()
+                    isUpdateTransform = false
+                }
+                Resume
+            }
+
             Resume -> updatePrevTransform(entry)
             PauseState -> PauseState
             else -> Reverse(1 - state.progress)
@@ -244,7 +256,6 @@ class PageEntry internal constructor(
     }
 
     override fun destroy() {
-        super.destroy()
         shouldDestroy.value = true
     }
 }

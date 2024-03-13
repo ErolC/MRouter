@@ -1,20 +1,17 @@
 package com.erolc.mrouter.scope
 
-import androidx.compose.animation.core.ExperimentalTransitionApi
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.rememberTransition
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
+import com.erolc.mrouter.backstack.entry.PanelEntry
 import com.erolc.mrouter.route.*
-import com.erolc.mrouter.route.Router
+import com.erolc.mrouter.route.router.MergeRouter
+import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
 import com.erolc.mrouter.utils.PageCache
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
@@ -26,6 +23,7 @@ open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
     internal var name: String = ""
     private val result = emptyArgs
+    //这个router存在两种可能，一种是mergeRouter，一种是EmptyRouter
     internal lateinit var router: Router
     val pageCache = PageCache()
     internal var onResult: RouteResult = {}
@@ -107,6 +105,11 @@ open class PageScope {
     @Composable
     internal fun rememberTransform(): Transition<TransformState>? {
         return transformTransition
+    }
+
+    internal fun createPanel(key: String, startRoute: String):PanelEntry? {
+        router.dispatchRoute(routeBuild("$key:$startRoute"))
+        return (router as? MergeRouter)?.getPanel(key)
     }
 
 }

@@ -16,7 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.addEventObserver
+import com.erolc.mrouter.AutoPanel
+import com.erolc.mrouter.PanelHost
 import com.erolc.mrouter.RouteHost
+import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.register.page
 import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.route.transform.normal
@@ -24,6 +27,7 @@ import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.window.WindowWidthSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -172,14 +176,15 @@ fun Home() {
             "47"
         )
     }
-    LazyColumn(
-        state = rememberLazyListState(),
-        modifier = Modifier.fillMaxSize().background(Color.Green).padding(top = 47.dp)
-    ) {
-        items(list) {
+    Row{
+        LazyColumn(
+            state = rememberLazyListState(),
+            modifier = Modifier.fillMaxSize().weight(2f).background(Color.Green)
+        ) {
+            items(list) {
 
-            Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                scope.route("root/second?key=123") {
+                Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
+                    scope.route("local:root/second?key=123") {
 //                    dialog {
 //                        enter = slideInVertically()
 //                        exit = slideOutVertically()
@@ -190,11 +195,14 @@ fun Home() {
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
                         transform = modal()
-                    onResult {
-                        log("ATG", "data:${it.getDataOrNull<Int>("result")}")
+                        onResult {
+                            log("ATG", "data:${it.getDataOrNull<Int>("result")}")
+                        }
                     }
-                }
-            }, fontSize = 20.sp)
+                }, fontSize = 20.sp)
+            }
         }
+
+        PanelHost(windowWidthSize = WindowWidthSize.Compact, modifier = Modifier.weight(1f))
     }
 }

@@ -20,11 +20,13 @@ import com.erolc.mrouter.utils.logi
 /**
  * 后退栈的一个条目。代表一个页面/window/dialog
  */
-sealed class StackEntry(val address: Address){
+interface StackEntry {
+    val address: Address
+
     /**
      * 界面内容
      */
     @Composable
-    open fun Content(modifier: Modifier = Modifier) {}
-    open fun destroy() {}
+    fun Content(modifier: Modifier)
+    fun destroy()
 }

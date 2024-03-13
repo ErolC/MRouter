@@ -7,12 +7,12 @@ import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
-import com.erolc.mrouter.route.Router
+import com.erolc.mrouter.route.router.RouterWrap
 
 
 class MRouter private constructor() {
 
-    private lateinit var rootRouter: Router
+    private lateinit var rootRouter: RouterWrap
 
     /**
      * 主后退栈，也是window后退栈，window节点将会保存在这里。

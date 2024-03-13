@@ -106,8 +106,8 @@ class RouteBuilder {
     private fun getPaths(path: String): Pair<String?, String> {
         var key: String? = null
         var address = path
-        if (path.contains("://")) {
-            val paths = path.split("://")
+        if (path.contains(":")) {
+            val paths = path.split(":")
             key = paths[0]
             address = paths[1]
         }

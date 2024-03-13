@@ -534,7 +534,6 @@ internal val Transition<TransformState>.pause
 @OptIn(InternalAnimationApi::class)
 @Composable
 internal fun Transition<TransformState>.createModifier(
-    page: String,
     transform: Transform,
     modifier: Modifier,
     label: String

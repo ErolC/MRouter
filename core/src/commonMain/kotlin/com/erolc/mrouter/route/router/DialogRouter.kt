@@ -1,4 +1,4 @@
-package com.erolc.mrouter.route
+package com.erolc.mrouter.route.router
 
 import com.erolc.mrouter.backstack.entry.DialogEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
@@ -6,8 +6,9 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 
 class DialogRouter(
+    addresses:List<Address>,
     pageRouter: Router
-) : Router("dialogRouter", pageRouter.addresses, parentRouter = pageRouter) {
+) : RouterWrap("dialogRouter", addresses, parentRouter = pageRouter) {
 
     init {
         backStack.threshold = 0
@@ -17,7 +18,7 @@ class DialogRouter(
         if (route.dialogOptions != null) {
             return DialogEntry(
                 route.dialogOptions,
-                PageRouter.createPageEntry(route, address, DialogRouter(this))
+                createPageEntry(route, address, EmptyRouter(this))
             )
         }
         return null

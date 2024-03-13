@@ -1,7 +1,6 @@
-package com.erolc.mrouter.route
+package com.erolc.mrouter.route.router
 
 import androidx.compose.runtime.mutableStateOf
-import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
@@ -13,7 +12,7 @@ import com.erolc.mrouter.register.Address
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
-class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
+class WindowRouter(addresses: List<Address>) : RouterWrap("root", addresses) {
 
     override fun createEntry(route: Route, address: Address): StackEntry? {
         return if (shouldCreateWindow(route))
@@ -45,12 +44,12 @@ class WindowRouter(addresses: List<Address>) : Router("root", addresses) {
     }
 
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
-        pageRouter = PageRouter(this@WindowRouter).also { pageRouter ->
+        pageRouter = PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
             pageRouter.route(
-                PageRouter.createPageEntry(
+                createPageEntry(
                     route,
                     address,
-                    DialogRouter(pageRouter)
+                    MergeRouter(pageRouter.addresses, pageRouter)
                 )
             )
         }

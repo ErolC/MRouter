@@ -1,12 +1,11 @@
-package com.erolc.mrouter.route
-
+package com.erolc.mrouter.route.router
 
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.scope.getScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.map
 
 /**
  * 路由器实现
@@ -15,8 +14,8 @@ import kotlinx.coroutines.flow.*
  * @param backStack 分析后退栈才能实现某些启动比如：singleTop
  * @param addresses 存放着该库所注册的所有地址。
  */
-class PageRouter(windowRouter: WindowRouter) :
-    Router("windowBackStack", windowRouter.addresses, windowRouter) {
+open class PageRouter(name: String, addresses: List<Address>, parentRouter: Router) :
+    RouterWrap(name, addresses, parentRouter) {
     override fun route(stackEntry: StackEntry) {
         stackEntry as PageEntry
         if (stackEntry.address.config.launchSingleTop)
@@ -34,10 +33,9 @@ class PageRouter(windowRouter: WindowRouter) :
     }
 
     override fun createEntry(route: Route, address: Address): StackEntry? {
-        if (route.dialogOptions == null) return createPageEntry(
-            route, address,
-            DialogRouter(this)
-        )
+        if (route.dialogOptions == null) return createPageEntry(route, address, MergeRouter(addresses,this))
+        //需要在这里将局部页面当做单页面的条件有两个：route的localKey是local；当前的页面情况已经小于能够显示该局部的尺寸
+        //创建的方式是获取当前界面，并在当前界面中的mergeRouter中提取出local的回退栈并构建一个特殊的页面作为承载即可。
         return null
     }
 
@@ -50,29 +48,5 @@ class PageRouter(windowRouter: WindowRouter) :
 
     override fun backPressedImpl(): Boolean {
         return backStack.preBack()
-    }
-
-    companion object {
-        /**
-         * 创建一个pageEntry
-         */
-        fun createPageEntry(
-            route: Route,
-            address: Address,
-            router: DialogRouter,
-        ): PageEntry {
-            return PageEntry(
-                getScope(),
-                address
-            ).apply {
-                transform.value = route.transform
-                scope.run {
-                    argsFlow.value = route.args
-                    onResult = route.onResult
-                    this.router = router
-                    name = route.address
-                }
-            }
-        }
     }
 }
