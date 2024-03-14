@@ -6,6 +6,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.erolc.mrouter.backstack.entry.WindowEntry
@@ -24,10 +25,8 @@ actual fun PlatformWindow(
     content: @Composable () -> Unit
 ) {
     entry.scope.windowSize.value = UIScreen.mainScreen.bounds.useContents {
-        with(LocalDensity.current) {
-            val size = DpSize(size.width.toFloat().toDp(), size.height.toFloat().toDp())
-            WindowSize.calculateFromSize(size)
-        }
+        val size = DpSize(size.width.dp, size.height.dp)
+        WindowSize.calculateFromSize(size)
     }
     content()
 }
