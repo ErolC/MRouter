@@ -1,13 +1,16 @@
 package com.erolc.mrouter.route.router
 
+import com.erolc.mrouter.backstack.entry.LocalPanelEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.backstack.entry.PanelEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.scope.getScope
 
 
 interface Router {
-    val parentRouter:Router?
+    val parentRouter: Router?
 
     fun dispatchRoute(route: Route): Boolean
     fun backPressed(notInterceptor: () -> Boolean = { true })
@@ -24,6 +27,26 @@ internal fun createPageEntry(
     return PageEntry(
         getScope(),
         address
+    ).apply {
+        transform.value = route.transform
+        scope.run {
+            argsFlow.value = route.args
+            onResult = route.onResult
+            this.router = router
+            name = route.address
+        }
+    }
+}
+
+internal fun createLocalPanelEntry(
+    route: Route,
+    address: Address,
+    router: Router,
+    entry: PanelEntry,
+): PageEntry {
+    return LocalPanelEntry(
+        getScope(),
+        address, entry
     ).apply {
         transform.value = route.transform
         scope.run {

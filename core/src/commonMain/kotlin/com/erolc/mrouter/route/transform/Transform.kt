@@ -24,22 +24,18 @@ import kotlin.math.roundToInt
 
 fun modal(scale: Float = 0.9f) = buildTransform {
     enter = slideInVertically { it }
-//    exit = slideOutVertically { it }
     prevPause = scaleOut(targetScale = scale)
     gesture = ModalGestureWrap(scale + 0.04f)
 }
 
 fun normal() = buildTransform {
     enter = slideInHorizontally { it }
-//    exit = slideOutHorizontally { it }
     prevPause = slideOutHorizontally { -it / 7 }
     gesture = NormalGestureWrap
 }
 
 fun none() = buildTransform {
     enter = slideInHorizontally { it }
-//    exit = slideOutHorizontally { it }
-    prevPause = slideOutHorizontally { -it / 7 }
     gesture = NoneGestureWrap
 }
 

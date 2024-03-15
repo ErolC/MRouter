@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.route.routeBuild
+import com.erolc.mrouter.route.router.MergeRouter
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.loge
@@ -25,7 +27,6 @@ import com.erolc.mrouter.window.WindowWidthSize
  * @param startRoute 当直接显示时所路由的第一个页面
  * @param windowWidthSize 当界面宽度大于这个尺寸级别时才显示，如果为空，则一直显示
  * @param windowHeightSize 当界面高度大于这个尺寸级别时才显示，如果为空，则一直显示
- * @param reserveStartAddress 是否保留初始地址；初始地址默认是空地址，可以选择在跳转到真正的页面时选择是否保留初始地址
  */
 @Composable
 fun PanelHost(
@@ -33,15 +34,32 @@ fun PanelHost(
     startRoute: String = Constants.defaultPage,
     windowWidthSize: WindowWidthSize? = null,
     windowHeightSize: WindowHeightSize? = null,
-    reserveStartAddress: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val scope = LocalPageScope.current
-    val panel = rememberInPage(key) {
-        scope.createPanel(key, startRoute) ?: throw RuntimeException("弹框内部页面不可使用面板（局部）路由")
+    val router = rememberInPage(key) {
+        scope.router as? MergeRouter ?: throw RuntimeException("弹框内部页面不可使用面板（局部）路由")
     }
-    AutoPanel(windowWidthSize, windowHeightSize, modifier) {
-        panel.Content(Modifier)
+    val windowScope = LocalWindowScope.current
+    val windowSize by remember { windowScope.windowSize }
+    if ((windowWidthSize == null && windowHeightSize == null) ||
+        (windowWidthSize != null && windowSize.width.value > windowWidthSize.value) ||
+        (windowHeightSize != null && windowSize.height.value > windowHeightSize.value)
+    ) {
+        val panel = rememberInPage(key) {
+            router.run {
+                route(routeBuild("$key:$startRoute"))
+                getPanel(key)
+            }
+        }
+        Box(modifier) {
+            router.run {
+                if (key == Constants.defaultLocal) showWithLocal()
+                panel.Content(Modifier)
+            }
+        }
+    } else if (key == Constants.defaultLocal) {
+        router.hideWithLocal()
     }
 }
 

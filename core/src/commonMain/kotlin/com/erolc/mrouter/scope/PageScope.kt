@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
-import com.erolc.mrouter.backstack.entry.PanelEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.router.MergeRouter
 import com.erolc.mrouter.route.router.Router
@@ -23,7 +23,7 @@ open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
     internal var name: String = ""
     private val result = emptyArgs
-    //这个router存在两种可能，一种是mergeRouter，一种是EmptyRouter
+    //这个router存在三种可能，一种是mergeRouter，一种是EmptyRouter，一种是DialogRouter
     internal lateinit var router: Router
     val pageCache = PageCache()
     internal var onResult: RouteResult = {}
@@ -106,12 +106,6 @@ open class PageScope {
     internal fun rememberTransform(): Transition<TransformState>? {
         return transformTransition
     }
-
-    internal fun createPanel(key: String, startRoute: String):PanelEntry? {
-        router.dispatchRoute(routeBuild("$key:$startRoute"))
-        return (router as? MergeRouter)?.getPanel(key)
-    }
-
 }
 
 @Composable

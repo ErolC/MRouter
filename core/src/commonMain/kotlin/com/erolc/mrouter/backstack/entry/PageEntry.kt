@@ -20,6 +20,7 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.MergeRouter
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.transform.*
+import com.erolc.mrouter.route.transform.NoneGestureWrap.setContent
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
@@ -27,7 +28,7 @@ import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
-class PageEntry internal constructor(
+open class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address
 ) : StackEntry, LifecycleOwner {
@@ -98,6 +99,11 @@ class PageEntry internal constructor(
             stack.forEach {
                 (it as? DialogEntry)?.Content(Modifier)
             }
+        }?:(scope.router as? DialogRouter)?.getBackStack()?.collectAsState()?.let {
+            val stack by remember { it }
+            stack.forEach {
+                (it as? DialogEntry)?.Content(Modifier)
+            }
         }
     }
 
@@ -105,7 +111,6 @@ class PageEntry internal constructor(
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     fun OnlyPage(modifier: Modifier) {
-        loge("tag", "page:${address.path} -- ${scope.router}")
         val state = remember(this) {
             MutableTransitionState(transformState.value)
         }
@@ -125,7 +130,9 @@ class PageEntry internal constructor(
         val transform by rememberInPage(this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
-                remember(this) { setContent(address.content) }
+                remember(this) {
+                    setContent(RealContent())
+                }
                 val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
@@ -141,6 +148,9 @@ class PageEntry internal constructor(
         if (isExit && !isIntercept) ExitImpl()
     }
 
+    open fun RealContent(): @Composable () -> Unit {
+        return address.content
+    }
 
     @Composable
     fun lifecycle() {

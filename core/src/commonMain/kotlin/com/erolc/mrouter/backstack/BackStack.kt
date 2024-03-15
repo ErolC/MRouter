@@ -26,6 +26,10 @@ open class BackStack(val name: String) {
         _backstack.value += entry
     }
 
+    fun addEntryWithFirst(entry: StackEntry) {
+        _backstack.value = listOf(entry) + _backstack.value
+    }
+
     val size: Int get() = _backstack.value.size
 
     fun isBottom() = size == threshold
@@ -41,7 +45,10 @@ open class BackStack(val name: String) {
             _backstack.value -= _backstack.value.last().apply { destroy() }
             true
         } else false
+    }
 
+    internal fun clear() {
+        _backstack.value = listOf()
     }
 
     /**
@@ -53,7 +60,7 @@ open class BackStack(val name: String) {
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit
             true
-        } else{
+        } else {
             _backstack.value.forEach {
                 (it as? PageEntry)?.isExit?.value = true
             }

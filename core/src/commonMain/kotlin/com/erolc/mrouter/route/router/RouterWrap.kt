@@ -4,6 +4,7 @@ import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 /**
@@ -29,8 +30,7 @@ abstract class RouterWrap(
      */
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
-        if (!isIntercept && route.layoutKey == null) {
-            logi("dispatchRoute", "$this")
+        if (!isIntercept && (route.layoutKey != null && parentRouter is PageRouter || route.layoutKey == null)) {
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"

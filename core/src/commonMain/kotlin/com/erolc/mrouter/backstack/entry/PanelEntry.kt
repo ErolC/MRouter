@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.transform.Resume
+import com.erolc.mrouter.utils.loge
 
 /**
  * 局部界面的元素
@@ -18,8 +19,14 @@ import com.erolc.mrouter.route.transform.Resume
  */
 class PanelEntry(override val address: Address) : StackEntry {
     lateinit var pageRouter: PageRouter
+
     @Composable
     override fun Content(modifier: Modifier) {
+        PanelContent(modifier)
+    }
+
+    @Composable
+    fun PanelContent(modifier: Modifier = Modifier) {
         Box(modifier.fillMaxSize()) {
             val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
             if (stack.size == 1) {
@@ -30,14 +37,13 @@ class PanelEntry(override val address: Address) : StackEntry {
             stack.forEachIndexed { index, stackEntry ->
                 (stackEntry as PageEntry).run {
                     if (index == 0 && stack.size == 2) pause(true)
-                    else {
-                        isSecond.value = false
-                    }
                     Content(Modifier)
                 }
             }
         }
     }
 
-    override fun destroy() {}
+    override fun destroy() {
+        pageRouter.backStack.pop()
+    }
 }

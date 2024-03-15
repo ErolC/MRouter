@@ -22,6 +22,7 @@ import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.register.page
 import com.erolc.mrouter.route.transform.modal
+import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
@@ -102,7 +103,7 @@ fun Second() {
     }
     var value by remember { mutableStateOf("") }
     Column(
-        Modifier.background(Color.White), horizontalAlignment = Alignment.CenterHorizontally
+        Modifier.background(Color.Red), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = {
             scope.backPressed()
@@ -120,14 +121,14 @@ fun Second() {
             Text("back:${args.getDataOrNull<Int>("key")}")
         }
 
-        TextField(value, onValueChange = {
-            value = it
-        })
+//        TextField(value, onValueChange = {
+//            value = it
+//        })
         Button(onClick = {
-            scope.route("root/greet") {
+            scope.route("local:root/greet?key=123") {
 //                window(defaultWindow, "greet")
-//                dialog()
-                transform = normal()
+                dialog()
+//                transform = normal()
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                 }
@@ -177,9 +178,11 @@ fun Home() {
         )
     }
     Row{
+        PanelHost(windowWidthSize = WindowWidthSize.Compact, modifier = Modifier.weight(2f))
+
         LazyColumn(
             state = rememberLazyListState(),
-            modifier = Modifier.fillMaxSize().weight(2f).background(Color.Green)
+            modifier = Modifier.fillMaxSize().weight(1f).background(Color.Green)
         ) {
             items(list) {
 
@@ -194,7 +197,7 @@ fun Home() {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
-                        transform = modal()
+                        transform = normal()
                         onResult {
                             log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                         }
@@ -203,6 +206,5 @@ fun Home() {
             }
         }
 
-        PanelHost(windowWidthSize = WindowWidthSize.Compact, modifier = Modifier.weight(1f))
     }
 }
