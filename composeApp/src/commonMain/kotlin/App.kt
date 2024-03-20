@@ -125,9 +125,8 @@ fun Second() {
 //            value = it
 //        })
         Button(onClick = {
-            scope.route("local:root/greet?key=123") {
+            scope.route("root/greet?key=123") {
 //                window(defaultWindow, "greet")
-                dialog()
 //                transform = normal()
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
@@ -188,10 +187,6 @@ fun Home() {
 
                 Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
                     scope.route("local:root/second?key=123") {
-//                    dialog {
-//                        enter = slideInVertically()
-//                        exit = slideOutVertically()
-//                    }
 //                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()

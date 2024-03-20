@@ -1,6 +1,7 @@
 package com.erolc.mrouter.route.router
 
 import androidx.compose.runtime.mutableStateOf
+import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
@@ -12,9 +13,10 @@ import com.erolc.mrouter.register.Address
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
-class WindowRouter(addresses: List<Address>) : RouterWrap("root", addresses) {
+class WindowRouter(private val addresses: List<Address>) : Router {
+    internal val backStack = BackStack("root")
 
-    override fun createEntry(route: Route, address: Address): StackEntry? {
+    fun createEntry(route: Route, address: Address): StackEntry? {
         return if (shouldCreateWindow(route))
             WindowEntry(mutableStateOf(route.windowOptions)).also {
                 it.newPageRouter(route, address)
@@ -25,6 +27,8 @@ class WindowRouter(addresses: List<Address>) : RouterWrap("root", addresses) {
     private fun shouldCreateWindow(route: Route): Boolean {
         return backStack.isEmpty() || backStack.findEntry(route.windowOptions.id) == null
     }
+
+    override val parentRouter: Router? = null
 
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
@@ -43,13 +47,18 @@ class WindowRouter(addresses: List<Address>) : RouterWrap("root", addresses) {
         return true
     }
 
+    override fun backPressed(notInterceptor: () -> Boolean) {
+        if (notInterceptor() && !backPressedImpl())
+            parentRouter?.backPressed(notInterceptor)
+    }
+
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
         pageRouter = PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
             pageRouter.route(
                 createPageEntry(
                     route,
                     address,
-                    MergeRouter(pageRouter.addresses, pageRouter)
+                    PanelRouter(addresses, pageRouter)
                 )
             )
         }
@@ -61,12 +70,14 @@ class WindowRouter(addresses: List<Address>) : RouterWrap("root", addresses) {
         oldEntry.scope.isCloseWindow.value = false
     }
 
-    override fun route(stackEntry: StackEntry) {
+    fun route(stackEntry: StackEntry) {
         val entry = backStack.findEntry(stackEntry.address.path)
-        if (entry == null) super.route(stackEntry)
+        if (entry == null) backStack.addEntry(stackEntry)
     }
 
-    override fun backPressedImpl(): Boolean {
+    fun backPressedImpl(): Boolean {
         return false
     }
+    internal fun getBackStack() = backStack.backStack
+
 }

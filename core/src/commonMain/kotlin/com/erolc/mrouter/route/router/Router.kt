@@ -1,8 +1,9 @@
 package com.erolc.mrouter.route.router
 
-import com.erolc.mrouter.backstack.entry.LocalPanelEntry
+import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.PanelEntry
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.transform.none
@@ -11,6 +12,8 @@ import com.erolc.mrouter.scope.getScope
 
 interface Router {
     val parentRouter: Router?
+
+    fun router(route: Route){}
 
     fun dispatchRoute(route: Route): Boolean
     fun backPressed(notInterceptor: () -> Boolean = { true })
@@ -44,7 +47,7 @@ internal fun createLocalPanelEntry(
     router: Router,
     entry: PanelEntry,
 ): PageEntry {
-    return LocalPanelEntry(
+    return LocalPageEntry(
         getScope(),
         address, entry
     ).apply {

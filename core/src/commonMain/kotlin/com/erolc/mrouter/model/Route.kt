@@ -14,7 +14,6 @@ import com.erolc.mrouter.route.transform.normal
  * @param address 下一个页面的地址
  * @param args 携带到下一个页面的数据
  * @param windowOptions 页面负载到对应window的参数
- * @param dialogOptions 页面负载到对应dialog的参数
  * @param onResult 回退方法
  * @param layoutKey 该页面将负载到当前页面的指定局部布局内。
  */
@@ -22,9 +21,8 @@ data class Route internal constructor(
     val path: String,
     val address: String,
     val windowOptions: WindowOptions,
-    val dialogOptions: DialogOptions? = null,
     val args: Args = emptyArgs,
     val onResult: (Args) -> Unit = {},
     val layoutKey: String? = null,
-    val transform: Transform = Transform.None
+    val transform: Transform = Transform.None,
 )

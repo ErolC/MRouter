@@ -21,7 +21,6 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
 class RouteBuilder {
     private var onResult: (Args) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, "")
-    private var dialogOptions: DialogOptions? = null
 
     private val args = emptyArgs
 
@@ -68,13 +67,7 @@ class RouteBuilder {
             .build(if (isMobile) Constants.defaultWindow else id, title)
     }
 
-    /**
-     * 以弹框的形式打开该窗口，需要注意的是该方法和[window]方法是互斥的，且[window]方法优先级更高。
-     *
-     */
-    fun dialog(builder: DialogBuilder.() -> Unit = {}) {
-        dialogOptions = DialogBuilder().apply(builder).build()
-    }
+
 
     internal fun build(route: String): Route {
         val split = route.split("?")
@@ -94,7 +87,6 @@ class RouteBuilder {
             route,
             address,
             windowOptions,
-            dialogOptions,
             args,
             onResult,
             key,

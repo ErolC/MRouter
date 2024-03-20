@@ -1,21 +1,14 @@
 package com.erolc.mrouter
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
-import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.route.routeBuild
-import com.erolc.mrouter.route.router.MergeRouter
-import com.erolc.mrouter.route.transform.Resume
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.window.WindowHeightSize
 import com.erolc.mrouter.window.WindowWidthSize
@@ -38,7 +31,7 @@ fun PanelHost(
 ) {
     val scope = LocalPageScope.current
     val router = rememberInPage(key) {
-        scope.router as? MergeRouter ?: throw RuntimeException("弹框内部页面不可使用面板（局部）路由")
+        scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
     val windowScope = LocalWindowScope.current
     val windowSize by remember { windowScope.windowSize }
