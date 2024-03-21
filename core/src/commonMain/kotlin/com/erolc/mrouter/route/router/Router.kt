@@ -46,7 +46,7 @@ internal fun createLocalPanelEntry(
     address: Address,
     router: Router,
     entry: PanelEntry,
-): PageEntry {
+): LocalPageEntry {
     return LocalPageEntry(
         getScope(),
         address, entry

@@ -30,6 +30,7 @@ import kotlin.math.roundToInt
 abstract class GestureWrap {
     internal var isUseContent = false
     internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
+    internal var gestureModifier = PauseModifierPost { Modifier }
 
     private val scope = GestureWrapScope()
 
@@ -85,7 +86,7 @@ abstract class GestureWrap {
     }
 
     internal fun updatePauseModifier(pauseModifierPost: PauseModifierPost) {
-        this.pauseModifierPost = pauseModifierPost
+        this.gestureModifier = pauseModifierPost
     }
 
     internal fun releasePauseModifier() {

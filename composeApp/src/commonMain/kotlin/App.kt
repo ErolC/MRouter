@@ -192,7 +192,7 @@ fun Home() {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
-                        transform = normal()
+                        transform = modal()
                         onResult {
                             log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                         }

@@ -1,11 +1,13 @@
 package com.erolc.mrouter.backstack
 
+import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.transform.PostExit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 
 
 /**
@@ -21,6 +23,7 @@ open class BackStack(val name: String) {
      * 阈值，这个值将指示后退栈到达底部的时机
      */
     var threshold = 1
+    private var isPreBack = false
 
     fun addEntry(entry: StackEntry) {
         _backstack.value += entry
@@ -42,9 +45,19 @@ open class BackStack(val name: String) {
      */
     internal fun pop(): Boolean {
         return if (_backstack.value.size > threshold) {
-            _backstack.value -= _backstack.value.last().apply { destroy() }
+            _backstack.value -= _backstack.value.last().apply {
+                if (this is LocalPageEntry && isPreBack) {
+                    isPreBack = false
+                    entry.pageRouter.backStack.reset()
+                }
+                destroy()
+            }
             true
         } else false
+    }
+
+    internal fun reset() {
+        _backstack.value = listOf(_backstack.value.first())
     }
 
     internal fun clear() {
@@ -57,6 +70,7 @@ open class BackStack(val name: String) {
      */
     fun preBack(): Boolean {
         return if (_backstack.value.size > threshold) {
+            isPreBack = true
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit
             true

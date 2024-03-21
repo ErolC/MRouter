@@ -4,6 +4,8 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.transform.Transform
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 /**
@@ -13,8 +15,8 @@ import com.erolc.mrouter.utils.logi
 class PanelRouter(private val addresses: List<Address>, override val parentRouter: PageRouter) : Router {
     //这里是当前界面中各个面板的回退栈
     private val panelStacks = mutableMapOf<String, PanelEntry>()
-    private var entry: PageEntry? = null
-    private var localPanelShow = false
+    private var entry: LocalPageEntry? = null
+    private var localPanelShow = true
     private var isRoute = false
 
 

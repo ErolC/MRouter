@@ -11,8 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.utils.loge
 
-object NoneGestureWrap : GestureWrap() {
+class NoneGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
         Box(modifier) {

@@ -14,7 +14,9 @@ import com.erolc.lifecycle.SystemLifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.route.router.EmptyRouter
 import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
@@ -66,7 +68,7 @@ open class PageEntry internal constructor(
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
-                Page(modifier)
+            Page(modifier)
         }
 
         lifecycle()
@@ -98,7 +100,7 @@ open class PageEntry internal constructor(
                 remember(this) {
                     setContent(RealContent())
                 }
-                val pageModifier = pauseModifierPost.getModifier().fillMaxSize()
+                val pageModifier = gestureModifier.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
                         0f -> Resume
@@ -109,7 +111,7 @@ open class PageEntry internal constructor(
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
         }
-        if (isExit && !isIntercept) ExitImpl()
+        if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
     }
 
     open fun RealContent(): @Composable () -> Unit {

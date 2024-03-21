@@ -31,12 +31,12 @@ fun modal(scale: Float = 0.9f) = buildTransform {
 fun normal() = buildTransform {
     enter = slideInHorizontally { it }
     prevPause = slideOutHorizontally { -it / 7 }
-    gesture = NormalGestureWrap
+    gesture = NormalGestureWrap()
 }
 
 fun none() = buildTransform {
     enter = slideInHorizontally { it }
-    gesture = NoneGestureWrap
+    gesture = NoneGestureWrap()
 }
 
 @Stable
@@ -305,7 +305,7 @@ class TransformBuilder {
     var enter: EnterTransition = EnterTransition.None
     var exit: ExitTransition = ExitTransition.None
     var prevPause: ExitTransition = ExitTransition.None
-    var gesture: GestureWrap = NoneGestureWrap
+    var gesture: GestureWrap = NoneGestureWrap()
     internal fun build(): Transform {
         return Transform(enter, exit, prevPause, gesture)
     }
@@ -328,7 +328,7 @@ data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _exit: ExitTransition = ExitTransition.None,
     internal val prevPause: ExitTransition = ExitTransition.None,
-    internal val gesture: GestureWrap = NoneGestureWrap
+    internal val gesture: GestureWrap = NoneGestureWrap()
 ) {
 
     companion object {

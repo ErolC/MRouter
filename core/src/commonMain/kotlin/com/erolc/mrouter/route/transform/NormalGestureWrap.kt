@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-object NormalGestureWrap : GestureWrap() {
+class NormalGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
         val (gestureModifier, pageModifier) = rememberDraggableModifier(
