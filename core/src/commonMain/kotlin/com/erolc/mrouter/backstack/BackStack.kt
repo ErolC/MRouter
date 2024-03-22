@@ -3,11 +3,13 @@ package com.erolc.mrouter.backstack
 import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
+import com.erolc.mrouter.route.ClearTaskFlag
+import com.erolc.mrouter.route.RouteFlag
+import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.transform.PostExit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 
 
 /**
@@ -23,20 +25,30 @@ open class BackStack(val name: String) {
      * 阈值，这个值将指示后退栈到达底部的时机
      */
     var threshold = 1
+
+    //是否预后退
     private var isPreBack = false
 
+    /**
+     * 给回退栈增加一个元素
+     */
     fun addEntry(entry: StackEntry) {
         _backstack.value += entry
     }
 
-    fun addEntryWithFirst(entry: StackEntry) {
-        _backstack.value = listOf(entry) + _backstack.value
-    }
-
+    /**
+     * 回退栈的大小
+     */
     val size: Int get() = _backstack.value.size
 
+    /**
+     * 回退栈是否到达底部
+     */
     fun isBottom() = size == threshold
 
+    /**
+     * 回退栈是否为空
+     */
     fun isEmpty() = size == 0
 
     /**
@@ -52,14 +64,29 @@ open class BackStack(val name: String) {
                 }
                 destroy()
             }
+            (_backstack.value.last() as PageEntry).shouldResume.value = true
             true
         } else false
     }
 
-    internal fun reset() {
-        _backstack.value = listOf(_backstack.value.first())
+    internal fun execute(flag: RouteFlag) {
+        flag.decode().filterIsInstance<StackFlag>().forEach {
+            when (it) {
+                is ClearTaskFlag -> _backstack.value = listOf(_backstack.value.last())
+            }
+        }
     }
 
+    /**
+     * 重置回退栈
+     */
+    internal fun reset(stackEntry: StackEntry? = null) {
+        _backstack.value = listOf(stackEntry ?: _backstack.value.first())
+    }
+
+    /**
+     * 清空回退栈
+     */
     internal fun clear() {
         _backstack.value = listOf()
     }

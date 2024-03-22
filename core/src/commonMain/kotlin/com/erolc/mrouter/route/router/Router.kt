@@ -13,7 +13,7 @@ import com.erolc.mrouter.scope.getScope
 interface Router {
     val parentRouter: Router?
 
-    fun router(route: Route){}
+    fun router(route: Route) {}
 
     fun dispatchRoute(route: Route): Boolean
     fun backPressed(notInterceptor: () -> Boolean = { true })
@@ -31,6 +31,7 @@ internal fun createPageEntry(
         getScope(),
         address
     ).apply {
+        flag = route.flag
         transform.value = route.transform
         scope.run {
             argsFlow.value = route.args

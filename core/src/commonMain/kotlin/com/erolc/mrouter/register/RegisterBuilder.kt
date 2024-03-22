@@ -45,9 +45,7 @@ class RegisterBuilder internal constructor() {
 
     init {
         addAddress(Address(Constants.defaultPage, emptyConfig) {
-            Box(Modifier.background(Color.White).fillMaxSize()) {
-                Text("default panel", fontSize = 15.sp, modifier = Modifier.align(Alignment.Center))
-            }
+            Box(Modifier.background(Color.White).fillMaxSize())
         })
     }
 

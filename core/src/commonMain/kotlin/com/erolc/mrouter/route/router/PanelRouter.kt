@@ -39,7 +39,16 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
     }
 
     internal fun route(route: Route) {
-        panelStacks[route.layoutKey] ?: dispatchRoute(route)
+        panelStacks[route.layoutKey] ?: initPanel(route)
+    }
+
+    private fun initPanel(route: Route) {
+        val address = addresses.find { it.path == route.address }
+        require(address != null) {
+            "can't find the address with ‘${route.path}’"
+        }
+        panelStacks[route.layoutKey!!] = createEntry(route, address)
+
     }
 
     override fun router(route: Route) {
@@ -56,9 +65,14 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
             }
-            val panel = panelStacks[route.layoutKey] ?: createEntry(route, address)
+            val panel = panelStacks[route.layoutKey]
+            if (panel == null && (route.layoutKey != null || (localPanelShow && route.layoutKey == Constants.defaultLocal))) {
+                parentRouter.route(route)
+                return true
+            }
+            val temp = panel ?: createEntry(route, address)
             if (!localPanelShow && route.layoutKey == Constants.defaultLocal) {
-                entry = createLocalPanelEntry(route, address, this, panel)
+                entry = createLocalPanelEntry(route, address, this, temp)
                 parentRouter.backStack.addEntry(entry!!)
             }
             if (panelStacks.contains(route.layoutKey)) {
@@ -68,10 +82,8 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
                     }
                 }
                 return false
-            } else {
-                panelStacks[route.layoutKey!!] = panel
-            }
-
+            } else
+                panelStacks[route.layoutKey!!] = temp
         }
         return true
     }
@@ -87,8 +99,8 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
         localPanelShow = false
     }
 
-    //panel是没有不需要后退的，如果其子路由已经无法后退，将事件交给他，那么他也是将这事件交给他的父路由处理即可
     override fun backPressed(notInterceptor: () -> Boolean) {
+        //panel是不需要后退的，如果其子路由已经无法后退，将事件交给他，那么他也是将这事件交给他的父路由处理即可
         if (notInterceptor())
             parentRouter.backPressed(notInterceptor)
     }

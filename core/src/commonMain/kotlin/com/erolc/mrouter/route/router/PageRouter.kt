@@ -5,6 +5,7 @@ import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.RouteFlag
 import kotlinx.coroutines.flow.map
 
 /**
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.map
 open class PageRouter(name: String, private val addresses: List<Address>, override val parentRouter: Router) : Router {
     internal val backStack = BackStack(name)
 
-    fun route(stackEntry: StackEntry) {
+    internal fun route(stackEntry: StackEntry) {
         stackEntry as PageEntry
         if (stackEntry.address.config.launchSingleTop)
             backStack.findTopEntry()?.also { entry ->
@@ -31,12 +32,11 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
             }
         else
             backStack.addEntry(stackEntry)
+
     }
 
-    fun createEntry(route: Route, address: Address): StackEntry {
+    private fun createEntry(route: Route, address: Address): StackEntry {
         return createPageEntry(route, address, PanelRouter(addresses, this))
-        //需要在这里将局部页面当做单页面的条件有两个：route的localKey是local；当前的页面情况已经小于能够显示该局部的尺寸
-        //创建的方式是获取当前界面，并在当前界面中的mergeRouter中提取出local的回退栈并构建一个特殊的页面作为承载即可。
     }
 
     /**
@@ -60,17 +60,20 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter.dispatchRoute(route)
         if (!isIntercept && shouldLoadPage(route)) {
-            val address = addresses.find { it.path == route.address }
-            require(address != null) {
-                "can't find the address with ‘${route.path}’"
-            }
-            val entry = createEntry(route, address)
-            route(entry)
+            route(route)
             return true
         }
         return false
     }
 
+    internal fun route(route: Route) {
+        val address = addresses.find { it.path == route.address }
+        require(address != null) {
+            "can't find the address with ‘${route.path}’"
+        }
+        val entry = createEntry(route, address)
+        route(entry)
+    }
 
     /**
      * 后退方法，将回退到前一个页面

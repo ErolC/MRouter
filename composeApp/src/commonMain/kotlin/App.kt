@@ -21,6 +21,10 @@ import com.erolc.mrouter.PanelHost
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.register.page
+import com.erolc.mrouter.route.ClearTaskFlag
+import com.erolc.mrouter.route.NormalFlag
+import com.erolc.mrouter.route.RouteFlag
+import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.route.transform.normal
@@ -28,6 +32,8 @@ import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
+import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.window.WindowWidthSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -176,8 +182,11 @@ fun Home() {
             "47"
         )
     }
-    Row{
-        PanelHost(windowWidthSize = WindowWidthSize.Compact, modifier = Modifier.weight(2f))
+    Row {
+        PanelHost( modifier = Modifier.weight(2f), onPanelChange = {
+            loge("tag","isShow:$it")
+        })
+        loge("tag", "${(NormalFlag or ClearTaskFlag).code}")
 
         LazyColumn(
             state = rememberLazyListState(),
@@ -186,7 +195,7 @@ fun Home() {
             items(list) {
 
                 Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                    scope.route("local:root/second?key=123") {
+                    scope.route("root/second?key=123") {
 //                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()

@@ -24,6 +24,8 @@ class RouteBuilder {
 
     private val args = emptyArgs
 
+    var flag:RouteFlag = NormalFlag
+
     var transform: Transform = none()
 
     fun transform(body: TransformBuilder.() -> Unit) {
@@ -86,6 +88,7 @@ class RouteBuilder {
         return Route(
             route,
             address,
+            flag,
             windowOptions,
             args,
             onResult,

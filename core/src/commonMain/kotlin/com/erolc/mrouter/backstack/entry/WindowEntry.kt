@@ -17,8 +17,9 @@ import com.erolc.mrouter.utils.PlatformWindow
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
-class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, "")),
-                  override val address: Address = Address(options.value.id)
+class WindowEntry(
+    val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, "")),
+    override val address: Address = Address(options.value.id)
 ) :
     StackEntry {
     internal lateinit var pageRouter: PageRouter
@@ -44,10 +45,7 @@ class WindowEntry(val options: MutableState<WindowOptions> = mutableStateOf(Wind
 
                     stack.forEachIndexed { index, stackEntry ->
                         (stackEntry as PageEntry).run {
-                            if (index == 0 && stack.size == 2) pause(true)
-                            else {
-                                isSecond.value = false
-                            }
+                            if (index == 0 && stack.size == 2) pause()
                             Content(Modifier)
                         }
                     }

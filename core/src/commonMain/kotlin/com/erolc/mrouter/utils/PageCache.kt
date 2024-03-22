@@ -43,6 +43,10 @@ inline fun <T : Any> PageCache.cache(invalid: Boolean, block: () -> T): T {
     }
 }
 
+/**
+ * 该系列方法的用法和[remember]一样，不同的是该方法所保存的变量的生命周期会比[remember]保存的要长，和当前界面的一样长.
+ *
+ */
 @Composable
 inline fun <T : Any> rememberInPage(crossinline calculation: @DisallowComposableCalls () -> T): T {
     val scope = LocalPageScope.current

@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.transform.Resume
-import com.erolc.mrouter.utils.loge
 
 /**
  * 局部界面的元素
@@ -36,7 +35,7 @@ class PanelEntry(override val address: Address) : StackEntry {
 
             stack.forEachIndexed { index, stackEntry ->
                 (stackEntry as PageEntry).run {
-                    if (index == 0 && stack.size == 2) pause(true)
+                    if (index == 0 && stack.size == 2) pause()
                     Content(Modifier)
                 }
             }
