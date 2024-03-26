@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.transform.PauseState
 import com.erolc.mrouter.route.transform.Resume
 
 /**
@@ -21,11 +23,6 @@ class PanelEntry(override val address: Address) : StackEntry {
 
     @Composable
     override fun Content(modifier: Modifier) {
-        PanelContent(modifier)
-    }
-
-    @Composable
-    fun PanelContent(modifier: Modifier = Modifier) {
         Box(modifier.fillMaxSize()) {
             val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
             if (stack.size == 1) {
@@ -33,13 +30,23 @@ class PanelEntry(override val address: Address) : StackEntry {
             } else
                 (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
 
-            stack.forEachIndexed { index, stackEntry ->
-                (stackEntry as PageEntry).run {
-                    if (index == 0 && stack.size == 2) pause()
-                    Content(Modifier)
-                }
+            stack.forEach { stackEntry ->
+                stackEntry.Content(Modifier)
             }
         }
+    }
+
+    internal fun handleLifecycleEvent(event: Lifecycle.Event) {
+        val pageEntry = (pageRouter.backStack.findTopEntry() as PageEntry)
+        when (event) {
+            Lifecycle.Event.ON_START -> pageEntry.start()
+            Lifecycle.Event.ON_RESUME -> pageEntry.resume()
+            Lifecycle.Event.ON_PAUSE -> pageEntry.pause()
+            Lifecycle.Event.ON_STOP -> pageEntry.stop()
+            Lifecycle.Event.ON_DESTROY -> {}
+            else -> {}
+        }
+
     }
 
     override fun destroy() {

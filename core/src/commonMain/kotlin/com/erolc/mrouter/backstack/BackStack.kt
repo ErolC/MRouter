@@ -4,9 +4,11 @@ import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.ClearTaskFlag
+import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.transform.PostExit
+import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,6 +39,18 @@ open class BackStack(val name: String) {
     }
 
     /**
+     * 更换，保证回退栈中始终只有一个元素
+     */
+    private fun replace() {
+        _backstack.value.first().destroy()
+        _backstack.value = listOf(_backstack.value.last())
+    }
+    private fun clearTask(){
+        _backstack.value.take(_backstack.value.size-1).forEach { (it as PageEntry).destroy() }
+        _backstack.value = listOf(_backstack.value.last())
+    }
+
+    /**
      * 回退栈的大小
      */
     val size: Int get() = _backstack.value.size
@@ -64,7 +78,6 @@ open class BackStack(val name: String) {
                 }
                 destroy()
             }
-            (_backstack.value.last() as PageEntry).shouldResume.value = true
             true
         } else false
     }
@@ -72,7 +85,8 @@ open class BackStack(val name: String) {
     internal fun execute(flag: RouteFlag) {
         flag.decode().filterIsInstance<StackFlag>().forEach {
             when (it) {
-                is ClearTaskFlag -> _backstack.value = listOf(_backstack.value.last())
+                is ClearTaskFlag -> clearTask()
+                is ReplaceFlag -> replace()
             }
         }
     }
@@ -118,4 +132,5 @@ open class BackStack(val name: String) {
      * 找顶部的条目
      */
     fun findTopEntry() = _backstack.value.lastOrNull()
+    fun isTopEntry(entry: StackEntry) = findTopEntry() == entry
 }

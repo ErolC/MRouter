@@ -3,10 +3,16 @@ package com.erolc.mrouter.backstack.entry
 import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.rememberTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.LifecycleRegistry
@@ -18,6 +24,7 @@ import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.EmptyRouter
 import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
@@ -36,9 +43,6 @@ open class PageEntry internal constructor(
         scope.lifecycle = registry
     }
 
-    //页面当前的事件
-    private var currentEvent = Lifecycle.Event.ON_ANY
-
     //transform中的prev在下一个页面打开的时候才会被赋值
     internal val transform = mutableStateOf(Transform.None)
 
@@ -53,7 +57,6 @@ open class PageEntry internal constructor(
 
     //是否销毁
     private val isDestroy = mutableStateOf(false)
-    internal val shouldResume = mutableStateOf(true)
 
     //是否需要退出
     internal val isExit = mutableStateOf(false)
@@ -61,16 +64,25 @@ open class PageEntry internal constructor(
     //是否拦截
     private val isIntercept get() = scope.isIntercept
 
+    private val pageRouter get() = scope.router.parentRouter as PageRouter
+
     override val lifecycle: Lifecycle get() = registry
 
 
     private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
-            when {
-                event == Lifecycle.Event.ON_RESUME -> resume()
-                event == Lifecycle.Event.ON_PAUSE -> pause()
-                event == Lifecycle.Event.ON_DESTROY -> destroy()
-            }
+            onEventCall(event)
+        }
+    }
+
+    private fun onEventCall(event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_START -> start()
+            Lifecycle.Event.ON_RESUME -> resume()
+            Lifecycle.Event.ON_PAUSE -> pause()
+            Lifecycle.Event.ON_STOP -> stop()
+            Lifecycle.Event.ON_DESTROY -> destroy()
+            else -> {}
         }
     }
 
@@ -84,7 +96,6 @@ open class PageEntry internal constructor(
             SysBackPressed { scope.backPressed() }
             Page(modifier)
         }
-
         lifecycle()
     }
 
@@ -92,22 +103,20 @@ open class PageEntry internal constructor(
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     private fun Page(modifier: Modifier) {
-        val state = remember(this) {
+        val state = rememberInPage {
             MutableTransitionState(transformState.value)
         }
-        var isExit by remember(this) { isExit }
-        val isIntercept by remember(this) { isIntercept }
+        var isExit by rememberInPage { isExit }
+        val isIntercept by rememberInPage { isIntercept }
 
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
-            if (exitFinished
-                && !(scope.router.parentRouter as PageRouter).backStack.pop()
-            ) isExit = true
+            if (exitFinished && !pageRouter.backStack.pop()) isExit = true
 
             if (resume) {
-                (scope.router.parentRouter as PageRouter).backStack.execute(flag)
+                pageRouter.backStack.execute(flag)
                 flag = NormalFlag
             }
         }
@@ -116,7 +125,7 @@ open class PageEntry internal constructor(
         val transform by rememberInPage(this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
-                remember(this) {
+                rememberInPage {
                     setContent(RealContent())
                 }
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
@@ -130,6 +139,7 @@ open class PageEntry internal constructor(
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
         }
+
         if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
     }
 
@@ -140,25 +150,24 @@ open class PageEntry internal constructor(
     @Composable
     fun lifecycle() {
         val windowScope = LocalWindowScope.current
-
-        val shouldDestroy by remember(this) { isDestroy }
-
-        SystemLifecycle {
-            when {
-                it == Lifecycle.Event.ON_RESUME -> resume()
-                it == Lifecycle.Event.ON_PAUSE -> pause()
-                it == Lifecycle.Event.ON_DESTROY -> destroy()
+        SystemLifecycle(::onEventCall)
+        DisposableEffect(this, transformState.value) {
+            if (transformState.value == Resume) {
+                start()
+                resume()
+            } else {
+                pause()
+                stop()
             }
-        }
-        resume()
-        DisposableEffect(this) {
-            windowScope.addLifecycleEventListener(listener)
+            if (scope.router is PanelRouter)
+                windowScope.addLifecycleEventListener(listener)
+
             onDispose {
                 scope.transformTransition = null
-                if (shouldDestroy) {
-                    windowScope.removeLifeCycleEventListener(listener)
-                    pause()
-                    onDestroy()
+                if (isDestroy.value) {
+                    if (scope.router is PanelRouter)
+                        windowScope.removeLifeCycleEventListener(listener)
+                    handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                 }
             }
         }
@@ -166,7 +175,7 @@ open class PageEntry internal constructor(
 
     @Composable
     fun shareTransform(entry: PageEntry) {
-        val state by remember(this) {
+        val state by rememberInPage(transformState) {
             transformState
         }
         entry.transformState.value = when (state) {
@@ -196,38 +205,42 @@ open class PageEntry internal constructor(
         return PauseState
     }
 
-
     private fun create() {
-        currentEvent = Lifecycle.Event.ON_CREATE
-        handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        if (registry.currentState == Lifecycle.State.INITIALIZED) handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
-    private fun resume() {
-        if (currentEvent.targetState == Lifecycle.State.CREATED && shouldResume.value) {
-            shouldResume.value = false
-            currentEvent = Lifecycle.Event.ON_RESUME
+    internal fun start() {
+        if (registry.currentState == Lifecycle.State.CREATED) handleLifecycleEvent(Lifecycle.Event.ON_START)
+    }
+
+    internal fun resume() {
+        if (registry.currentState == Lifecycle.State.STARTED)
             handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        }
+
     }
 
     internal fun pause() {
-        if (currentEvent.targetState == Lifecycle.State.RESUMED) {
+        if (registry.currentState == Lifecycle.State.RESUMED)
             handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            currentEvent = Lifecycle.Event.ON_PAUSE
-        }
+
     }
 
-    private fun onDestroy() {
-        handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    }
+    internal fun stop() {
+        if (registry.currentState == Lifecycle.State.STARTED) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
 
-    private fun handleLifecycleEvent(event: Lifecycle.Event) {
-        logi("tag", "$this - $event - ${address.path}")
-        registry.handleLifecycleEvent(event)
     }
 
     override fun destroy() {
         isDestroy.value = true
     }
+
+    internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
+        logi("tag", "$this - $event - ${address.path}")
+        registry.handleLifecycleEvent(event)
+        if (event != Lifecycle.Event.ON_CREATE)
+            (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
+    }
+
+
 }
 

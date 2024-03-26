@@ -133,7 +133,7 @@ fun Second() {
         Button(onClick = {
             scope.route("root/greet?key=123") {
 //                window(defaultWindow, "greet")
-//                transform = normal()
+                transform = modal()
                 onResult {
                     log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                 }
@@ -184,10 +184,8 @@ fun Home() {
     }
     Row {
         PanelHost( modifier = Modifier.weight(2f), onPanelChange = {
-            loge("tag","isShow:$it")
+            loge("tag","isAttach:$it")
         })
-        loge("tag", "${(NormalFlag or ClearTaskFlag).code}")
-
         LazyColumn(
             state = rememberLazyListState(),
             modifier = Modifier.fillMaxSize().weight(1f).background(Color.Green)
@@ -195,13 +193,13 @@ fun Home() {
             items(list) {
 
                 Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                    scope.route("root/second?key=123") {
+                    scope.route("local:root/second?key=123") {
 //                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()
 //                        prevPause = fadeOut()+ slideOutHorizontally { it }
 //                    }
-                        transform = modal()
+                        transform = normal()
                         onResult {
                             log("ATG", "data:${it.getDataOrNull<Int>("result")}")
                         }

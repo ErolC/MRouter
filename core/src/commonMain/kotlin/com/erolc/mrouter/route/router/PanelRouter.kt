@@ -1,5 +1,6 @@
 package com.erolc.mrouter.route.router
 
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
@@ -60,7 +61,6 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter.dispatchRoute(route)
         if (!isIntercept) {
-            logi("dispatchRoute", "$this")
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
@@ -71,14 +71,14 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
                 return true
             }
             val temp = panel ?: createEntry(route, address)
-            if (!localPanelShow && route.layoutKey == Constants.defaultLocal) {
-                entry = createLocalPanelEntry(route, address, this, temp)
-                parentRouter.backStack.addEntry(entry!!)
+            if (!localPanelShow && route.layoutKey == Constants.defaultLocal && entry == null) {
+                entry = createLocalPanelEntry(route, this, temp)
+                parentRouter.backStack.addEntry(entry!!.apply { start() })
             }
             if (panelStacks.contains(route.layoutKey)) {
                 if (isRoute) {
                     panelStacks[route.layoutKey]?.pageRouter?.run {
-                        route(createPageEntry(route, address, EmptyRouter(this)))
+                        route(createPageEntry(route, address, EmptyRouter(this),true))
                     }
                 }
                 return false
@@ -92,11 +92,16 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
         if (localPanelShow) return
         localPanelShow = true
         parentRouter.backStack.pop()
+        entry = null
     }
 
     internal fun hideWithLocal() {
         if (!localPanelShow) return
         localPanelShow = false
+    }
+
+    internal fun handleLifecycleEvent(event: Lifecycle.Event){
+        panelStacks.forEach { it.value.handleLifecycleEvent(event) }
     }
 
     override fun backPressed(notInterceptor: () -> Boolean) {

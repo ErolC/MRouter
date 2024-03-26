@@ -14,6 +14,7 @@ import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
+import com.erolc.mrouter.utils.loge
 
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
@@ -38,16 +39,13 @@ class WindowEntry(
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
-                    if (stack.size == 1) {
+                    if (stack.size == 1)
                         (stack.first() as PageEntry).transformState.value = Resume
-                    } else
+                    else
                         (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
 
-                    stack.forEachIndexed { index, stackEntry ->
-                        (stackEntry as PageEntry).run {
-                            if (index == 0 && stack.size == 2) pause()
-                            Content(Modifier)
-                        }
+                    stack.forEach { stackEntry ->
+                        stackEntry.Content(Modifier)
                     }
                 }
             }

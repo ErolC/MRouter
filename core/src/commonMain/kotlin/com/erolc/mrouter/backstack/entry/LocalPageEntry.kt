@@ -1,19 +1,25 @@
 package com.erolc.mrouter.backstack.entry
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
 
-class LocalPageEntry(scope: PageScope, address: Address, val entry: PanelEntry) : PageEntry(scope, address) {
-    init {
-        //在使用page的方式承载panel时，需要重置其内部页面路由的回退栈
-        reset()
-    }
+class LocalPageEntry(scope: PageScope, val entry: PanelEntry) : PageEntry(scope, Address("")) {
 
     override fun RealContent(): @Composable () -> Unit {
-        return { entry.PanelContent() }
+        return { entry.Content(Modifier) }
     }
 
-    internal fun reset() = entry.pageRouter.backStack.reset()
+    override fun handleLifecycleEvent(event: Lifecycle.Event) {
+        super.handleLifecycleEvent(event)
+        entry?.handleLifecycleEvent(event)
+    }
 }

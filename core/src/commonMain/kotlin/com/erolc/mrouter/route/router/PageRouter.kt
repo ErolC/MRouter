@@ -31,7 +31,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
                 }
             }
         else
-            backStack.addEntry(stackEntry)
+            backStack.addEntry(stackEntry.apply { start() })
 
     }
 

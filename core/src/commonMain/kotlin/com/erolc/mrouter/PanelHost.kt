@@ -1,7 +1,6 @@
 package com.erolc.mrouter
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,14 +19,14 @@ import com.erolc.mrouter.window.WindowWidthSize
  * @param key 局部路由的id,默认的key是[Constants.defaultLocal]，只有该局部路由可以在界面变小时（局部路由消失时）并入到主路由上。
  * @param startRoute 当直接显示时所路由的第一个页面
  * @param panelState 面板状态
- * @param onPanelChange 面板显示状态改变
+ * @param onPanelChange 面板显示状态改变（是否附着在页面上）
  * @param modifier 面板的Modified
  */
 @Composable
 fun PanelHost(
     key: String = Constants.defaultLocal,
     startRoute: String = Constants.defaultPage,
-    onPanelChange: (isShow: Boolean) -> Unit = {},
+    onPanelChange: (isAttach: Boolean) -> Unit = {},
     panelState: PanelState = rememberPanelState(),
     modifier: Modifier = Modifier
 ) {
@@ -35,12 +34,12 @@ fun PanelHost(
     val router = rememberInPage(key) {
         scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
-    val isShow = panelState.shouldShowPanel
-    remember(isShow) {
-        onPanelChange(isShow)
+    val isAttach = panelState.shouldAttach
+    remember(isAttach) {
+        onPanelChange(isAttach)
     }
 
-    if (isShow) {
+    if (isAttach) {
         val panel = rememberInPage(key) {
             router.run {
                 route(routeBuild("$key:$startRoute"))
@@ -66,15 +65,15 @@ fun PanelHost(
 @Composable
 fun AutoPanel(
     panelState: PanelState = rememberPanelState(),
-    onPanelChange: (isShow: Boolean) -> Unit = {},
+    onPanelChange: (isAttach: Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val isShow = panelState.shouldShowPanel
-    remember(isShow) {
-        onPanelChange(isShow)
+    val isAttach = panelState.shouldAttach
+    remember(isAttach) {
+        onPanelChange(isAttach)
     }
-    if (panelState.shouldShowPanel)
+    if (panelState.shouldAttach)
         Box(modifier) {
             content()
         }
@@ -101,7 +100,7 @@ data class PanelState(
     val windowHeightSize: WindowHeightSize? = null
 ) {
 
-    val shouldShowPanel: Boolean
+    val shouldAttach: Boolean
         @Composable get() {
             val windowScope = LocalWindowScope.current
             val windowSize by remember { windowScope.windowSize }
