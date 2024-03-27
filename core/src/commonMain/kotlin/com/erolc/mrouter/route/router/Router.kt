@@ -3,11 +3,9 @@ package com.erolc.mrouter.route.router
 import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.PanelEntry
-import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ReplaceFlag
-import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.scope.getScope
 
 
@@ -53,6 +51,7 @@ internal fun createLocalPanelEntry(
         getScope(),
         entry
     ).apply {
+        flag = route.flag
         transform.value = route.transform
         scope.run {
             argsFlow.value = route.args

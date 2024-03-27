@@ -38,15 +38,8 @@ open class BackStack(val name: String) {
         _backstack.value += entry
     }
 
-    /**
-     * 更换，保证回退栈中始终只有一个元素
-     */
-    private fun replace() {
-        _backstack.value.first().destroy()
-        _backstack.value = listOf(_backstack.value.last())
-    }
-    private fun clearTask(){
-        _backstack.value.take(_backstack.value.size-1).forEach { (it as PageEntry).destroy() }
+    private fun clearTask() {
+        _backstack.value.take(_backstack.value.size - 1).forEach { (it as PageEntry).destroy() }
         _backstack.value = listOf(_backstack.value.last())
     }
 
@@ -85,8 +78,7 @@ open class BackStack(val name: String) {
     internal fun execute(flag: RouteFlag) {
         flag.decode().filterIsInstance<StackFlag>().forEach {
             when (it) {
-                is ClearTaskFlag -> clearTask()
-                is ReplaceFlag -> replace()
+                is ClearTaskFlag, is ReplaceFlag -> clearTask()
             }
         }
     }

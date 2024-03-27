@@ -5,7 +5,9 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.route.transform.NoneGestureWrap
 import com.erolc.mrouter.route.transform.Transform
+import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
@@ -78,7 +80,7 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
             if (panelStacks.contains(route.layoutKey)) {
                 if (isRoute) {
                     panelStacks[route.layoutKey]?.pageRouter?.run {
-                        route(createPageEntry(route, address, EmptyRouter(this),true))
+                        route(createPageEntry(route, address, EmptyRouter(this), true))
                     }
                 }
                 return false
@@ -100,8 +102,9 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
         localPanelShow = false
     }
 
-    internal fun handleLifecycleEvent(event: Lifecycle.Event){
-        panelStacks.forEach { it.value.handleLifecycleEvent(event) }
+    internal fun handleLifecycleEvent(event: Lifecycle.Event) {
+        if (localPanelShow)
+            panelStacks.forEach { it.value.handleLifecycleEvent(event) }
     }
 
     override fun backPressed(notInterceptor: () -> Boolean) {

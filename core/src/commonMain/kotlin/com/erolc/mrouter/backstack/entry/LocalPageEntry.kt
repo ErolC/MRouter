@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.route.transform.GestureWrap
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
@@ -19,7 +20,7 @@ class LocalPageEntry(scope: PageScope, val entry: PanelEntry) : PageEntry(scope,
     }
 
     override fun handleLifecycleEvent(event: Lifecycle.Event) {
-        super.handleLifecycleEvent(event)
-        entry?.handleLifecycleEvent(event)
+//        super.handleLifecycleEvent(event)
+        entry?.handleLifecycleEvent(event, true)
     }
 }

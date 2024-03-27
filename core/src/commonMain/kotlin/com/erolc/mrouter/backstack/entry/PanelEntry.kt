@@ -3,14 +3,18 @@ package com.erolc.mrouter.backstack.entry
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.transform.PauseState
 import com.erolc.mrouter.route.transform.Resume
+import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.logi
 
 /**
  * 局部界面的元素
@@ -36,14 +40,14 @@ class PanelEntry(override val address: Address) : StackEntry {
         }
     }
 
-    internal fun handleLifecycleEvent(event: Lifecycle.Event) {
+    internal fun handleLifecycleEvent(event: Lifecycle.Event, isLocalPage: Boolean = false) {
         val pageEntry = (pageRouter.backStack.findTopEntry() as PageEntry)
         when (event) {
             Lifecycle.Event.ON_START -> pageEntry.start()
             Lifecycle.Event.ON_RESUME -> pageEntry.resume()
             Lifecycle.Event.ON_PAUSE -> pageEntry.pause()
             Lifecycle.Event.ON_STOP -> pageEntry.stop()
-            Lifecycle.Event.ON_DESTROY -> {}
+            Lifecycle.Event.ON_DESTROY -> if (isLocalPage) pageEntry.destroy()
             else -> {}
         }
 

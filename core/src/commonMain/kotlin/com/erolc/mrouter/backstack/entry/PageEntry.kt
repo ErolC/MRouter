@@ -29,7 +29,6 @@ import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
@@ -95,8 +94,9 @@ open class PageEntry internal constructor(
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
+            lifecycle()
         }
-        lifecycle()
+
     }
 
 
@@ -148,20 +148,20 @@ open class PageEntry internal constructor(
     }
 
     @Composable
-    fun lifecycle() {
+    private fun lifecycle() {
         val windowScope = LocalWindowScope.current
         SystemLifecycle(::onEventCall)
-        DisposableEffect(this, transformState.value) {
-            if (transformState.value == Resume) {
-                start()
-                resume()
-            } else {
-                pause()
-                stop()
-            }
+        val state by rememberInPage(transformState) { transformState }
+        if (state == Resume) {
+            start()
+            resume()
+        } else {
+            pause()
+            stop()
+        }
+        DisposableEffect(this) {
             if (scope.router is PanelRouter)
                 windowScope.addLifecycleEventListener(listener)
-
             onDispose {
                 scope.transformTransition = null
                 if (isDestroy.value) {
