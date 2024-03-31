@@ -22,21 +22,22 @@ class LocalPageEntry(scope: PageScope) : PageEntry(scope, Address("LocalPageEntr
         scope.isLocalPageEntry = true
     }
 
+    val panel: PanelEntry get() = (scope.router as PanelRouter).getPanel(Constants.defaultLocal)
+
     override fun RealContent(): @Composable () -> Unit {
         return {
-            (scope.router as PanelRouter).getPanel(Constants.defaultLocal).Content(Modifier)
+            panel.Content(Modifier)
         }
     }
 
     override fun handleLifecycleEvent(event: Lifecycle.Event) {
         super.handleLifecycleEvent(event)
         if (event > Lifecycle.Event.ON_CREATE)
-            (scope.router as PanelRouter).getPanel(Constants.defaultLocal).handleLifecycleEvent(event)
+            panel.handleLifecycleEvent(event)
     }
 
     override fun destroy() {
         super.destroy()
-        (scope.router as PanelRouter).getPanel(Constants.defaultLocal).destroy()
-
+        panel.destroy()
     }
 }
