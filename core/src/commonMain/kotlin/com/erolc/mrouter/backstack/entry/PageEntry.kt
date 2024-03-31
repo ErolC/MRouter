@@ -17,6 +17,7 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
+import com.erolc.mrouter.Constants
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -29,6 +30,7 @@ import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
@@ -36,10 +38,11 @@ open class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address
 ) : StackEntry, LifecycleOwner {
-    private val registry: LifecycleRegistry = LifecycleRegistry(this)
+    internal val registry: LifecycleRegistry = LifecycleRegistry(this)
+    final override val lifecycle: Lifecycle get() = registry
 
     init {
-        scope.lifecycle = registry
+        scope.lifecycle = lifecycle
     }
 
     //transform中的prev在下一个页面打开的时候才会被赋值
@@ -65,8 +68,6 @@ open class PageEntry internal constructor(
 
     private val pageRouter get() = scope.router.parentRouter as PageRouter
 
-    override val lifecycle: Lifecycle get() = registry
-
 
     private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
@@ -85,10 +86,6 @@ open class PageEntry internal constructor(
         }
     }
 
-    init {
-        create()
-    }
-
     @Composable
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalPageScope provides scope) {
@@ -102,30 +99,27 @@ open class PageEntry internal constructor(
 
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
-    private fun Page(modifier: Modifier) {
-        val state = rememberInPage {
+    fun Page(modifier: Modifier) {
+        val state = rememberInPage("page_state") {
             MutableTransitionState(transformState.value)
         }
-        var isExit by rememberInPage { isExit }
-        val isIntercept by rememberInPage { isIntercept }
+        var isExit by rememberInPage("page_exit") { isExit }
+        val isIntercept by rememberInPage("page_intercept") { isIntercept }
 
         state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
             if (exitFinished && !pageRouter.backStack.pop()) isExit = true
+            if (resume) onResume()
 
-            if (resume) {
-                pageRouter.backStack.execute(flag)
-                flag = NormalFlag
-            }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
-        val transform by rememberInPage(this, transform) { transform }
+        val transform by rememberInPage("page_transform", this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
-                rememberInPage {
+                rememberInPage("page_content") {
                     setContent(RealContent())
                 }
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
@@ -143,6 +137,12 @@ open class PageEntry internal constructor(
         if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
     }
 
+    private fun onResume() {
+        pageRouter.backStack.execute(flag)
+        flag = NormalFlag
+        isUpdateTransform = false
+    }
+
     open fun RealContent(): @Composable () -> Unit {
         return address.content
     }
@@ -151,7 +151,7 @@ open class PageEntry internal constructor(
     private fun lifecycle() {
         val windowScope = LocalWindowScope.current
         SystemLifecycle(::onEventCall)
-        val state by rememberInPage(transformState) { transformState }
+        val state by rememberInPage("page_transform_state", transformState) { transformState }
         if (state == Resume) {
             start()
             resume()
@@ -173,18 +173,18 @@ open class PageEntry internal constructor(
         }
     }
 
+    /**
+     * 和上一个页面共享同一个变换过程
+     */
     @Composable
     fun shareTransform(entry: PageEntry) {
-        val state by rememberInPage(transformState) {
+        val state by rememberInPage("page_share_transform_state", transformState) {
             transformState
         }
         entry.transformState.value = when (state) {
-            PreEnter -> Resume
+            PreEnter, PostExit -> Resume
             PostExit -> {
-                entry.run {
-                    transform.value.gesture.releasePauseModifier()
-                    isUpdateTransform = false
-                }
+                transform.value.gesture.releasePauseModifier()
                 Resume
             }
 
@@ -205,7 +205,7 @@ open class PageEntry internal constructor(
         return PauseState
     }
 
-    private fun create() {
+    internal fun create() {
         if (registry.currentState == Lifecycle.State.INITIALIZED) handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
@@ -227,7 +227,6 @@ open class PageEntry internal constructor(
 
     internal fun stop() {
         if (registry.currentState == Lifecycle.State.STARTED) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-
     }
 
     override fun destroy() {

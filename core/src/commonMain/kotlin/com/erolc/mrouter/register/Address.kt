@@ -7,8 +7,8 @@ import com.erolc.mrouter.model.PageConfig
  * 地址，用于定义一个页面地址
  * @param path
  */
-open class Address(
-    open val path: String,
-    open val config: PageConfig = emptyConfig,
-    open val content: @Composable () -> Unit = {}
+data class Address(
+    val path: String,
+    val config: PageConfig = emptyConfig,
+    val content: @Composable () -> Unit = {}
 )

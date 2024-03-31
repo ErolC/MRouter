@@ -68,6 +68,6 @@ data object ClearTaskFlag : StackFlag(0b10)
 /**
  * 更换当前回退栈中存在的页面。
  */
-internal data object ReplaceFlag:StackFlag(0b100)
+internal data object ReplaceFlag : StackFlag(0b100)
 
 

@@ -15,13 +15,20 @@ import com.erolc.mrouter.utils.logi
  * 融合的路由，在这里会存在dialog的后退栈
  * 对于Panel来说，是必须一个界面的，可以让其选择
  */
-class PanelRouter(private val addresses: List<Address>, override val parentRouter: PageRouter) : Router {
+class PanelRouter(
+    private val addresses: List<Address>,
+    override val parentRouter: PageRouter,
+    panelEntry: PanelEntry? = null
+) : Router {
     //这里是当前界面中各个面板的回退栈
     private val panelStacks = mutableMapOf<String, PanelEntry>()
-    private var entry: LocalPageEntry? = null
-    private var localPanelShow = true
+    private var localPanelShow = false
     private var isRoute = false
 
+    init {
+        if (panelEntry != null)
+            panelStacks[Constants.defaultLocal] = panelEntry
+    }
 
     fun createEntry(route: Route, address: Address): PanelEntry {
         return PanelEntry(Address(route.layoutKey!!)).also {
@@ -62,44 +69,56 @@ class PanelRouter(private val addresses: List<Address>, override val parentRoute
 
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter.dispatchRoute(route)
-        if (!isIntercept) {
+        val layoutKey = route.layoutKey
+        //如果是内部的路由产生的路由事件，那么将交由内部处理。
+        if (!isIntercept && isRoute) {
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
             }
+            val isLocal = layoutKey == Constants.defaultLocal
+
             val panel = panelStacks[route.layoutKey]
-            if (panel == null && (route.layoutKey != null || (localPanelShow && route.layoutKey == Constants.defaultLocal))) {
-                parentRouter.route(route)
+            // 如果这个时候，panel还是空，那么证明该panel就没有实现
+            if (panel == null) {
+                val newRoute = route.copy(layoutKey = null)
+                parentRouter.route(newRoute)
                 return true
             }
-            val temp = panel ?: createEntry(route, address)
-            if (!localPanelShow && route.layoutKey == Constants.defaultLocal && entry == null) {
-                entry = createLocalPanelEntry(route, this, temp)
-                parentRouter.backStack.addEntry(entry!!.apply { start() })
-            }
-            if (panelStacks.contains(route.layoutKey)) {
-                if (isRoute) {
-                    panelStacks[route.layoutKey]?.pageRouter?.run {
-                        route(createPageEntry(route, address, EmptyRouter(this), true))
-                    }
+            if (isLocal && !localPanelShow) {
+                panel.pageRouter.run {
+                    route(
+                        createPageEntry(
+                            route,
+                            address.let { it.copy(config = it.config.copy(launchSingleTop = true)) },
+                            EmptyRouter(this),
+                            true
+                        )
+                    )
                 }
-                return false
-            } else
-                panelStacks[route.layoutKey!!] = temp
+                val entry = createLocalPanelEntry(route, PanelRouter(addresses, parentRouter, panel))
+                parentRouter.route(entry)
+            } else panel.pageRouter.run {
+                route(createPageEntry(route, address, EmptyRouter(this), true))
+            }
+            return true
         }
-        return true
+        return false
     }
+
 
     internal fun showWithLocal() {
         if (localPanelShow) return
         localPanelShow = true
-        parentRouter.backStack.pop()
-        entry = null
+        if (parentRouter.backStack.findTopEntry() is LocalPageEntry)
+            parentRouter.backStack.pop(false)
+        panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
     }
 
     internal fun hideWithLocal() {
         if (!localPanelShow) return
         localPanelShow = false
+        panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE) }
     }
 
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {

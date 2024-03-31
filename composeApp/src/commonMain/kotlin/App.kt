@@ -14,12 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.AutoPanel
 import com.erolc.mrouter.PanelHost
 import com.erolc.mrouter.RouteHost
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
+import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.register.page
 import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.NormalFlag
@@ -29,6 +32,7 @@ import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.scope.addEventObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.log
@@ -42,16 +46,34 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun App() {
     MaterialTheme {
-        RouteHost("home") {
-            page("root/greet") {
+        RouteHost("greet") {
+            page("greet") {
                 GreetingPage()
             }
-            page("root/second") {
+            page("second") {
                 Second()
             }
             page("home") {
                 Home()
             }
+            page("three") {
+                ThreePage()
+            }
+        }
+    }
+}
+
+@Composable
+fun ThreePage() {
+    addEventObserver { lifecycleOwner, event ->
+        loge("tag", "ThreePage_____$event")
+    }
+    val scope = LocalPageScope.current
+    Column(Modifier.background(Color.White)) {
+        Button(onClick = {
+            scope.backPressed()
+        }) {
+            Text("back")
         }
     }
 }
@@ -63,38 +85,57 @@ fun GreetingPage() {
     var showImage by remember { mutableStateOf(false) }
     val scope = LocalPageScope.current
     val args = rememberArgs()
-    Column(
-        Modifier.background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = {
-            scope.setResult("result" to 3444)
-            scope.backPressed()
-        }) {
-            Text("back111")
-        }
-        Button(onClick = {
-            greetingText = "Compose: ${Greeting().greet()}"
-            showImage = !showImage
-        }) {
-            Text(greetingText)
-        }
-        AnimatedVisibility(
-            showImage,
-            modifier = Modifier,
-            enter = androidx.compose.animation.slideInHorizontally(),
-            exit = androidx.compose.animation.slideOutHorizontally()
+    addEventObserver { lifecycleOwner, event ->
+        loge("tag", "greet__$event")
+    }
+    Row {
+        Column(
+            Modifier.background(Color.Blue).fillMaxSize().weight(1f).zIndex(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painterResource(DrawableResource("compose-multiplatform.xml")),
-                null
-            )
+            Button(onClick = {
+                scope.setResult("result" to 3444)
+                scope.backPressed()
+            }) {
+                Text("back111")
+            }
+            Button(onClick = {
+//            greetingText = "Compose: ${Greeting().greet()}"
+//            showImage = !showImage
+                scope.route("local:home?key=123") {
+//                window(defaultWindow, "greet")
+                    transform = normal()
+                    onResult {
+                        log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
+                    }
+                }
+            }) {
+                Text(greetingText)
+            }
+            AnimatedVisibility(
+                showImage,
+                modifier = Modifier,
+                enter = androidx.compose.animation.slideInHorizontally(),
+                exit = androidx.compose.animation.slideOutHorizontally()
+            ) {
+                Image(
+                    painterResource(DrawableResource("compose-multiplatform.xml")),
+                    null
+                )
+            }
+
         }
+        PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
+            loge("tag", "isAttach:$it")
+        })
     }
 }
 
 @Composable
 fun Second() {
+    addEventObserver { lifecycleOwner, event ->
+        loge("tag", "second__$event")
+    }
     var greetingText by remember { mutableStateOf("Hello World!") }
     val scope = LocalPageScope.current
     val args = rememberArgs()
@@ -131,7 +172,7 @@ fun Second() {
 //            value = it
 //        })
         Button(onClick = {
-            scope.route("root/greet?key=123") {
+            scope.route("three") {
 //                window(defaultWindow, "greet")
                 transform = modal()
                 onResult {
@@ -148,6 +189,7 @@ fun Second() {
 @Composable
 fun Home() {
     val scope = LocalPageScope.current
+
     val list = remember {
         listOf(
             "1111111552222221116666633333344",
@@ -183,17 +225,14 @@ fun Home() {
         )
     }
     Row {
-        PanelHost( modifier = Modifier.weight(2f), onPanelChange = {
-            loge("tag","isAttach:$it")
-        })
         LazyColumn(
-            state = rememberLazyListState(),
+            state = rememberLazyListState("list"),
             modifier = Modifier.fillMaxSize().weight(1f).background(Color.Green)
         ) {
             items(list) {
 
                 Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                    scope.route("local:root/second?key=123") {
+                    scope.route("second?key=123") {
 //                    window("second", "second")
 //                    transform {
 //                        enter = fadeIn()+ slideInHorizontally()
@@ -209,4 +248,5 @@ fun Home() {
         }
 
     }
+
 }

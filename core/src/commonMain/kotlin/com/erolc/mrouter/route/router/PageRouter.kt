@@ -21,20 +21,20 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     internal fun route(stackEntry: StackEntry) {
         stackEntry as PageEntry
         if (stackEntry.address.config.launchSingleTop)
-            backStack.findTopEntry()?.also { entry ->
-                entry as PageEntry
-                entry.scope.run {
-                    argsFlow.value = stackEntry.scope.argsFlow.value
-                    router = stackEntry.scope.router
-                    onResult = stackEntry.scope.onResult
-                    name = stackEntry.scope.name
-                }
-            }
+            backStack.findTopEntry()?.let { entry ->
+                if (entry.address.path == stackEntry.address.path) {
+                    entry as PageEntry
+                    entry.scope.run {
+                        argsFlow.value = stackEntry.scope.argsFlow.value
+                        router = stackEntry.scope.router
+                        onResult = stackEntry.scope.onResult
+                        name = stackEntry.scope.name
+                    }
+                } else null
+            } ?: backStack.addEntry(stackEntry.apply { create() })
         else
-            backStack.addEntry(stackEntry.apply { start() })
-
+            backStack.addEntry(stackEntry.apply { create() })
     }
-
     private fun createEntry(route: Route, address: Address): StackEntry {
         return createPageEntry(route, address, PanelRouter(addresses, this))
     }

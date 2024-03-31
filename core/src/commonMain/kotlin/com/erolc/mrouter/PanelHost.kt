@@ -9,6 +9,7 @@ import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.window.WindowHeightSize
 import com.erolc.mrouter.window.WindowWidthSize
@@ -31,16 +32,16 @@ fun PanelHost(
     modifier: Modifier = Modifier
 ) {
     val scope = LocalPageScope.current
-    val router = rememberInPage(key) {
+    val router = rememberInPage("panel_$key",key) {
         scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
     val isAttach = panelState.shouldAttach
-    remember(isAttach) {
+    rememberInPage ("panel_attach",isAttach) {
         onPanelChange(isAttach)
     }
 
     if (isAttach) {
-        val panel = rememberInPage(key) {
+        val panel = rememberInPage("panel_$key",key,router) {
             router.run {
                 route(routeBuild("$key:$startRoute"))
                 getPanel(key)
@@ -90,7 +91,7 @@ fun rememberPanelState(
     windowWidthSize: WindowWidthSize? = WindowWidthSize.Compact,
     windowHeightSize: WindowHeightSize? = null
 ): PanelState {
-    return rememberInPage(windowHeightSize, windowWidthSize) {
+    return rememberInPage("panel_state",windowHeightSize, windowWidthSize) {
         PanelState(windowWidthSize, windowHeightSize)
     }
 }

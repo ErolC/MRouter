@@ -4,23 +4,39 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
+import com.erolc.mrouter.Constants
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.SysBackPressed
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.transform.GestureWrap
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.logi
 
-class LocalPageEntry(scope: PageScope, val entry: PanelEntry) : PageEntry(scope, Address("")) {
+class LocalPageEntry(scope: PageScope) : PageEntry(scope, Address("LocalPageEntry")) {
+    init {
+        scope.isLocalPageEntry = true
+    }
 
     override fun RealContent(): @Composable () -> Unit {
-        return { entry.Content(Modifier) }
+        return {
+            (scope.router as PanelRouter).getPanel(Constants.defaultLocal).Content(Modifier)
+        }
     }
 
     override fun handleLifecycleEvent(event: Lifecycle.Event) {
-//        super.handleLifecycleEvent(event)
-        entry?.handleLifecycleEvent(event, true)
+        super.handleLifecycleEvent(event)
+        if (event > Lifecycle.Event.ON_CREATE)
+            (scope.router as PanelRouter).getPanel(Constants.defaultLocal).handleLifecycleEvent(event)
+    }
+
+    override fun destroy() {
+        super.destroy()
+        (scope.router as PanelRouter).getPanel(Constants.defaultLocal).destroy()
+
     }
 }

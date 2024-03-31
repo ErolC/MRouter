@@ -6,10 +6,14 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
+import com.erolc.mrouter.route.router.EmptyRouter
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
 import com.erolc.mrouter.utils.PageCache
+import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.utils.rememberInPage
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
@@ -21,9 +25,13 @@ open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
     internal var name: String = ""
     private val result = emptyArgs
+
+    //当前页面范围是否是LocalPageEntry
+     var isLocalPageEntry = false
+
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
     internal lateinit var router: Router
-    val pageCache = PageCache()
+    var pageCache = PageCache()
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
@@ -40,7 +48,7 @@ open class PageScope {
 
     private fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY) {
+            if (event == Lifecycle.Event.ON_DESTROY && !isLocalPageEntry) {
                 onResult(result)
                 interceptors.clear()
             }
@@ -115,10 +123,8 @@ fun rememberArgs(): Args {
 @Composable
 fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val scope = LocalPageScope.current
-    scope.addEventObserver(body)
-}
-
-
-fun PageScope.addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
-    lifecycle.addEventObserver(body)
+    rememberInPage("page_event") {
+        if (!scope.isLocalPageEntry)
+            scope.lifecycle.addEventObserver(body)
+    }
 }

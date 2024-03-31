@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.utils.cache
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
 
 /**
@@ -14,24 +15,27 @@ import com.erolc.mrouter.utils.rememberInPage
 
 // todo 需要更细致的测试一下pageRemember
 @Composable
-internal fun <T : Any> rememberInWindow(init: () -> T): T {
+internal fun <T : Any> rememberInWindow(key:String,init: () -> T): T {
     val scope = LocalWindowScope.current
     return remember(scope) {
-        scope.pageCache.cache(false, init)
+        scope.pageCache.cache(key,false, init)
     }
 }
 
 @Composable
 fun rememberLazyListState(
+    key: String,
     initialFirstVisibleItemIndex: Int = 0,
     initialFirstVisibleItemScrollOffset: Int = 0
 ): LazyListState {
-    val value = rememberInPage {
+    val scope = LocalPageScope.current
+    val value = rememberInPage(key) {
         LazyListState(
             initialFirstVisibleItemIndex,
             initialFirstVisibleItemScrollOffset
         )
     }
+    loge("tag","$scope -------- ${value.firstVisibleItemIndex}")
     return rememberSaveable(saver = LazyListState.Saver) {
         value
     }
@@ -39,11 +43,11 @@ fun rememberLazyListState(
 
 
 @Composable
-fun rememberLazyGirdState(
+fun rememberLazyGirdState(key: String,
     initialFirstVisibleItemIndex: Int = 0,
     initialFirstVisibleItemScrollOffset: Int = 0
 ): LazyGridState {
-    val value = rememberInPage {
+    val value = rememberInPage(key) {
         LazyGridState(
             initialFirstVisibleItemIndex,
             initialFirstVisibleItemScrollOffset

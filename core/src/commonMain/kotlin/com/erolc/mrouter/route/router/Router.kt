@@ -45,12 +45,8 @@ internal fun createPageEntry(
 internal fun createLocalPanelEntry(
     route: Route,
     router: Router,
-    entry: PanelEntry,
 ): LocalPageEntry {
-    return LocalPageEntry(
-        getScope(),
-        entry
-    ).apply {
+    return LocalPageEntry(getScope()).apply {
         flag = route.flag
         transform.value = route.transform
         scope.run {

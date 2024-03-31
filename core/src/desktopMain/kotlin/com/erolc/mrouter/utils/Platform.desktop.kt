@@ -24,7 +24,7 @@ actual fun PlatformWindow(
     entry: WindowEntry,
     content: @Composable () -> Unit
 ) {
-    val state = rememberInWindow {
+    val state = rememberInWindow("window_state") {
         WindowState(
             placement = options.state.toPlacement(),
             position = options.alignment?.let { WindowPosition(it) }
@@ -43,7 +43,7 @@ actual fun PlatformWindow(
     entry.scope.windowSize.value = size
     entry.options.value = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
     val application = LocalApplicationScope.current
-    val isCloseWindow by rememberInWindow { entry.scope.isCloseWindow }
+    val isCloseWindow by rememberInWindow("window_close") { entry.scope.isCloseWindow }
     if (!isCloseWindow)
         Window(
             title = options.title,

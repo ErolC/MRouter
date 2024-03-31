@@ -62,14 +62,13 @@ open class BackStack(val name: String) {
      * 后退
      * @return 是否后退成功，只有在无法后退时才会后退失败，也就是下面没有过更多的页面可以后退了。
      */
-    internal fun pop(): Boolean {
+    internal fun pop(isDestroy: Boolean = true): Boolean {
         return if (_backstack.value.size > threshold) {
             _backstack.value -= _backstack.value.last().apply {
                 if (this is LocalPageEntry && isPreBack) {
                     isPreBack = false
-                    entry.pageRouter.backStack.reset()
                 }
-                destroy()
+                if (isDestroy) destroy()
             }
             true
         } else false
