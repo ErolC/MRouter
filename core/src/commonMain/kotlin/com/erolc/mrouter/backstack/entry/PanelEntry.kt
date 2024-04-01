@@ -23,15 +23,19 @@ import com.erolc.mrouter.utils.logi
  */
 class PanelEntry(override val address: Address) : StackEntry {
     lateinit var pageRouter: PageRouter
+    var isLocalPageEntry = false
 
     @Composable
     override fun Content(modifier: Modifier) {
         Box(modifier.fillMaxSize()) {
             val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
+            val last = (stack.last() as PageEntry).also {
+                if (isLocalPageEntry) it.transformState.value = Resume
+            }
             if (stack.size == 1) {
                 (stack.first() as PageEntry).transformState.value = Resume
             } else
-                (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
+                last.shareTransform(stack.first() as PageEntry)
 
             stack.forEach { stackEntry ->
                 stackEntry.Content(Modifier)

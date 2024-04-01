@@ -94,8 +94,9 @@ fun GreetingPage() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(onClick = {
-                scope.setResult("result" to 3444)
-                scope.backPressed()
+//                scope.setResult("result" to 3444)
+//                scope.backPressed()
+                scope.route("local:second?key=123")
             }) {
                 Text("back111")
             }
@@ -172,7 +173,7 @@ fun Second() {
 //            value = it
 //        })
         Button(onClick = {
-            scope.route("three") {
+            scope.route("local:three") {
 //                window(defaultWindow, "greet")
                 transform = modal()
                 onResult {

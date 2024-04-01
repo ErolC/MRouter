@@ -17,27 +17,22 @@ import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
-class LocalPageEntry(scope: PageScope) : PageEntry(scope, Address("LocalPageEntry")) {
-    init {
-        scope.isLocalPageEntry = true
-    }
+class LocalPageEntry(scope: PageScope) : PageEntry(scope.apply { isLocalPageEntry = true }, Address("LocalPageEntry")) {
 
-    val panel: PanelEntry get() = (scope.router as PanelRouter).getPanel(Constants.defaultLocal)
+    val panel: PanelEntry get() = (scope.router as PanelRouter).getPanel(Constants.defaultLocal).apply { isLocalPageEntry = true }
 
     override fun RealContent(): @Composable () -> Unit {
-        return {
-            panel.Content(Modifier)
-        }
+        return { panel.Content(Modifier) }
     }
 
     override fun handleLifecycleEvent(event: Lifecycle.Event) {
         super.handleLifecycleEvent(event)
-        if (event > Lifecycle.Event.ON_CREATE)
-            panel.handleLifecycleEvent(event)
+        if (event > Lifecycle.Event.ON_CREATE) panel.handleLifecycleEvent(event)
     }
 
     override fun destroy() {
         super.destroy()
         panel.destroy()
+        panel.isLocalPageEntry = false
     }
 }
