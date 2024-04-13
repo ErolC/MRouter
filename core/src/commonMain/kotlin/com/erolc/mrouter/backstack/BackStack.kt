@@ -7,6 +7,7 @@ import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
+import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.PostExit
 import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,6 +106,7 @@ open class BackStack(val name: String) {
             isPreBack = true
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit
+            ShareEleController.exitShare()
             true
         } else {
             _backstack.value.forEach {

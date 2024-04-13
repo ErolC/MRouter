@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,9 +29,11 @@ import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
+import com.erolc.mrouter.route.shareele.Element
 import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.route.transform.normal
+import com.erolc.mrouter.route.transform.shareEle
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.addEventObserver
 import com.erolc.mrouter.scope.rememberArgs
@@ -93,19 +96,23 @@ fun GreetingPage() {
             Modifier.background(Color.Blue).fillMaxSize().weight(1f).zIndex(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = {
+            Element("back", modifier = Modifier.width(100.dp).height(50.dp)) {
+                Box(Modifier.fillMaxSize().background(Color.Gray).alpha(0.5f)) {
+                    Button(onClick = {
 //                scope.setResult("result" to 3444)
 //                scope.backPressed()
-                scope.route("local:second?key=123")
-            }) {
-                Text("back111")
+                        scope.route("second?key=123")
+                    }) {
+                        Text("back:123")
+                    }
+                }
             }
             Button(onClick = {
 //            greetingText = "Compose: ${Greeting().greet()}"
 //            showImage = !showImage
-                scope.route("local:home?key=123") {
+                scope.route("second?key=123") {
 //                window(defaultWindow, "greet")
-                    transform = normal()
+                    transform = shareEle("back")
                     onResult {
                         log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                     }
@@ -126,9 +133,9 @@ fun GreetingPage() {
             }
 
         }
-        PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
-            loge("tag", "isAttach:$it")
-        })
+//        PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
+//            loge("tag", "isAttach:$it")
+//        })
     }
 }
 
@@ -158,10 +165,14 @@ fun Second() {
         }) {
             Text("back:${args.getDataOrNull<Int>("key")}")
         }
-        Button(onClick = {
-            scope.backPressed()
-        }) {
-            Text("back:${args.getDataOrNull<Int>("key")}")
+        Element("back", modifier = Modifier.width(200.dp).height(100.dp)) {
+            Box(Modifier.fillMaxSize().background(Color.Gray).alpha(0.5f)) {
+                Button(onClick = {
+                    scope.backPressed()
+                }) {
+                    Text("back:${args.getDataOrNull<Int>("key")}")
+                }
+            }
         }
         Button(onClick = {
             scope.backPressed()
@@ -173,7 +184,7 @@ fun Second() {
 //            value = it
 //        })
         Button(onClick = {
-            scope.route("local:three") {
+            scope.route("three") {
 //                window(defaultWindow, "greet")
                 transform = modal()
                 onResult {

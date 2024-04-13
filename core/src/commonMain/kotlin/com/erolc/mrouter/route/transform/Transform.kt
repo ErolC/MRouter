@@ -39,6 +39,18 @@ fun none() = buildTransform {
     gesture = NoneGestureWrap()
 }
 
+/**
+ * 共享元素
+ */
+fun shareEle(
+    vararg keys: String,
+    animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
+    gesture: GestureWrap = ShareGestureWrap(*keys)
+) = buildTransform {
+    enter = fadeIn(animationSpec)
+    this.gesture = gesture
+}
+
 @Stable
 fun fadeIn(
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),

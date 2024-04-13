@@ -1,6 +1,9 @@
 package com.erolc.mrouter.model
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.geometry.Rect
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * 一个共享元素
@@ -8,6 +11,12 @@ import androidx.compose.runtime.Composable
  * @param content 元素的compose
  * @param address 元素所在地址
  */
-data class Element(val name: String, val content: @Composable () -> Unit, val address: String) {
+@Immutable
+data class ShareElement(
+    val name: String,
+    val content: @Composable () -> Unit,
+    val address: String,
+    val position: StateFlow<Rect>
+) {
     val tag get() = "${address}_$name"
 }

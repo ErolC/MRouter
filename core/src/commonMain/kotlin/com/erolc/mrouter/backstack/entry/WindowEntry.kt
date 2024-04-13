@@ -11,6 +11,8 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.WindowRouter
+import com.erolc.mrouter.route.shareele.LocalShareEleController
+import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
@@ -34,7 +36,8 @@ class WindowEntry(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        CompositionLocalProvider(LocalWindowScope provides scope) {
+        val controller = ShareEleController
+        CompositionLocalProvider(LocalWindowScope provides scope, LocalShareEleController provides controller) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
@@ -47,6 +50,9 @@ class WindowEntry(
                     stack.forEach { stackEntry ->
                         stackEntry.Content(Modifier)
                     }
+                    if (stack.size == 2)
+                    ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+                    controller.Overlay()
                 }
             }
         }

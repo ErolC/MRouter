@@ -3,17 +3,15 @@ package com.erolc.mrouter.register
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.routeBuild
+import com.erolc.mrouter.utils.logi
 
 /**
  * 空白的页面配置
@@ -50,15 +48,18 @@ class RegisterBuilder internal constructor() {
     }
 
     /**
-     * 添加地址，需要注意的是相同path的地址会被覆盖
+     * 添加地址，需要注意的是相同path的address会被覆盖
      */
     internal fun addAddress(address: Address) =
         addEntryToList(addresses, address) { it.path == address.path }
 
 
-    private fun <T> addEntryToList(list: MutableList<T>, entry: T, body: (T) -> Boolean) {
+    private fun  addEntryToList(list: MutableList<Address>, entry: Address, body: (Address) -> Boolean) {
         val index = list.indexOfFirst(body)
-        if (index == -1) list += entry else list[index] = entry
+        if (index == -1) list += entry else {
+            logi("route","${entry.path}的address已经覆盖更新，请知悉")
+            list[index] = entry
+        }
     }
 
     /**

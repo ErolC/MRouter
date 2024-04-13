@@ -2,6 +2,7 @@ package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,9 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.EmptyRouter
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
+import com.erolc.mrouter.route.shareele.Init
+import com.erolc.mrouter.route.shareele.LocalShareEleController
+import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
@@ -96,7 +100,6 @@ open class PageEntry internal constructor(
 
     }
 
-
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     fun Page(modifier: Modifier) {
@@ -106,16 +109,17 @@ open class PageEntry internal constructor(
         var isExit by rememberInPage("page_exit") { isExit }
         val isIntercept by rememberInPage("page_intercept") { isIntercept }
 
-        state.targetState = transformState.value
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
             if (exitFinished && !pageRouter.backStack.pop()) isExit = true
             if (resume) onResume()
-
+            if (pause) {
+                pause()
+                stop()
+            }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
-
         val transform by rememberInPage("page_transform", this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
@@ -133,14 +137,19 @@ open class PageEntry internal constructor(
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
         }
+        state.targetState = transformState.value
 
         if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
     }
 
+    @Composable
     private fun onResume() {
         pageRouter.backStack.execute(flag)
         flag = NormalFlag
         isUpdateTransform = false
+        resume()
+
+
     }
 
     open fun RealContent(): @Composable () -> Unit {
@@ -154,10 +163,6 @@ open class PageEntry internal constructor(
         val state by rememberInPage("page_transform_state", transformState) { transformState }
         if (state == Resume) {
             start()
-            resume()
-        } else {
-            pause()
-            stop()
         }
         DisposableEffect(this) {
             if (scope.router is PanelRouter)
@@ -165,6 +170,7 @@ open class PageEntry internal constructor(
             onDispose {
                 scope.transformTransition = null
                 if (isDestroy.value) {
+                    ShareEleController.afterShare(this@PageEntry)
                     if (scope.router is PanelRouter)
                         windowScope.removeLifeCycleEventListener(listener)
                     handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -182,7 +188,7 @@ open class PageEntry internal constructor(
             transformState
         }
         entry.transformState.value = when (state) {
-            PreEnter, PostExit -> Resume
+            PreEnter -> Resume
             PostExit -> {
                 transform.value.gesture.releasePauseModifier()
                 Resume
@@ -216,6 +222,7 @@ open class PageEntry internal constructor(
     internal fun resume() {
         if (registry.currentState == Lifecycle.State.STARTED)
             handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
 
     }
 
