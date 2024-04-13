@@ -119,8 +119,8 @@ fun GreetingPage() {
 //            showImage = !showImage
                 scope.route("second?key=123") {
 //                window(defaultWindow, "greet")
-//                    transform = shareEle("back")
-                    transform = normal()
+                    transform = shareEle("back")
+//                    transform = normal()
                     onResult {
                         log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                     }
