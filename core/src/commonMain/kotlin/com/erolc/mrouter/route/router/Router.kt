@@ -8,13 +8,26 @@ import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.scope.getScope
 
-
+/**
+ * 路由器，负责管理该路由的元素，包括器路由的分配以及回退
+ */
 interface Router {
     val parentRouter: Router?
 
+    /**
+     * 路由的起点
+     */
     fun router(route: Route) {}
 
+    /**
+     * 分配路由
+     */
     fun dispatchRoute(route: Route): Boolean
+
+    /**
+     * 回退
+     * @param notInterceptor 是否不拦截
+     */
     fun backPressed(notInterceptor: () -> Boolean = { true })
 }
 
@@ -42,6 +55,9 @@ internal fun createPageEntry(
     }
 }
 
+/**
+ * 创建一个面板的载体页面
+ */
 internal fun createLocalPanelEntry(
     route: Route,
     router: Router,

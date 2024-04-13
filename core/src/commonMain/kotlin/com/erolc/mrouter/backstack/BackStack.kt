@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 
 /**
- * 后退栈，
+ * 后退栈，保存着一个路由器中有关的所有元素
  */
 open class BackStack(val name: String) {
 
@@ -39,6 +39,9 @@ open class BackStack(val name: String) {
         _backstack.value += entry
     }
 
+    /**
+     * 清空回退栈
+     */
     private fun clearTask() {
         _backstack.value.take(_backstack.value.size - 1).forEach { (it as PageEntry).destroy() }
         _backstack.value = listOf(_backstack.value.last())
@@ -91,13 +94,6 @@ open class BackStack(val name: String) {
     }
 
     /**
-     * 清空回退栈
-     */
-    internal fun clear() {
-        _backstack.value = listOf()
-    }
-
-    /**
      * 预后退，page在后退时不可以直接[pop]，因为[pop]是无法做动画的。这里需要先预后退，通知框架需要后退。
      * 待切换动画完成之后再[pop]
      */
@@ -125,5 +121,4 @@ open class BackStack(val name: String) {
      * 找顶部的条目
      */
     fun findTopEntry() = _backstack.value.lastOrNull()
-    fun isTopEntry(entry: StackEntry) = findTopEntry() == entry
 }

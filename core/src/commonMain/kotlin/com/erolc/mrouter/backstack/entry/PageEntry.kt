@@ -2,23 +2,15 @@ package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.rememberTransition
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
-import com.erolc.mrouter.Constants
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -27,22 +19,22 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.EmptyRouter
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
-import com.erolc.mrouter.route.shareele.Init
-import com.erolc.mrouter.route.shareele.LocalShareEleController
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
+/**
+ * 页面载体，承载着页面的生命周期，代表一个页面。
+ */
 open class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address
 ) : StackEntry, LifecycleOwner {
-    internal val registry: LifecycleRegistry = LifecycleRegistry(this)
+    private val registry: LifecycleRegistry = LifecycleRegistry(this)
     final override val lifecycle: Lifecycle get() = registry
 
     init {
@@ -70,15 +62,17 @@ open class PageEntry internal constructor(
     //是否拦截
     private val isIntercept get() = scope.isIntercept
 
+    // 管理当前页面的路由器
     private val pageRouter get() = scope.router.parentRouter as PageRouter
 
-
+    //生命周期事件监听器
     private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
             onEventCall(event)
         }
     }
 
+    // 生命周期事件处理
     private fun onEventCall(event: Lifecycle.Event) {
         when (event) {
             Lifecycle.Event.ON_START -> start()
@@ -95,7 +89,26 @@ open class PageEntry internal constructor(
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
-            lifecycle()
+
+            val windowScope = LocalWindowScope.current
+            SystemLifecycle(::onEventCall)
+            val state by rememberInPage("page_transform_state", transformState) { transformState }
+            if (state == Resume) {
+                start()
+            }
+            DisposableEffect(this) {
+                if (scope.router is PanelRouter)
+                    windowScope.addLifecycleEventListener(listener)
+                onDispose {
+                    scope.transformTransition = null
+                    if (isDestroy.value) {
+                        ShareEleController.afterShare(this@PageEntry)
+                        if (scope.router is PanelRouter)
+                            windowScope.removeLifeCycleEventListener(listener)
+                        handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                    }
+                }
+            }
         }
 
     }
@@ -120,6 +133,7 @@ open class PageEntry internal constructor(
             }
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
+
         val transform by rememberInPage("page_transform", this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
@@ -138,7 +152,6 @@ open class PageEntry internal constructor(
             }
         }
         state.targetState = transformState.value
-
         if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
     }
 
@@ -148,37 +161,12 @@ open class PageEntry internal constructor(
         flag = NormalFlag
         isUpdateTransform = false
         resume()
-
-
     }
 
+    //内容本体
     open fun RealContent(): @Composable () -> Unit {
         return address.content
     }
-
-    @Composable
-    private fun lifecycle() {
-        val windowScope = LocalWindowScope.current
-        SystemLifecycle(::onEventCall)
-        val state by rememberInPage("page_transform_state", transformState) { transformState }
-        if (state == Resume) {
-            start()
-        }
-        DisposableEffect(this) {
-            if (scope.router is PanelRouter)
-                windowScope.addLifecycleEventListener(listener)
-            onDispose {
-                scope.transformTransition = null
-                if (isDestroy.value) {
-                    ShareEleController.afterShare(this@PageEntry)
-                    if (scope.router is PanelRouter)
-                        windowScope.removeLifeCycleEventListener(listener)
-                    handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                }
-            }
-        }
-    }
-
     /**
      * 和上一个页面共享同一个变换过程
      */
@@ -211,37 +199,25 @@ open class PageEntry internal constructor(
         return PauseState
     }
 
-    internal fun create() {
-        if (registry.currentState == Lifecycle.State.INITIALIZED) handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    private fun upFromEvent(state: Lifecycle.State) {
+        if (registry.currentState == state) Lifecycle.Event.upFrom(state)?.let { handleLifecycleEvent(it) }
     }
 
-    internal fun start() {
-        if (registry.currentState == Lifecycle.State.CREATED) handleLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun downFromEvent(state: Lifecycle.State) {
+        if (registry.currentState == state) Lifecycle.Event.downFrom(state)?.let { handleLifecycleEvent(it) }
     }
 
-    internal fun resume() {
-        if (registry.currentState == Lifecycle.State.STARTED)
-            handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-
-
-    }
-
-    internal fun pause() {
-        if (registry.currentState == Lifecycle.State.RESUMED)
-            handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-
-    }
-
-    internal fun stop() {
-        if (registry.currentState == Lifecycle.State.STARTED) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-    }
-
+    internal fun create() = upFromEvent(Lifecycle.State.INITIALIZED)
+    internal fun start() = upFromEvent(Lifecycle.State.CREATED)
+    internal fun resume() = upFromEvent(Lifecycle.State.STARTED)
+    internal fun pause() = downFromEvent(Lifecycle.State.RESUMED)
+    internal fun stop() = downFromEvent(Lifecycle.State.STARTED)
     override fun destroy() {
         isDestroy.value = true
     }
 
+
     internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
-        logi("tag", "$this - $event - ${address.path}")
         registry.handleLifecycleEvent(event)
         if (event != Lifecycle.Event.ON_CREATE)
             (scope.router as? PanelRouter)?.handleLifecycleEvent(event)

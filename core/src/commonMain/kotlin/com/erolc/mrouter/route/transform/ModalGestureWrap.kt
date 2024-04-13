@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
+/**
+ * 类ios的Modal手势实现，在页面route时设置[modal]即可使用
+ */
 class ModalGestureWrap(private val proportion: Float) : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {

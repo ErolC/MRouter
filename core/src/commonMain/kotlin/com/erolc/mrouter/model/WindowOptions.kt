@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
  * @param maximumSize window的最大尺寸
  * @param size window初始尺寸
  * @param position window位置
- * @param alignment 对齐方式，比如说window居中：[Alignment.Center],请注意，在[alignment] 设置了值之后，position将失效
+ * @param alignment 对齐方式，比如说window居中：[Alignment.Center],请注意，在[alignment] 设置了值之后，[position]将失效
  */
 data class WindowOptions(
     val id: String,

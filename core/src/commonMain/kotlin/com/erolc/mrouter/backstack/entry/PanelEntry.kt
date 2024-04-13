@@ -17,13 +17,14 @@ import com.erolc.mrouter.utils.logi
 
 /**
  * 局部界面的元素
- * 局部界面的后退需要注意的是，如果局部路由已经是最后一个后退点，那么将无法再后退。
- * 这里将出现两种情况：开放用户设置可在无法后退时退出当前界面，2，不开放直接可后退。
- * 还需要考虑面板在界面中的显示比例问题。需要做到当面板消失时，剩余部分可以沾满整个界面，可能需要自定义layout
+ * 局部界面的后退需要注意的是，如果局部路由已经是最后一个后退点，那么将无法再后退。其后退事件将穿透到承载他的页面。
+ *
+ * @param address 该页面的地址
  */
 class PanelEntry(override val address: Address) : StackEntry {
-    lateinit var pageRouter: PageRouter
-    var isLocalPageEntry = false
+    //管理该面板的页面路由器
+    internal lateinit var pageRouter: PageRouter
+    internal var isLocalPageEntry = false
 
     @Composable
     override fun Content(modifier: Modifier) {
@@ -32,17 +33,18 @@ class PanelEntry(override val address: Address) : StackEntry {
             val last = (stack.last() as PageEntry).also {
                 if (isLocalPageEntry) it.transformState.value = Resume
             }
-            if (stack.size == 1) {
-                (stack.first() as PageEntry).transformState.value = Resume
-            } else
-                last.shareTransform(stack.first() as PageEntry)
 
-            stack.forEach { stackEntry ->
-                stackEntry.Content(Modifier)
-            }
+            if (stack.size == 1)
+                (stack.first() as PageEntry).transformState.value = Resume
+            else
+                last.shareTransform(stack.first() as PageEntry)
+            stack.forEach { it.Content(Modifier) }
         }
     }
 
+    /**
+     * 处理生命周期事件
+     */
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
         val pageEntry = (pageRouter.backStack.findTopEntry() as PageEntry)
         when (event) {

@@ -7,12 +7,15 @@ import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.DefWindowSize
 
+/**
+ * 窗口的作用域
+ */
 class WindowScope {
     val windowSize = mutableStateOf(DefWindowSize)
     private val listeners = mutableSetOf<LifecycleEventListener>()
 
     internal val isCloseWindow = mutableStateOf(false)
-    val pageCache = PageCache()
+    internal val pageCache = PageCache()
 
     internal fun onLifeEvent(event: Lifecycle.Event) {
         listeners.forEach { it.call(event) }

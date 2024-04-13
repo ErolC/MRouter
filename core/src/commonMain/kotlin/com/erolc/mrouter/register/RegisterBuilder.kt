@@ -28,9 +28,8 @@ fun RegisterBuilder.page(
     path: String,
     config: PageConfig = emptyConfig,
     content: @Composable () -> Unit
-) {
-    addAddress(Address(path, config, content))
-}
+) = addAddress(Address(path, config, content))
+
 
 /**
  * @author erolc
@@ -50,14 +49,13 @@ class RegisterBuilder internal constructor() {
     /**
      * 添加地址，需要注意的是相同path的address会被覆盖
      */
-    internal fun addAddress(address: Address) =
-        addEntryToList(addresses, address) { it.path == address.path }
+    internal fun addAddress(address: Address) = addEntryToList(addresses, address) { it.path == address.path }
 
 
     private fun  addEntryToList(list: MutableList<Address>, entry: Address, body: (Address) -> Boolean) {
         val index = list.indexOfFirst(body)
         if (index == -1) list += entry else {
-            logi("route","${entry.path}的address已经覆盖更新，请知悉")
+            logi("route","${entry.path}的页面已经覆盖更新，请知悉")
             list[index] = entry
         }
     }

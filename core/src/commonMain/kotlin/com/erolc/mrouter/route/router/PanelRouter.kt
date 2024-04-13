@@ -5,15 +5,11 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.route.transform.NoneGestureWrap
-import com.erolc.mrouter.route.transform.Transform
-import com.erolc.mrouter.route.transform.none
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.logi
+import com.erolc.mrouter.backstack.BackStack
 
 /**
- * 融合的路由，在这里会存在dialog的后退栈
- * 对于Panel来说，是必须一个界面的，可以让其选择
+ * 面板路由/局部路由。将管理一个页面中所有的面板，这些面板不存在上下级关系，所以并不会以[BackStack]作为其存储工具。
+ *
  */
 class PanelRouter(
     private val addresses: List<Address>,
@@ -30,7 +26,7 @@ class PanelRouter(
             panelStacks[Constants.defaultLocal] = panelEntry
     }
 
-    fun createEntry(route: Route, address: Address): PanelEntry {
+    private fun createEntry(route: Route, address: Address): PanelEntry {
         return PanelEntry(Address(route.layoutKey!!)).also {
             it.newPageRouter(route, address)
         }

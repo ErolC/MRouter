@@ -13,6 +13,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.utils.loge
 
+/**
+ * 无手势实现
+ */
 class NoneGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {

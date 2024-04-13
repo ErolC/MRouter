@@ -1,5 +1,7 @@
 package com.erolc.mrouter.route.shareele
 
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,20 +30,18 @@ import kotlinx.coroutines.flow.asStateFlow
  * 需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置
  */
 @Composable
-fun Element(name: String, modifier: Modifier, content: @Composable () -> Unit) {
-    val controller = LocalShareEleController.current
+fun Element(name: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
     val scope = LocalPageScope.current
     val position = remember { MutableStateFlow(Rect(Offset.Zero, Size.Zero)) }
     remember(name, scope) {
         val element = ShareElement(name, content, scope.name, position)
-        loge("tag", "add_ele")
-        controller.elements.add(element)
+        ShareEleController.addElement(element)
     }
-    val state by controller.shareState.asStateFlow().collectAsState()
+    val state by ShareEleController.rememberShareState()
     Box(modifier = modifier.background(Color.Transparent).onGloballyPositioned {
         position.value = it.boundsInRoot()
     }) {
         if (state == Init || state == BeforeShare || state == AfterShare)
-            content()
+            content(updateTransition(Init))
     }
 }

@@ -34,7 +34,8 @@ inline fun <T : Any> PageCache.cache(key: String, invalid: Boolean, block: () ->
 }
 
 /**
- * 该系列方法的用法和[remember]一样，不同的是该方法所保存的变量的生命周期会比[remember]保存的要长，和当前界面的一样长.
+ * 该系列方法的用法和[remember]一样，不同的是该方法所保存的变量的生命周期会比[remember]保存的要长，和当前界面的一样长
+ * @param key 用于指定该记住在当前页面的数据，可再次通过该key从页面缓存中提取出来
  *
  */
 @Composable

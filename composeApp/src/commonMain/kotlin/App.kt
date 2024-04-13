@@ -1,4 +1,8 @@
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.ExperimentalTransitionApi
+import androidx.compose.animation.core.createChildTransition
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -30,6 +34,7 @@ import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.shareele.Element
+import com.erolc.mrouter.route.shareele.Init
 import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.route.transform.none
 import com.erolc.mrouter.route.transform.normal
@@ -45,20 +50,22 @@ import com.erolc.mrouter.window.WindowWidthSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import page.Home
 
 @Composable
 fun App() {
     MaterialTheme {
         RouteHost("greet") {
+            page("home") {
+                Home()
+            }
             page("greet") {
                 GreetingPage()
             }
             page("second") {
                 Second()
             }
-            page("home") {
-                Home()
-            }
+
             page("three") {
                 ThreePage()
             }
@@ -81,7 +88,7 @@ fun ThreePage() {
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalTransitionApi::class)
 @Composable
 fun GreetingPage() {
     var greetingText by remember { mutableStateOf("Hello World!") }
@@ -103,7 +110,7 @@ fun GreetingPage() {
 //                scope.backPressed()
                         scope.route("second?key=123")
                     }) {
-                        Text("back:123")
+                        Text("back:121")
                     }
                 }
             }
@@ -112,7 +119,8 @@ fun GreetingPage() {
 //            showImage = !showImage
                 scope.route("second?key=123") {
 //                window(defaultWindow, "greet")
-                    transform = shareEle("back")
+//                    transform = shareEle("back")
+                    transform = normal()
                     onResult {
                         log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
                     }
@@ -198,67 +206,3 @@ fun Second() {
 }
 
 
-@Composable
-fun Home() {
-    val scope = LocalPageScope.current
-
-    val list = remember {
-        listOf(
-            "1111111552222221116666633333344",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "0",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15",
-            "16",
-            "17",
-            "24",
-            "25",
-            "26",
-            "27",
-            "34",
-            "35",
-            "36",
-            "37",
-            "44",
-            "45",
-            "46",
-            "47"
-        )
-    }
-    Row {
-        LazyColumn(
-            state = rememberLazyListState("list"),
-            modifier = Modifier.fillMaxSize().weight(1f).background(Color.Green)
-        ) {
-            items(list) {
-
-                Text(it, Modifier.fillMaxWidth().padding(10.dp).clickable {
-                    scope.route("second?key=123") {
-//                    window("second", "second")
-//                    transform {
-//                        enter = fadeIn()+ slideInHorizontally()
-//                        prevPause = fadeOut()+ slideOutHorizontally { it }
-//                    }
-                        transform = normal()
-                        onResult {
-                            log("ATG", "data:${it.getDataOrNull<Int>("result")}")
-                        }
-                    }
-                }, fontSize = 20.sp)
-            }
-        }
-
-    }
-
-}

@@ -11,20 +11,28 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.route.shareele.LocalShareEleController
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.utils.PlatformWindow
 import com.erolc.mrouter.utils.loge
 
+/**
+ * window域
+ */
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
 
+/**
+ * 代表一个窗口，对于ios和android来说，其只有一个window，而对于desktop来说是可以有多个window的。
+ * @param options window的一些配置选项
+ * @param address window的地址
+ */
 class WindowEntry(
     val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, "")),
     override val address: Address = Address(options.value.id)
 ) :
     StackEntry {
+    //页面路由器，管理当前窗口的所有界面
     internal lateinit var pageRouter: PageRouter
 
     val scope = WindowScope()
@@ -37,7 +45,7 @@ class WindowEntry(
     @Composable
     override fun Content(modifier: Modifier) {
         val controller = ShareEleController
-        CompositionLocalProvider(LocalWindowScope provides scope, LocalShareEleController provides controller) {
+        CompositionLocalProvider(LocalWindowScope provides scope) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {

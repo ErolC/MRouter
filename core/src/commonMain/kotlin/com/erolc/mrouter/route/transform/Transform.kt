@@ -6,6 +6,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -14,6 +15,7 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
+import com.erolc.mrouter.route.shareele.ShareState
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
@@ -40,12 +42,16 @@ fun none() = buildTransform {
 }
 
 /**
- * 共享元素
+ * 共享元素，当需要使用共享元素动画时，需要使用该transform
+ * @param animationSpec 页面转换动画使用
+ * @param transitionSpec 共享元素变换使用,控制共享元素尺寸的变化
  */
 fun shareEle(
     vararg keys: String,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
-    gesture: GestureWrap = ShareGestureWrap(*keys)
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect> =
+        { spring(visibilityThreshold = Rect.VisibilityThreshold) },
+    gesture: GestureWrap = ShareGestureWrap(*keys, transitionSpec = transitionSpec)
 ) = buildTransform {
     enter = fadeIn(animationSpec)
     this.gesture = gesture

@@ -9,11 +9,10 @@ import com.erolc.mrouter.route.RouteFlag
 import kotlinx.coroutines.flow.map
 
 /**
- * 路由器实现
- * 路由器在路由的时候需要：
- * @param onResult 在后退时将值返回给前一个页面，
- * @param backStack 分析后退栈才能实现某些启动比如：singleTop
+ * 页面路由器的实现，将管理一个载体（window/panel）内所有的页面
  * @param addresses 存放着该库所注册的所有地址。
+ * @param parentRouter 父路由，对于window内的页面路由来说，[WindowRouter]将是其父路由，同理，对于panel内的页面路由来说[PanelRouter]将是其父路由。
+ * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [EmptyRouter]
  */
 open class PageRouter(name: String, private val addresses: List<Address>, override val parentRouter: Router) : Router {
     internal val backStack = BackStack(name)
@@ -35,6 +34,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
         else
             backStack.addEntry(stackEntry.apply { create() })
     }
+
     private fun createEntry(route: Route, address: Address): StackEntry {
         return createPageEntry(route, address, PanelRouter(addresses, this))
     }
@@ -42,11 +42,11 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     /**
      * 获取展示的stack
      */
-    fun getPlayStack() = backStack.backStack.map {
+    internal fun getPlayStack() = backStack.backStack.map {
         it.takeLast(2)
     }
 
-    fun backPressedImpl(): Boolean {
+    private fun backPressedImpl(): Boolean {
         return backStack.preBack()
     }
 

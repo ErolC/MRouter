@@ -9,7 +9,9 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
 import com.erolc.mrouter.route.router.WindowRouter
 
-
+/**
+ * 路由库的本体
+ */
 class MRouter private constructor() {
 
     private lateinit var rootRouter: WindowRouter

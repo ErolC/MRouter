@@ -21,13 +21,16 @@ internal fun getScope() = default
 
 val LocalPageScope = staticCompositionLocalOf { default }
 
+/**
+ * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
+ */
 open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
     internal var name: String = ""
     private val result = emptyArgs
 
     //当前页面范围是否是LocalPageEntry
-     var isLocalPageEntry = false
+    var isLocalPageEntry = false
 
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
     internal lateinit var router: Router
@@ -39,6 +42,7 @@ open class PageScope {
     internal var transformTransition: Transition<TransformState>? = null
     internal val isIntercept = mutableStateOf(false)
 
+    //生命周期
     var lifecycle: Lifecycle
         internal set(value) {
             initLifeCycle(value)
@@ -114,12 +118,18 @@ open class PageScope {
     }
 }
 
+/**
+ * 获取上一个页面传递过来的数据
+ */
 @Composable
 fun rememberArgs(): Args {
     val args by LocalPageScope.current.argsFlow.collectAsState()
     return args
 }
 
+/**
+ * 添加生命周期事件监听
+ */
 @Composable
 fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val scope = LocalPageScope.current

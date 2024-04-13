@@ -15,8 +15,9 @@ import com.erolc.mrouter.route.transform.normal
  * @param address 下一个页面的地址
  * @param args 携带到下一个页面的数据
  * @param windowOptions 页面负载到对应window的参数
- * @param onResult 回退方法
+ * @param onResult 页面回退时可将参数从方法传回
  * @param layoutKey 该页面将负载到当前页面的指定局部布局内。
+ * @param transform 变换，页面跳转时的动画以及手势
  */
 data class Route internal constructor(
     val path: String,

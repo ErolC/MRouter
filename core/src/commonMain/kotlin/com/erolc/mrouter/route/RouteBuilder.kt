@@ -55,9 +55,9 @@ class RouteBuilder {
 
     /**
      * 以[id]对应的窗口打开，如果没有则创建一个新窗口打开，
-     * 需要注意1：ios和android都只有一个窗口，所以目前可以以多窗口模式运行的只有desktop
-     * 在桌面端以外的场景，[window]是不起作用的
-     * @param id 窗口的id
+     * 需要注意：ios和android都只有一个窗口，所以目前可以以多窗口模式运行的只有desktop
+     * 在桌面端以外的场景，该方法是不起作用的
+     * @param id 窗口的唯一标识
      * @param builder 窗口的设置
      */
     fun window(

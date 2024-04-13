@@ -96,6 +96,11 @@ abstract class GestureWrap {
 
 /**
  * 由拖拽手势生成的两个modifier，具体可参考[ModalGestureWrap]和[NormalGestureWrap]
+ * 该方法有一定的局限性，如果需要不同的手势操作请自行实现
+ * @param orientation 方向
+ * @param progress 进度
+ * @param proportion 比例
+ * @param paddingValue padding的值，根据方向的不同，padding将放置在不同的地方，且当该值设置是[proportion]将失效
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -108,10 +113,10 @@ fun GestureWrap.rememberDraggableModifier(
     val squareSize = with(LocalWindowScope.current.windowSize.value) {
         if (orientation == Orientation.Horizontal) width.size else height.size
     }
-    val paddingTop = paddingValue ?: ((1 - proportion) * squareSize)
+    val padding = paddingValue ?: ((1 - proportion) * squareSize)
 
     val max = with(LocalDensity.current) {
-        squareSize.toPx() - paddingTop.toPx()
+        squareSize.toPx() - padding.toPx()
     }
 
     val anchorsDraggableState = rememberAnchoredDraggableState(0f, DraggableAnchors {
@@ -135,7 +140,10 @@ fun GestureWrap.rememberDraggableModifier(
     return modifier.anchoredDraggable(
         state = anchorsDraggableState,
         orientation = orientation,
-    ) to Modifier.padding(top = paddingTop).offset {
+    ) to Modifier.padding(
+        top = if (orientation == Orientation.Vertical) padding else 0.dp,
+        start = if (orientation == Orientation.Horizontal) padding else 0.dp
+    ).offset {
         if (orientation == Orientation.Vertical)
             IntOffset(0, (max * offsetProgress).roundToInt())
         else

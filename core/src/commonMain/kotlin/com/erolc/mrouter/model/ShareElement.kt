@@ -1,8 +1,10 @@
 package com.erolc.mrouter.model
 
+import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.Rect
+import com.erolc.mrouter.route.shareele.ShareState
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -14,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 @Immutable
 data class ShareElement(
     val name: String,
-    val content: @Composable () -> Unit,
+    val content: @Composable Transition<ShareState>.() -> Unit,
     val address: String,
     val position: StateFlow<Rect>
 ) {

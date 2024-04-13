@@ -83,7 +83,7 @@ internal class BackPressedHandlerImpl(private val onBack: () -> Unit) : BackPres
  * 退出
  * @param enable 是否启动拦截
  * @param delayTime 延迟若干时间后重新拦截监听，如果为[Duration.ZERO]那么将不会重新拦截，除非手动将enable重置为true
- * @param block 当进入非拦截期间，会显现该compose。
+ * @param block 当进入非拦截期间，会显现该compose。即在该compose显现时再次出发回退，将执行退出App行为。
  */
 @Composable
 fun Exit(
@@ -96,7 +96,6 @@ fun Exit(
 
     BackInterceptor(interceptEnable) {
         scope.launch {
-            loge("tag", "$interceptEnable -----")
             interceptEnable = false
             if (delayTime != ZERO) {
                 delay(delayTime)

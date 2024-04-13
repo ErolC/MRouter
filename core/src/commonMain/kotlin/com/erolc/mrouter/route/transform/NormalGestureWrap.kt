@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * 普通的默认手势实现，在页面route时设置[normal]即可使用
+ */
 class NormalGestureWrap : GestureWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {

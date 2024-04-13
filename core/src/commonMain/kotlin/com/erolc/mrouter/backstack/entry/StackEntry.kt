@@ -18,9 +18,12 @@ import com.erolc.mrouter.utils.logi
 
 
 /**
- * 后退栈的一个条目。代表一个页面/window/dialog
+ * 后退栈的一个条目。代表一个页面/window
  */
 interface StackEntry {
+    /**
+     * 该条目的地址
+     */
     val address: Address
 
     /**
@@ -28,5 +31,9 @@ interface StackEntry {
      */
     @Composable
     fun Content(modifier: Modifier)
+
+    /**
+     * 销毁方法
+     */
     fun destroy()
 }

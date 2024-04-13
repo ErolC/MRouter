@@ -6,17 +6,18 @@ import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.Constants.defaultWindow
 
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
- * window的路由器管理的是window，对于移动端来说，只有一个window：[Constants.defaultWindow].
+ * window的路由器管理的是window，对于移动端来说，只有一个window：[defaultWindow].
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
 class WindowRouter(private val addresses: List<Address>) : Router {
     internal val backStack = BackStack("root")
 
-    fun createEntry(route: Route, address: Address): StackEntry? {
+    private fun createEntry(route: Route, address: Address): StackEntry? {
         return if (shouldCreateWindow(route))
             WindowEntry(mutableStateOf(route.windowOptions)).also {
                 it.newPageRouter(route, address)
@@ -28,6 +29,9 @@ class WindowRouter(private val addresses: List<Address>) : Router {
         return backStack.isEmpty() || backStack.findEntry(route.windowOptions.id) == null
     }
 
+    /**
+     * 该路由器已经是最高级的路由器，其没有父路由器
+     */
     override val parentRouter: Router? = null
 
     override fun dispatchRoute(route: Route): Boolean {
@@ -75,9 +79,7 @@ class WindowRouter(private val addresses: List<Address>) : Router {
         if (entry == null) backStack.addEntry(stackEntry)
     }
 
-    fun backPressedImpl(): Boolean {
-        return false
-    }
+    private fun backPressedImpl() = false
     internal fun getBackStack() = backStack.backStack
 
 }

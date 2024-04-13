@@ -5,6 +5,9 @@ import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.WindowOptions
 
+/**
+ * 平台window
+ */
 @Composable
 expect fun PlatformWindow(
     options: WindowOptions,
@@ -12,6 +15,7 @@ expect fun PlatformWindow(
     content: @Composable () -> Unit
 )
 
+@Deprecated("")
 @Composable
 expect fun PlatformDialog(
     onDismissRequest: () -> Unit,

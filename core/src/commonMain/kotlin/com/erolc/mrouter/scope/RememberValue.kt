@@ -12,8 +12,6 @@ import com.erolc.mrouter.utils.rememberInPage
 /**
  * 记忆在pageScope中，使得对象和页面的生命周期中保持一致。
  */
-
-// todo 需要更细致的测试一下pageRemember
 @Composable
 internal fun <T : Any> rememberInWindow(key:String,init: () -> T): T {
     val scope = LocalWindowScope.current
@@ -28,14 +26,12 @@ fun rememberLazyListState(
     initialFirstVisibleItemIndex: Int = 0,
     initialFirstVisibleItemScrollOffset: Int = 0
 ): LazyListState {
-    val scope = LocalPageScope.current
     val value = rememberInPage(key) {
         LazyListState(
             initialFirstVisibleItemIndex,
             initialFirstVisibleItemScrollOffset
         )
     }
-    loge("tag","$scope -------- ${value.firstVisibleItemIndex}")
     return rememberSaveable(saver = LazyListState.Saver) {
         value
     }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import com.erolc.mrouter.backstack.entry.PageEntry
@@ -19,39 +21,39 @@ import kotlinx.coroutines.flow.map
 import kotlin.math.roundToInt
 
 
-internal val LocalShareEleController = staticCompositionLocalOf { ShareEleController }
-
 /**
  * 共享控制器
- * 控制共享的状态顺序为 init - preShare - exitShare - init。如此往复。
+ * 控制共享元素的变动。
  *
  */
 internal object ShareEleController {
     /**
      * 用于保存所有已产生的共享元素
      */
-    internal val elements = mutableSetOf<ShareElement>()
-    var transition: MutableState<Transition<TransformState>?> = mutableStateOf(null)
-        internal set
-
+    private val elements = mutableSetOf<ShareElement>()
 
     /**
      * 共享状态
      */
-    internal val shareState: MutableStateFlow<ShareState> = MutableStateFlow(Init)
+    private val shareState: MutableStateFlow<ShareState> = MutableStateFlow(Init)
 
     /**
      * 当进行共享时，将会在[elements]中提取成对的共享元素组装成[ShareEntry]并添加到堆栈中
      */
     private val shareStack = MutableStateFlow(listOf<ShareEntry>())
 
+    internal fun addElement(element: ShareElement) {
+        elements.add(element)
+    }
+
+    @Composable
+    internal fun rememberShareState() = shareState.asStateFlow().collectAsState()
+
     /**
-     * 初始化共享过程
+     * 初始化共享
      */
     fun initShare(entry: PageEntry, endEntry: PageEntry) {
-        transition.value = entry.scope.transformTransition
         val gesture = endEntry.transform.value.gesture
-        //到这里时，end的元素尚未加入
         if (gesture is ShareGestureWrap) {
             val groups = gesture.keys.mapNotNull {
                 val startTag = "${entry.address.path}_$it"
@@ -60,23 +62,29 @@ internal object ShareEleController {
                 val endEle = elements.find { it.tag == endTag }
                 startEle?.let { start -> endEle?.let { end -> ShareElementGroup(start, end) } }
             }
-            shareStack.value += ShareEntry(groups)
-            shareState.value = BeforeShare.apply { isForward = true }
+            if (groups.isNotEmpty()) {
+                shareStack.value += ShareEntry(groups, gesture.transitionSpec)
+                shareState.value = BeforeShare.apply { isForward = true }
+            }
         }
     }
 
+    /**
+     * 后退共享过程
+     */
     internal fun exitShare() {
-        shareState.value = BeforeShare.apply { isForward = false }
+        if (shareStack.value.isNotEmpty())
+            shareState.value = BeforeShare.apply { isForward = false }
     }
 
     /**
-     * 共享之后
+     * 共享结束之后
      */
     fun afterShare(entry: PageEntry) {
         shareState.value = Init
         val last = shareStack.value.lastOrNull()
         last?.let {
-            if (it.groups.first().end.address == entry.address.path && shareStack.value.isNotEmpty())
+            if (it.groups.firstOrNull()?.end?.address == entry.address.path && shareStack.value.isNotEmpty())
                 shareStack.value -= it
         }
     }
@@ -84,49 +92,62 @@ internal object ShareEleController {
     private fun getShareStack() = shareStack.map { it.takeLast(1) }
 
     @Composable
-    fun Overlay() {
+    internal fun Overlay() {
         val state by shareState.asStateFlow().collectAsState()
         val transition = updateTransition(state)
         if (state != Init) {
             val entry by getShareStack().collectAsState(emptyList())
-            entry.lastOrNull()?.groups?.forEach {
-                transition.ShareElement(it)
-            }
-            loge("tag", "share_______${transition.currentState}")
-            transition.segment.apply {
-                when {
-                    Init isTransitioningTo BeforeShare -> (targetState as BeforeShare).run {
-                        if (isForward) shareState.value = PreShare else shareState.value = ExitShare
-                    }
-
-                    BeforeShare isTransitioningTo PreShare -> shareState.value = ExitShare
-                    BeforeShare isTransitioningTo ExitShare -> shareState.value = PreShare
+            entry.lastOrNull()?.run {
+                groups.forEach {
+                    transition.ShareElement(it, transitionSpec)
                 }
             }
+        }
+        var resetState by remember { mutableStateOf<ShareState>(PreShare) }
+        transition.segment.apply {
+            when {
+                Init isTransitioningTo BeforeShare -> (targetState as BeforeShare).run {
+                    if (isForward) {
+                        resetState = ExitShare
+                        shareState.value = PreShare
+                    } else {
+                        resetState = PreShare
+                        shareState.value = ExitShare
+                    }
+                }
+
+                BeforeShare isTransitioningTo PreShare -> shareState.value = ExitShare
+                BeforeShare isTransitioningTo ExitShare -> shareState.value = PreShare
+            }
+        }
+        if (transition.currentState == resetState && transition.targetState == resetState) {
+            shareState.value = Init
         }
     }
 
     @Composable
-    fun Transition<ShareState>.ShareElement(group: ShareElementGroup) {
+    fun Transition<ShareState>.ShareElement(
+        group: ShareElementGroup,
+        transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>
+    ) {
         val density = LocalDensity.current
         val startPosition by group.start.position.collectAsState()
         val endPosition by group.end.position.collectAsState()
-        val rect by animateRect(label = "") {
-            if (it == PreShare || it == BeforeShare) startPosition else endPosition
+        val rect by animateRect(label = "", transitionSpec = transitionSpec) {
+            if (it == PreShare || it == BeforeShare && (it as BeforeShare).isForward) startPosition else endPosition
         }
         var target by remember { mutableStateOf<ShareElement?>(group.start) }
-        if (targetState is BeforeShare) {
-            target = if ((targetState as BeforeShare).isForward) group.start else group.end
+        if (currentState is BeforeShare) {
+            target = if ((currentState as BeforeShare).isForward) group.start else group.end
         }
-
         Box(
-            androidx.compose.ui.Modifier
+            Modifier
                 .size(with(density) { rect.size.toDpSize() })
                 .offset {
                     IntOffset(rect.topLeft.x.roundToInt(), rect.topLeft.y.roundToInt())
                 }
         ) {
-            target?.content?.invoke()
+            target?.content?.invoke(this@ShareElement)
         }
     }
 
@@ -146,7 +167,7 @@ data object Init : ShareState
 /**
  * 共享之前，在共享之前，需要显示共享控件，但是原本的控件也不能隐藏
  */
-object BeforeShare : ShareState {
+data object BeforeShare : ShareState {
     var isForward: Boolean = false
 }
 
@@ -154,12 +175,6 @@ object BeforeShare : ShareState {
  *开始共享
  */
 data object PreShare : ShareState
-//
-///**
-// * 共享中
-// * @param progress 共享进度
-// */
-//data class Sharing(override val progress: Float = 0f) : ShareState(progress)
 
 /**
  * 共享结束
@@ -170,3 +185,5 @@ data object ExitShare : ShareState
  * 共享之后。需要同时显示共享控件和原本的控件
  */
 data object AfterShare : ShareState
+
+

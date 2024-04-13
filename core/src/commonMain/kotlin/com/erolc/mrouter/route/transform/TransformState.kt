@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import com.erolc.mrouter.scope.LocalPageScope
 
 /**
- * 描述界面变换的状态，以及进度。
+ * 描述界面变换的状态，以及进度。需要注意的是[TransformState]类簇仅描述界面变换，不代表页面生命周期。
  */
 @Immutable
 sealed class TransformState(open val progress: Float)
@@ -35,12 +35,12 @@ internal data object Resume : TransformState(1f)
 internal data object PauseState : TransformState(0f)
 
 /**
- * 过渡状态，从[Resume]到[PostExit]
+ * 从[Resume]到[PostExit]的中间态，用于手势过程
  */
 @Immutable
 internal data class TransitionState(override val progress: Float) : TransformState(progress)
 /**
- * 逆向过渡状态，从[PauseState]到[Resume],所谓逆向是相对于[TransitionState]而言
+ * 从[PauseState]到[Resume]的中间态,用于手势过程
  */
 @Immutable
 internal data class Reverse(override val progress: Float) : TransformState(progress)
