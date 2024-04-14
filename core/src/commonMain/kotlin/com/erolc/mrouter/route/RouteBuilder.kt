@@ -75,7 +75,6 @@ class RouteBuilder {
         val split = route.split("?")
         val path = split[0]
         val (key, address) = getPaths(path)
-        val args = emptyArgs
         if (split.size == 2) {
             args += split[1].split("&").map {
                 val (aKey, value) = it.split("=")
@@ -84,7 +83,6 @@ class RouteBuilder {
                 it.second.isNotEmpty()
             }.toMap().toArgs()
         }
-        args += args
         return Route(
             route,
             address,

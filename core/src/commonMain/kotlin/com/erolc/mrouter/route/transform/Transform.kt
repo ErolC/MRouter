@@ -43,6 +43,7 @@ fun none() = buildTransform {
 
 /**
  * 共享元素，当需要使用共享元素动画时，需要使用该transform
+ * @param keys 指定参与该次页面切换的共享控件
  * @param animationSpec 页面转换动画使用
  * @param transitionSpec 共享元素变换使用,控制共享元素尺寸的变化
  */

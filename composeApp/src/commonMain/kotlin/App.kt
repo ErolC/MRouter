@@ -50,159 +50,34 @@ import com.erolc.mrouter.window.WindowWidthSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import page.Home
+import page.*
 
 @Composable
 fun App() {
     MaterialTheme {
-        RouteHost("greet") {
+        RouteHost("home") {
             page("home") {
                 Home()
             }
-            page("greet") {
-                GreetingPage()
+            page("first") {
+                First()
             }
+
             page("second") {
                 Second()
             }
-
-            page("three") {
-                ThreePage()
+            page("panel") {
+                PanelDemo()
+            }
+            page("share") {
+                Share()
+            }
+            page("search") {
+                Search()
+            }
+            page("anim") {
+                Anim()
             }
         }
     }
 }
-
-@Composable
-fun ThreePage() {
-    addEventObserver { lifecycleOwner, event ->
-        loge("tag", "ThreePage_____$event")
-    }
-    val scope = LocalPageScope.current
-    Column(Modifier.background(Color.White)) {
-        Button(onClick = {
-            scope.backPressed()
-        }) {
-            Text("back")
-        }
-    }
-}
-
-@OptIn(ExperimentalResourceApi::class, ExperimentalTransitionApi::class)
-@Composable
-fun GreetingPage() {
-    var greetingText by remember { mutableStateOf("Hello World!") }
-    var showImage by remember { mutableStateOf(false) }
-    val scope = LocalPageScope.current
-    val args = rememberArgs()
-    addEventObserver { lifecycleOwner, event ->
-        loge("tag", "greet__$event")
-    }
-    Row {
-        Column(
-            Modifier.background(Color.Blue).fillMaxSize().weight(1f).zIndex(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Element("back", modifier = Modifier.width(100.dp).height(50.dp)) {
-                Box(Modifier.fillMaxSize().background(Color.Gray).alpha(0.5f)) {
-                    Button(onClick = {
-//                scope.setResult("result" to 3444)
-//                scope.backPressed()
-                        scope.route("second?key=123")
-                    }) {
-                        Text("back:121")
-                    }
-                }
-            }
-            Button(onClick = {
-//            greetingText = "Compose: ${Greeting().greet()}"
-//            showImage = !showImage
-                scope.route("second?key=123") {
-//                window(defaultWindow, "greet")
-                    transform = shareEle("back")
-//                    transform = normal()
-                    onResult {
-                        log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
-                    }
-                }
-            }) {
-                Text(greetingText)
-            }
-            AnimatedVisibility(
-                showImage,
-                modifier = Modifier,
-                enter = androidx.compose.animation.slideInHorizontally(),
-                exit = androidx.compose.animation.slideOutHorizontally()
-            ) {
-                Image(
-                    painterResource(DrawableResource("compose-multiplatform.xml")),
-                    null
-                )
-            }
-
-        }
-//        PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
-//            loge("tag", "isAttach:$it")
-//        })
-    }
-}
-
-@Composable
-fun Second() {
-    addEventObserver { lifecycleOwner, event ->
-        loge("tag", "second__$event")
-    }
-    var greetingText by remember { mutableStateOf("Hello World!") }
-    val scope = LocalPageScope.current
-    val args = rememberArgs()
-    scope.lifecycle.addEventObserver { source, event ->
-        when (event) {
-            Lifecycle.Event.ON_DESTROY -> {
-                scope.setResult("result" to 1233)
-            }
-
-            else -> {}
-        }
-    }
-    var value by remember { mutableStateOf("") }
-    Column(
-        Modifier.background(Color.Red), horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = {
-            scope.backPressed()
-        }) {
-            Text("back:${args.getDataOrNull<Int>("key")}")
-        }
-        Element("back", modifier = Modifier.width(200.dp).height(100.dp)) {
-            Box(Modifier.fillMaxSize().background(Color.Gray).alpha(0.5f)) {
-                Button(onClick = {
-                    scope.backPressed()
-                }) {
-                    Text("back:${args.getDataOrNull<Int>("key")}")
-                }
-            }
-        }
-        Button(onClick = {
-            scope.backPressed()
-        }) {
-            Text("back:${args.getDataOrNull<Int>("key")}")
-        }
-
-//        TextField(value, onValueChange = {
-//            value = it
-//        })
-        Button(onClick = {
-            scope.route("three") {
-//                window(defaultWindow, "greet")
-                transform = modal()
-                onResult {
-                    log("ATG", "data____:${it.getDataOrNull<Int>("result")}")
-                }
-            }
-        }) {
-            Text(greetingText)
-        }
-    }
-}
-
-

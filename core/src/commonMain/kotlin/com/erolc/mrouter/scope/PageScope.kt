@@ -30,11 +30,12 @@ open class PageScope {
     private val result = emptyArgs
 
     //当前页面范围是否是LocalPageEntry
-    var isLocalPageEntry = false
+    internal var isLocalPageEntry = false
 
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
     internal lateinit var router: Router
     var pageCache = PageCache()
+    private set
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle

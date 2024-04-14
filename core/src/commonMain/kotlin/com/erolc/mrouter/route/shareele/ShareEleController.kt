@@ -14,7 +14,6 @@ import com.erolc.mrouter.model.ShareElement
 import com.erolc.mrouter.model.ShareElementGroup
 import com.erolc.mrouter.model.ShareEntry
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -157,7 +156,15 @@ internal object ShareEleController {
 /**
  * 定义共享控件的状态
  */
-sealed interface ShareState
+sealed interface ShareState {
+    infix fun <T> T.startTransform(target: T): T {
+        return if (preShare || this@ShareState == Init) this else target
+    }
+
+    infix fun <T> T.endTransform(target: T): T {
+        return if (preShare) this else target
+    }
+}
 
 /**
  * 无状态，显示原本的控件
@@ -185,5 +192,8 @@ data object ExitShare : ShareState
  * 共享之后。需要同时显示共享控件和原本的控件
  */
 data object AfterShare : ShareState
+
+val ShareState.preShare get() = this is PreShare || (this is BeforeShare && this.isForward)
+val ShareState.exitShare get() = this is ExitShare || (this is BeforeShare && !this.isForward)
 
 

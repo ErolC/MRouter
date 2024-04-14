@@ -6,6 +6,7 @@ import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.RouteFlag
+import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.map
 
 /**
@@ -68,8 +69,9 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
 
     internal fun route(route: Route) {
         val address = addresses.find { it.path == route.address }
-        require(address != null) {
-            "can't find the address with ‘${route.path}’"
+        if (address == null) {
+            loge("MRouter", "not yet register the address：${route.address}")
+            return
         }
         val entry = createEntry(route, address)
         route(entry)

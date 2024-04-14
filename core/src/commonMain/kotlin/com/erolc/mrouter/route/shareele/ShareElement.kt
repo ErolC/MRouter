@@ -27,7 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
  * @param name 共享元素的名称
  * @param modifier 共享元素的修饰符
  * @param content 共享元素的界面
- * 需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置
+ * 需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置,
+ * 也就是共享元素的大小将由[Element]决定，而其内部的[content]只需要沾满[Element]即可
  */
 @Composable
 fun Element(name: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {

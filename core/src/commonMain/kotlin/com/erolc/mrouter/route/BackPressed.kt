@@ -3,7 +3,6 @@ package com.erolc.mrouter.route
 import androidx.compose.runtime.*
 import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
 import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -36,7 +35,7 @@ internal expect fun ExitImpl()
  * 和android的BackHandler的差别就是[BackPressedHandler.backPressed]方法。
  */
 @Composable
-fun BackInterceptor(enabled: Boolean = true, onBack: BackPressedHandler.() -> Unit) {
+fun BackHandler(enabled: Boolean = true, onBack: BackPressedHandler.() -> Unit = {}) {
     val scope = LocalPageScope.current
     val currentOnBack by rememberUpdatedState(onBack)
 
@@ -94,7 +93,7 @@ fun Exit(
     val scope = rememberPageCoroutineScope()
     var interceptEnable by remember(enable) { enable }
 
-    BackInterceptor(interceptEnable) {
+    BackHandler(interceptEnable) {
         scope.launch {
             interceptEnable = false
             if (delayTime != ZERO) {

@@ -5,7 +5,7 @@ val emptyArgs get() = Args()
 val emptyArg get() = Arg("", "")
 
 /**
- * 变量，用于在界面跳转间传递数据
+ * 变量，用于在界面跳转间传递数据，基础数据类型会自动赋予默认值
  * @author erolc
  * @since 2023/10/26 15:07
  */
@@ -87,18 +87,6 @@ class Args : Iterable<Arg> {
     }
 
     val range = IntRange(0, size - 1)
-
-    private var index = 0
-
-//    override fun hasNext(): Boolean {
-//        return index < size - 1
-//    }
-//
-//    override fun next(): Arg {
-//        val result = list[index]
-//        index += 1
-//        return result
-//    }
 
     fun toList() = list
 
@@ -207,16 +195,16 @@ inline fun <reified T> getBasicData(value: Any): T? {
     return if (isBasic(value))
         value as? T ?: when (T::class) {
             Int::class -> when (value) {
-                is String -> value.toInt()
+                is String -> value.toIntOrNull() ?: 0
                 is Boolean -> if (value) 1 else 0
                 is Number -> value.toInt()
                 is Char -> value.digitToInt()
-                else -> null
+                else -> 0
             }
 
             String::class -> value.toString()
             Boolean::class -> when (value) {
-                is String -> value.toBooleanStrictOrNull()
+                is String -> value.toBooleanStrictOrNull() ?: false
                 is Int -> value >= 1
                 is Short -> value > 0
                 is Long -> value > 0
@@ -224,49 +212,49 @@ inline fun <reified T> getBasicData(value: Any): T? {
                 is Char -> value.code > 0
                 is Double -> value > 0
                 is Float -> value > 0
-                else -> null
+                else -> false
             }
 
             Short::class -> when (value) {
                 is Number -> value.toShort()
-                is String -> value.toShortOrNull()
+                is String -> value.toShortOrNull() ?: 0
                 is Boolean -> (if (value) 1 else 0).toShort()
-                else -> null
+                else -> 0
             }
 
             Long::class -> when (value) {
                 is Number -> value.toLong()
-                is String -> value.toLongOrNull()
+                is String -> value.toLongOrNull() ?: 0L
                 is Boolean -> if (value) 1L else 0L
                 is Char -> value.code.toLong()
-                else -> null
+                else -> 0L
             }
 
             Byte::class -> when (value) {
                 is Number -> value.toByte()
-                is String -> value.toByteOrNull()
+                is String -> value.toByteOrNull() ?: 0
                 is Boolean -> (if (value) 1 else 0).toByte()
                 is Char -> value.code.toByte()
-                else -> null
+                else -> 0
             }
 
             Char::class -> when (value) {
                 is Number -> value.toInt().toChar()
                 is Boolean -> if (value) 1.digitToChar() else 0.digitToChar()
-                else -> null
+                else -> '0'
             }
 
             Double::class -> when (value) {
                 is Number -> value.toDouble()
-                is String -> value.toDoubleOrNull()
+                is String -> value.toDoubleOrNull() ?: 0.0
                 is Boolean -> if (value) 1.0 else 0.0
                 is Char -> value.code.toDouble()
-                else -> null
+                else -> 0.0
             }
 
             Float::class -> when (value) {
                 is Number -> value.toFloat()
-                is String -> value.toFloatOrNull()
+                is String -> value.toFloatOrNull() ?: 0f
                 is Boolean -> if (value) 1f else 0f
                 is Char -> value.code.toFloat()
                 else -> null
@@ -274,34 +262,34 @@ inline fun <reified T> getBasicData(value: Any): T? {
             //        is UByte -> true
             UInt::class -> when (value) {
                 is Number -> value.toInt().toUInt()
-                is String -> value.toUIntOrNull()
+                is String -> value.toUIntOrNull() ?: 0
                 is Boolean -> (if (value) 1 else 0).toUInt()
                 is Char -> value.code.toUInt()
-                else -> null
+                else -> 0
             }
 
             ULong::class -> when (value) {
                 is Number -> value.toLong().toULong()
-                is String -> value.toULongOrNull()
+                is String -> value.toULongOrNull() ?: 0L
                 is Boolean -> (if (value) 1 else 0).toULong()
                 is Char -> value.code.toULong()
-                else -> null
+                else -> 0L
             }
 
             UShort::class -> when (value) {
                 is Number -> value.toShort().toUShort()
-                is String -> value.toUShortOrNull()
+                is String -> value.toUShortOrNull() ?: 0
                 is Boolean -> (if (value) 1 else 0).toUShort()
                 is Char -> value.code.toUShort()
-                else -> null
+                else -> 0
             }
 
             UByte::class -> when (value) {
                 is Number -> value.toByte().toUByte()
-                is String -> value.toUByteOrNull()
+                is String -> value.toUByteOrNull() ?: 0
                 is Boolean -> (if (value) 1 else 0).toUByte()
                 is Char -> value.code.toUByte()
-                else -> null
+                else -> 0
             }
 
             else -> null

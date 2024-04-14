@@ -8,6 +8,7 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.Constants.defaultWindow
 
+
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
  * window的路由器管理的是window，对于移动端来说，只有一个window：[defaultWindow].
@@ -36,20 +37,28 @@ class WindowRouter(private val addresses: List<Address>) : Router {
 
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter?.dispatchRoute(route) ?: false
-        if (!isIntercept) {
+
+
+        return shouldDispatchRoute(isIntercept, route) {
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
             }
-            val oldEntry = backStack.findEntry(route.windowOptions.id)
-                ?.takeIf { (it as WindowEntry).scope.isCloseWindow.value }
-            val entry =
-                oldEntry?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(route, address)
-                ?: return false
-            route(entry)
+            it?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(route, address)
         }
-        return true
     }
+
+    private fun shouldDispatchRoute(isIntercept: Boolean, route: Route, block: (StackEntry?) -> StackEntry?): Boolean {
+        val oldEntry = backStack.findEntry(route.windowOptions.id)
+        return if (!isIntercept && (oldEntry == null || (oldEntry as WindowEntry).scope.isCloseWindow.value)) {
+            val entry = block(oldEntry?.takeIf { (it as WindowEntry).scope.isCloseWindow.value })
+            entry?.let {
+                route(it)
+                true
+            } ?: false
+        } else false
+    }
+
 
     override fun backPressed(notInterceptor: () -> Boolean) {
         if (notInterceptor() && !backPressedImpl())

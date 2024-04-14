@@ -6,6 +6,7 @@ import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.backstack.BackStack
+import com.erolc.mrouter.utils.loge
 
 /**
  * 面板路由/局部路由。将管理一个页面中所有的面板，这些面板不存在上下级关系，所以并不会以[BackStack]作为其存储工具。
@@ -50,8 +51,9 @@ class PanelRouter(
 
     private fun initPanel(route: Route) {
         val address = addresses.find { it.path == route.address }
-        require(address != null) {
-            "can't find the address with ‘${route.path}’"
+        if (address == null) {
+            loge("MRouter", "not yet register the address：${route.address}")
+            return
         }
         panelStacks[route.layoutKey!!] = createEntry(route, address)
 
@@ -69,8 +71,9 @@ class PanelRouter(
         //如果是内部的路由产生的路由事件，那么将交由内部处理。
         if (!isIntercept && isRoute) {
             val address = addresses.find { it.path == route.address }
-            require(address != null) {
-                "can't find the address with ‘${route.path}’"
+            if (address == null) {
+                loge("MRouter", "not yet register the address：${route.address}")
+                return true
             }
             val isLocal = layoutKey == Constants.defaultLocal
 
@@ -80,7 +83,7 @@ class PanelRouter(
                 val newRoute = route.copy(layoutKey = null)
                 parentRouter.route(newRoute)
                 return true
-            }else panel.pageRouter.run {
+            } else panel.pageRouter.run {
                 route(createPageEntry(route, address, EmptyRouter(this), true))
             }
             if (isLocal && !localPanelShow) {
@@ -119,6 +122,6 @@ class PanelRouter(
     }
 
     internal fun getPanel(name: String): PanelEntry {
-        return panelStacks[name]!!
+        return panelStacks[name]?:throw RuntimeException("由于没有找不到起始页面而无法初始化panel")
     }
 }
