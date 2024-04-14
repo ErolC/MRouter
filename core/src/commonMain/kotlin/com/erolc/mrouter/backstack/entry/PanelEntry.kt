@@ -8,6 +8,7 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
+import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.PauseState
 import com.erolc.mrouter.route.transform.Resume
 import com.erolc.mrouter.scope.LocalPageScope
@@ -39,6 +40,10 @@ class PanelEntry(override val address: Address) : StackEntry {
             else
                 last.shareTransform(stack.first() as PageEntry)
             stack.forEach { it.Content(Modifier) }
+
+            if (stack.size == 2)
+                ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+
         }
     }
 

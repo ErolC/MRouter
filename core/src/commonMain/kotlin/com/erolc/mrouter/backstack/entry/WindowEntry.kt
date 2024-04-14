@@ -44,7 +44,6 @@ class WindowEntry(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        val controller = ShareEleController
         CompositionLocalProvider(LocalWindowScope provides scope) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
@@ -59,8 +58,8 @@ class WindowEntry(
                         stackEntry.Content(Modifier)
                     }
                     if (stack.size == 2)
-                    ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
-                    controller.Overlay()
+                        ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+                    ShareEleController.Overlay()
                 }
             }
         }

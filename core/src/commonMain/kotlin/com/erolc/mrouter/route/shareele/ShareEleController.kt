@@ -29,7 +29,7 @@ internal object ShareEleController {
     /**
      * 用于保存所有已产生的共享元素
      */
-    private val elements = mutableSetOf<ShareElement>()
+    private val elements = mutableMapOf<String,ShareElement>()
 
     /**
      * 共享状态
@@ -42,7 +42,7 @@ internal object ShareEleController {
     private val shareStack = MutableStateFlow(listOf<ShareEntry>())
 
     internal fun addElement(element: ShareElement) {
-        elements.add(element)
+        elements[element.tag]=element
     }
 
     @Composable
@@ -57,8 +57,8 @@ internal object ShareEleController {
             val groups = gesture.keys.mapNotNull {
                 val startTag = "${entry.address.path}_$it"
                 val endTag = "${endEntry.address.path}_$it"
-                val startEle = elements.find { it.tag == startTag }
-                val endEle = elements.find { it.tag == endTag }
+                val startEle = elements[startTag]
+                val endEle = elements[endTag]
                 startEle?.let { start -> endEle?.let { end -> ShareElementGroup(start, end) } }
             }
             if (groups.isNotEmpty()) {
