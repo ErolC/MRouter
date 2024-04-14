@@ -19,7 +19,7 @@ fun First() = Page {
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             backPressed()
         }) {
-            Text("回退")
+            Text("回退:${this@Page.name}")
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             val key = args.getData<String>("key")

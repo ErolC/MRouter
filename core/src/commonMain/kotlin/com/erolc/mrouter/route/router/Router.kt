@@ -69,7 +69,7 @@ internal fun createLocalPanelEntry(
             argsFlow.value = route.args
             onResult = route.onResult
             this.router = router
-            name = route.address
+            name = "localPanelEntry"
         }
     }
 }

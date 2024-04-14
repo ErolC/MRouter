@@ -6,8 +6,6 @@ import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
-import com.erolc.mrouter.route.router.EmptyRouter
-import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
@@ -19,14 +17,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal val default get() = PageScope()
 internal fun getScope() = default
 
-val LocalPageScope = staticCompositionLocalOf { default }
+val LocalPageScope = compositionLocalOf { default }
 
 /**
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
 open class PageScope {
     internal val argsFlow = MutableStateFlow(emptyArgs)
-    internal var name: String = ""
+    var name: String = ""
+        internal set
     private val result = emptyArgs
 
     //当前页面范围是否是LocalPageEntry
@@ -35,7 +34,7 @@ open class PageScope {
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
     internal lateinit var router: Router
     var pageCache = PageCache()
-    private set
+        private set
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
@@ -68,6 +67,7 @@ open class PageScope {
      */
     open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
         val routeObj = routeBuild(route, builder)
+        loge("tag", "$this -- ")
         router.router(routeObj)
     }
 

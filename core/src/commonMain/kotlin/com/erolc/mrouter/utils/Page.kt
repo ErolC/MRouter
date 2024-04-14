@@ -16,8 +16,8 @@ import com.erolc.mrouter.scope.PageScope
  */
 @Composable
 fun Page(block: @Composable PageScope.() -> Unit) {
-    val scope = LocalPageScope.current
     Surface {
+        val scope = LocalPageScope.current
         block(scope)
     }
 }

@@ -54,11 +54,11 @@ class WindowEntry(
                     else
                         (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
 
-                    stack.forEach { stackEntry ->
-                        stackEntry.Content(Modifier)
-                    }
+                    stack.forEach { it.Content(Modifier) }
+
                     if (stack.size == 2)
                         ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+
                     ShareEleController.Overlay()
                 }
             }

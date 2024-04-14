@@ -6,6 +6,7 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleOwner
@@ -24,6 +25,7 @@ import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
 
@@ -54,7 +56,7 @@ open class PageEntry internal constructor(
     internal val transformState get() = scope.transformState
 
     //是否销毁
-    private val isDestroy = mutableStateOf(false)
+    internal val isDestroy = mutableStateOf(false)
 
     //是否需要退出
     internal val isExit = mutableStateOf(false)
@@ -63,17 +65,20 @@ open class PageEntry internal constructor(
     private val isIntercept get() = scope.isIntercept
 
     // 管理当前页面的路由器
-    private val pageRouter get() = scope.router.parentRouter as PageRouter
+    private val pageRouter:PageRouter get(){
+        val router = scope.router
+        return if (router is PanelRouter) router.parentRouter else router.parentRouter as PageRouter
+    }
 
     //生命周期事件监听器
-    private val listener = object : LifecycleEventListener {
+    internal val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
             onEventCall(event)
         }
     }
 
     // 生命周期事件处理
-    private fun onEventCall(event: Lifecycle.Event) {
+    internal fun onEventCall(event: Lifecycle.Event) {
         when (event) {
             Lifecycle.Event.ON_START -> start()
             Lifecycle.Event.ON_RESUME -> resume()
@@ -86,6 +91,7 @@ open class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
+        loge("tag","${address.path} -- ${this.scope} __ ${LocalPageScope.current}")
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)

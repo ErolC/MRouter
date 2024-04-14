@@ -30,7 +30,7 @@ fun Transition<ShareState>.padding(isStart:Boolean) = animateDp { it.transform(i
 fun Share() = Page {
     Row(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
-        Element("search", Modifier.padding(100.dp).weight(3f).height(50.dp)) {
+        Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp)) {
             val corner by animateDp {
                 it.startTransform(100.dp,10.dp)
             }
