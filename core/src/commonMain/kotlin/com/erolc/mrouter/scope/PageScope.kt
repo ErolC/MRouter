@@ -10,10 +10,7 @@ import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.PreEnter
 import com.erolc.mrouter.utils.PageCache
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.utils.rememberPrivateInPage
-import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
 internal fun getScope() = default
@@ -23,8 +20,8 @@ val LocalPageScope = compositionLocalOf { default }
 /**
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
-open class PageScope {
-    internal val argsFlow = MutableStateFlow(emptyArgs)
+open class PageScope:LifecycleOwner{
+    internal val args = mutableStateOf(emptyArgs)
     var name: String = ""
         internal set
     private val result = emptyArgs
@@ -44,7 +41,7 @@ open class PageScope {
     internal val isIntercept = mutableStateOf(false)
 
     //生命周期
-    var lifecycle: Lifecycle
+    override var lifecycle: Lifecycle
         internal set(value) {
             initLifeCycle(value)
             _lifecycle = value
@@ -124,7 +121,7 @@ open class PageScope {
  */
 @Composable
 fun rememberArgs(): Args {
-    val args by LocalPageScope.current.argsFlow.collectAsState()
+    val args by LocalPageScope.current.args
     return args
 }
 
@@ -132,7 +129,7 @@ fun rememberArgs(): Args {
  * 添加生命周期事件监听
  */
 @Composable
-fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+fun EventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val scope = LocalPageScope.current
     rememberPrivateInPage("page_event") {
         if (!scope.isLocalPageEntry)

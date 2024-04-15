@@ -24,7 +24,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
                 if (entry.address.path == stackEntry.address.path) {
                     entry as PageEntry
                     entry.scope.run {
-                        argsFlow.value = stackEntry.scope.argsFlow.value
+                        args.value = stackEntry.scope.args.value
                         router = stackEntry.scope.router
                         onResult = stackEntry.scope.onResult
                         name = stackEntry.scope.name

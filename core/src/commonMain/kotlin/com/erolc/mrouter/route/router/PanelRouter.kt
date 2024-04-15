@@ -86,7 +86,10 @@ class PanelRouter(
                 parentRouter.route(newRoute)
                 return true
             } else panel.pageRouter.let {
-                it.route(createPageEntry(route, address, EmptyRouter(it), true))
+                val temp = if (localPanelShow) address else address.let { address ->
+                    address.copy(config = address.config.copy(launchSingleTop = true))
+                }
+                it.route(createPageEntry(route, temp, EmptyRouter(it), true))
             }
             if (isLocal && !localPanelShow) {
                 val routeBuild = routeBuild(Constants.defaultPrivateLocal)

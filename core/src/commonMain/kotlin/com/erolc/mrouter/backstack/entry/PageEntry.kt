@@ -36,12 +36,11 @@ import com.erolc.mrouter.utils.rememberPrivateInPage
 open class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address
-) : StackEntry, LifecycleOwner {
-    private val registry: LifecycleRegistry = LifecycleRegistry(this)
-    final override val lifecycle: Lifecycle get() = registry
+) : StackEntry {
+    private val registry: LifecycleRegistry = LifecycleRegistry(scope)
 
     init {
-        scope.lifecycle = lifecycle
+        scope.lifecycle = registry
     }
 
     //transform中的prev在下一个页面打开的时候才会被赋值
@@ -122,7 +121,7 @@ open class PageEntry internal constructor(
 
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
-    fun Page(modifier: Modifier) {
+    private fun Page(modifier: Modifier) {
         val state = rememberPrivateInPage("page_state") {
             MutableTransitionState(transformState.value)
         }
@@ -170,7 +169,7 @@ open class PageEntry internal constructor(
         resume()
     }
 
-    //内容本体
+
     open fun RealContent(): @Composable () -> Unit {
         return address.content
     }
@@ -179,7 +178,7 @@ open class PageEntry internal constructor(
      * 和上一个页面共享同一个变换过程
      */
     @Composable
-    fun shareTransform(entry: PageEntry) {
+    internal fun shareTransform(entry: PageEntry) {
         val state by rememberPrivateInPage("page_share_transform_state", transformState) {
             transformState
         }
