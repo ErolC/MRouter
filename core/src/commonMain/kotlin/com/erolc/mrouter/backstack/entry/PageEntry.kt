@@ -28,6 +28,7 @@ import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 import com.erolc.mrouter.utils.rememberInPage
+import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
  * 页面载体，承载着页面的生命周期，代表一个页面。
@@ -98,7 +99,7 @@ open class PageEntry internal constructor(
 
             val windowScope = LocalWindowScope.current
             SystemLifecycle(::onEventCall)
-            val state by rememberInPage("page_transform_state", transformState) { transformState }
+            val state by rememberPrivateInPage("page_transform_state", transformState) { transformState }
             if (state == Resume) {
                 start()
             }
@@ -122,11 +123,11 @@ open class PageEntry internal constructor(
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     fun Page(modifier: Modifier) {
-        val state = rememberInPage("page_state") {
+        val state = rememberPrivateInPage("page_state") {
             MutableTransitionState(transformState.value)
         }
-        var isExit by rememberInPage("page_exit") { isExit }
-        val isIntercept by rememberInPage("page_intercept") { isIntercept }
+        var isExit by rememberPrivateInPage("page_exit") { isExit }
+        val isIntercept by rememberPrivateInPage("page_intercept") { isIntercept }
 
 
         val transition = rememberTransition(state).apply {
@@ -140,10 +141,10 @@ open class PageEntry internal constructor(
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
-        val transform by rememberInPage("page_transform", this, transform) { transform }
+        val transform by rememberPrivateInPage("page_transform", this, transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
-                rememberInPage("page_content") {
+                rememberPrivateInPage("page_content") {
                     setContent(RealContent())
                 }
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
@@ -179,7 +180,7 @@ open class PageEntry internal constructor(
      */
     @Composable
     fun shareTransform(entry: PageEntry) {
-        val state by rememberInPage("page_share_transform_state", transformState) {
+        val state by rememberPrivateInPage("page_share_transform_state", transformState) {
             transformState
         }
         entry.transformState.value = when (state) {

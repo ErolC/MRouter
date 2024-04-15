@@ -12,6 +12,7 @@ import com.erolc.mrouter.route.transform.PreEnter
 import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
+import com.erolc.mrouter.utils.rememberPrivateInPage
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val default get() = PageScope()
@@ -133,7 +134,7 @@ fun rememberArgs(): Args {
 @Composable
 fun addEventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val scope = LocalPageScope.current
-    rememberInPage("page_event") {
+    rememberPrivateInPage("page_event") {
         if (!scope.isLocalPageEntry)
             scope.lifecycle.addEventObserver(body)
     }

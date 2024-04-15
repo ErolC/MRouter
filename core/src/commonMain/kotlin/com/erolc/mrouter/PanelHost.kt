@@ -12,6 +12,7 @@ import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
+import com.erolc.mrouter.utils.rememberPrivateInPage
 import com.erolc.mrouter.window.WindowHeightSize
 import com.erolc.mrouter.window.WindowWidthSize
 
@@ -33,16 +34,16 @@ fun PanelHost(
     modifier: Modifier = Modifier
 ) {
     val scope = LocalPageScope.current
-    val router = rememberInPage("panel_router_$key", key) {
+    val router = rememberPrivateInPage("panel_router_$key", key) {
         scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
     val isAttach = panelState.shouldAttach
-    rememberInPage("panel_attach", isAttach) {
+    rememberPrivateInPage("panel_attach", isAttach) {
         onPanelChange(isAttach)
     }
 
     if (isAttach) {
-        val panel = rememberInPage("panel_$key", key, router) {
+        val panel = rememberPrivateInPage("panel_$key", key, router) {
             router.run {
                 route(routeBuild("$key:$startRoute"))
                 getPanel(key)
@@ -92,7 +93,7 @@ fun rememberPanelState(
     windowWidthSize: WindowWidthSize? = WindowWidthSize.Compact,
     windowHeightSize: WindowHeightSize? = null
 ): PanelState {
-    return rememberInPage("panel_state", windowHeightSize, windowWidthSize) {
+    return rememberPrivateInPage("panel_state", windowHeightSize, windowWidthSize) {
         PanelState(windowWidthSize, windowHeightSize)
     }
 }
@@ -116,11 +117,11 @@ data class PanelState(
 @Composable
 internal fun LocalPanelHost(key: String = Constants.defaultLocal) {
     val scope = LocalPageScope.current
-    val router = rememberInPage("panel_router_$key", key) {
+    val router = rememberPrivateInPage("panel_router_$key", key) {
         scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
 
-    val panel = rememberInPage("panel_$key", key, router) {
+    val panel = rememberPrivateInPage("panel_$key", key, router) {
         router.getPanel(key)
     }
     Box {

@@ -13,17 +13,17 @@ class PageCache {
 
     private fun has(key: String) = values.containsKey(key)
 
-    fun getValue(key: String): Any? {
+    internal fun getValue(key: String): Any? {
         return if (has(key)) values[key] else null
     }
 
-    fun updateValue(key: String, value: Any) {
+    internal fun updateValue(key: String, value: Any) {
         values[key] = value
     }
 }
 
 
-inline fun <T : Any> PageCache.cache(key: String, invalid: Boolean, block: () -> T): T {
+fun <T : Any> PageCache.cache(key: String, invalid: Boolean, block: () -> T): T {
     return getValue(key).let {
         if (invalid || it == null) {
             val value = block()
@@ -39,10 +39,13 @@ inline fun <T : Any> PageCache.cache(key: String, invalid: Boolean, block: () ->
  *
  */
 @Composable
-inline fun <T : Any> rememberInPage(key: String, crossinline calculation: @DisallowComposableCalls () -> T): T {
+inline fun <T : Any> rememberInPage(
+    key: String,
+    noinline calculation: @DisallowComposableCalls () -> T
+): T {
     val scope = LocalPageScope.current
     return remember(scope) {
-        scope.pageCache.cache(key, false, calculation)
+        scope.pageCache.cache("cache_$key", false, calculation)
     }
 }
 
@@ -51,12 +54,12 @@ inline fun <T : Any> rememberInPage(key: String, crossinline calculation: @Disal
 inline fun <T : Any> rememberInPage(
     key: String,
     key1: Any?,
-    crossinline calculation: @DisallowComposableCalls () -> T
+    noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
     val invalid = currentComposer.changed(key1)
     return remember(key1, scope) {
-        scope.pageCache.cache(key, invalid, calculation)
+        scope.pageCache.cache("cache_$key", invalid, calculation)
     }
 }
 
@@ -65,14 +68,14 @@ inline fun <T : Any> rememberInPage(
 inline fun <T : Any> rememberInPage(
     key: String,
     key1: Any?, key2: Any?,
-    crossinline calculation: @DisallowComposableCalls () -> T
+    noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
     val invalid = currentComposer.changed(key1) or currentComposer.changed(key2)
 
     return remember(key1, key2, scope) {
         scope.pageCache.cache(
-            key,
+            "cache_$key",
             invalid, calculation
         )
     }
@@ -82,13 +85,16 @@ inline fun <T : Any> rememberInPage(
 inline fun <T : Any> rememberInPage(
     key: String,
     key1: Any?, key2: Any?, key3: Any?,
-    crossinline calculation: @DisallowComposableCalls () -> T
+    noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid = currentComposer.changed(key1) or currentComposer.changed(key2) or currentComposer.changed(key3)
+    val invalid =
+        currentComposer.changed(key1) or currentComposer.changed(key2) or currentComposer.changed(
+            key3
+        )
 
     return remember(key1, key2, key3, scope) {
-        scope.pageCache.cache(key, invalid, calculation)
+        scope.pageCache.cache("cache_$key", invalid, calculation)
     }
 }
 
@@ -103,7 +109,49 @@ fun <T : Any> rememberInPage(
     var invalid = false
     for (temp in inputs) invalid = invalid or currentComposer.changed(temp)
     return remember(inputs, scope) {
+        scope.pageCache.cache("cache_$key", invalid, calculation)
+    }
+}
+
+
+@Composable
+internal inline fun <T : Any> rememberPrivateInPage(
+    key: String,
+    noinline calculation: @DisallowComposableCalls () -> T
+): T {
+    val scope = LocalPageScope.current
+    return remember(scope) {
+        scope.pageCache.cache(key, false, calculation)
+    }
+}
+
+
+@Composable
+internal inline fun <T : Any> rememberPrivateInPage(
+    key: String,
+    key1: Any?,
+    noinline calculation: @DisallowComposableCalls () -> T
+): T {
+    val scope = LocalPageScope.current
+    val invalid = currentComposer.changed(key1)
+    return remember(key1, scope) {
         scope.pageCache.cache(key, invalid, calculation)
     }
 }
 
+@Composable
+inline fun <T : Any> rememberPrivateInPage(
+    key: String,
+    key1: Any?, key2: Any?,
+    noinline calculation: @DisallowComposableCalls () -> T
+): T {
+    val scope = LocalPageScope.current
+    val invalid = currentComposer.changed(key1) or currentComposer.changed(key2)
+
+    return remember(key1, key2, scope) {
+        scope.pageCache.cache(
+            key,
+            invalid, calculation
+        )
+    }
+}
