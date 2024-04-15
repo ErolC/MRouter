@@ -1,5 +1,6 @@
 package page
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import com.erolc.mrouter.PanelHost
+import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
@@ -23,10 +27,12 @@ fun ListDetail() = Page {
         (0..100).map { Content("item$it", it) }
     }
     Row {
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(modifier = Modifier.weight(1f).zIndex(1f).background(Color.Blue)) {
             items(items) {
                 Text(it.name, Modifier.fillMaxWidth().clickable {
-                    route("local:panel")
+                    route("local:detail?id=${it.id}"){
+                        transform = normal()
+                    }
                 })
             }
         }
@@ -40,7 +46,7 @@ fun ListDetail() = Page {
 fun Detail() = Page {
     val args = rememberArgs()
     val id = args.getData<Int>("id")
-    Text("detail:${id}")
+    Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
     EventObserver { lifecycleOwner, event ->
         loge("tag","id:$id owner:$lifecycleOwner event:$event")
     }

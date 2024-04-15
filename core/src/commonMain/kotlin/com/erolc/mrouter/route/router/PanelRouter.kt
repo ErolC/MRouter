@@ -92,10 +92,10 @@ class PanelRouter(
                 it.route(createPageEntry(route, temp, EmptyRouter(it), true))
             }
             if (isLocal && !localPanelShow) {
-                val routeBuild = routeBuild(Constants.defaultPrivateLocal)
-//                val entry = createLocalPanelEntry(routeBuild,this)
-                val localAddress = addresses.find { it.path == routeBuild.address }
-                val entry = createPageEntry(routeBuild, localAddress!!, this)
+                val routeBuild = routeBuild(Constants.defaultPrivateLocal).copy(flag = route.flag, windowOptions = route.windowOptions, transform = route.transform)
+                val entry = createLocalPanelEntry(routeBuild,this)
+//                val localAddress = addresses.find { it.path == routeBuild.address }
+//                val entry = createPageEntry(routeBuild, localAddress!!, this)
                 parentRouter.route(entry)
             }
             return true

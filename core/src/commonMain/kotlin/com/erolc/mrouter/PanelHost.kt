@@ -5,10 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.PanelRouter
+import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
@@ -122,13 +125,18 @@ internal fun LocalPanelHost(key: String = Constants.defaultLocal) {
     }
 
     val panel = rememberPrivateInPage("panel_$key", key, router) {
-        router.getPanel(key)
+        router.getPanel(key).apply { isLocalPageEntry = true }
     }
     Box {
         router.run { panel.Content(Modifier) }
     }
+    EventObserver { _, event ->
+        loge("tag","event:$event")
+        if (event == Lifecycle.Event.ON_DESTROY) panel.isLocalPageEntry = false
+    }
 }
 
 internal fun StackEntry.isLocalPanelEntry(): Boolean {
-    return address.path == Constants.defaultPrivateLocal
+//    return address.path == Constants.defaultPrivateLocal
+    return this is LocalPageEntry
 }

@@ -42,7 +42,8 @@ class PanelEntry(override val address: Address) : StackEntry {
             stack.forEach { it.Content(Modifier) }
 
             if (stack.size == 2)
-                ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+                ShareEleController.
+                    initShare(stack.first() as PageEntry, stack.last() as PageEntry)
 
         }
     }

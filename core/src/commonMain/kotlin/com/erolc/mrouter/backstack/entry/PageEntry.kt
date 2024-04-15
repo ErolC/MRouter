@@ -6,12 +6,11 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.LifecycleOwner
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
+import com.erolc.mrouter.isLocalPanelEntry
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -25,9 +24,6 @@ import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.logi
-import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
@@ -99,9 +95,9 @@ open class PageEntry internal constructor(
             val windowScope = LocalWindowScope.current
             SystemLifecycle(::onEventCall)
             val state by rememberPrivateInPage("page_transform_state", transformState) { transformState }
-            if (state == Resume) {
+            if (state == Resume)
                 start()
-            }
+
             DisposableEffect(this) {
                 if (scope.router is PanelRouter)
                     windowScope.addLifecycleEventListener(listener)
@@ -111,7 +107,7 @@ open class PageEntry internal constructor(
                         ShareEleController.afterShare(this@PageEntry)
                         if (scope.router is PanelRouter)
                             windowScope.removeLifeCycleEventListener(listener)
-                        handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                        downFromEvent(Lifecycle.State.CREATED)
                     }
                 }
             }
@@ -207,13 +203,11 @@ open class PageEntry internal constructor(
     }
 
     private fun upFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.upFrom(state)
-            ?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.upFrom(state)?.let { handleLifecycleEvent(it) }
     }
 
     private fun downFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.downFrom(state)
-            ?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.downFrom(state)?.let { handleLifecycleEvent(it) }
     }
 
     internal fun create() = upFromEvent(Lifecycle.State.INITIALIZED)
