@@ -41,9 +41,6 @@ fun main() = mRouterApplication {
 由于需要管理window，所以从application开始定义。没错，desktop在使用该库是可以多窗口运行的。
 ### ios
 ```kotlin
-/**
- * 由于放到Mrouter里面将无法
- */
 object SwitchBackgroundDelegate :
     UIApplicationBackgroundDelegate by UIApplicationBackgroundDelegateImpl
 

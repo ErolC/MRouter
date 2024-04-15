@@ -56,7 +56,7 @@ open class PageEntry internal constructor(
     internal val transformState get() = scope.transformState
 
     //是否销毁
-    internal val isDestroy = mutableStateOf(false)
+    private val isDestroy = mutableStateOf(false)
 
     //是否需要退出
     internal val isExit = mutableStateOf(false)
@@ -65,20 +65,21 @@ open class PageEntry internal constructor(
     private val isIntercept get() = scope.isIntercept
 
     // 管理当前页面的路由器
-    private val pageRouter:PageRouter get(){
-        val router = scope.router
-        return if (router is PanelRouter) router.parentRouter else router.parentRouter as PageRouter
-    }
+    private val pageRouter: PageRouter
+        get() {
+            val router = scope.router
+            return if (router is PanelRouter) router.parentRouter else router.parentRouter as PageRouter
+        }
 
     //生命周期事件监听器
-    internal val listener = object : LifecycleEventListener {
+    private val listener = object : LifecycleEventListener {
         override fun call(event: Lifecycle.Event) {
             onEventCall(event)
         }
     }
 
     // 生命周期事件处理
-    internal fun onEventCall(event: Lifecycle.Event) {
+    private fun onEventCall(event: Lifecycle.Event) {
         when (event) {
             Lifecycle.Event.ON_START -> start()
             Lifecycle.Event.ON_RESUME -> resume()
@@ -91,7 +92,6 @@ open class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        loge("tag","${address.path} -- ${this.scope} __ ${LocalPageScope.current}")
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
@@ -173,6 +173,7 @@ open class PageEntry internal constructor(
     open fun RealContent(): @Composable () -> Unit {
         return address.content
     }
+
     /**
      * 和上一个页面共享同一个变换过程
      */
@@ -206,11 +207,13 @@ open class PageEntry internal constructor(
     }
 
     private fun upFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.upFrom(state)?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.upFrom(state)
+            ?.let { handleLifecycleEvent(it) }
     }
 
     private fun downFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.downFrom(state)?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.downFrom(state)
+            ?.let { handleLifecycleEvent(it) }
     }
 
     internal fun create() = upFromEvent(Lifecycle.State.INITIALIZED)

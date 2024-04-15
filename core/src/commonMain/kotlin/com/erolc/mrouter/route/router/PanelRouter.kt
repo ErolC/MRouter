@@ -6,6 +6,8 @@ import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.backstack.BackStack
+import com.erolc.mrouter.isLocalPanelEntry
+import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.utils.loge
 
 /**
@@ -87,7 +89,10 @@ class PanelRouter(
                 it.route(createPageEntry(route, address, EmptyRouter(it), true))
             }
             if (isLocal && !localPanelShow) {
-                val entry = createLocalPanelEntry(route,this)
+                val routeBuild = routeBuild(Constants.defaultPrivateLocal)
+//                val entry = createLocalPanelEntry(routeBuild,this)
+                val localAddress = addresses.find { it.path == routeBuild.address }
+                val entry = createPageEntry(routeBuild, localAddress!!, this)
                 parentRouter.route(entry)
             }
             return true
@@ -99,7 +104,7 @@ class PanelRouter(
     internal fun showWithLocal() {
         if (localPanelShow) return
         localPanelShow = true
-        if (parentRouter.backStack.findTopEntry() is LocalPageEntry)
+        if (parentRouter.backStack.findTopEntry()?.isLocalPanelEntry() == true)
             parentRouter.backStack.pop(false)
         panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
     }
@@ -111,17 +116,16 @@ class PanelRouter(
     }
 
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
-        if (localPanelShow)
-            panelStacks.forEach { it.value.handleLifecycleEvent(event) }
+        if (localPanelShow) panelStacks.forEach { it.value.handleLifecycleEvent(event) }
     }
 
     override fun backPressed(notInterceptor: () -> Boolean) {
         //panel是不需要后退的，如果其子路由已经无法后退，将事件交给他，那么他也是将这事件交给他的父路由处理即可
-        if (notInterceptor())
-            parentRouter.backPressed(notInterceptor)
+        if (notInterceptor()) parentRouter.backPressed(notInterceptor)
     }
 
     internal fun getPanel(name: String): PanelEntry {
-        return panelStacks[name]?:throw RuntimeException("由于没有找不到起始页面而无法初始化panel")
+        return panelStacks[name]
+            ?: throw RuntimeException("由于没有找不到起始页面而无法初始化panel")
     }
 }

@@ -17,6 +17,7 @@ import com.erolc.mrouter.route.transform.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlin.math.roundToInt
 
 
@@ -29,7 +30,7 @@ internal object ShareEleController {
     /**
      * 用于保存所有已产生的共享元素
      */
-    private val elements = mutableMapOf<String,ShareElement>()
+    private val elements = mutableMapOf<String, ShareElement>()
 
     /**
      * 共享状态
@@ -42,7 +43,7 @@ internal object ShareEleController {
     private val shareStack = MutableStateFlow(listOf<ShareEntry>())
 
     internal fun addElement(element: ShareElement) {
-        elements[element.tag]=element
+        elements[element.tag] = element
     }
 
     @Composable
@@ -54,19 +55,32 @@ internal object ShareEleController {
     fun initShare(entry: PageEntry, endEntry: PageEntry) {
         val gesture = endEntry.transform.value.gesture
         if (gesture is ShareGestureWrap) {
-            val groups = gesture.keys.mapNotNull {
-                val startTag = "${entry.address.path}_$it"
-                val endTag = "${endEntry.address.path}_$it"
-                val startEle = elements[startTag]
-                val endEle = elements[endTag]
-                startEle?.let { start -> endEle?.let { end -> ShareElementGroup(start, end) } }
-            }
-            if (groups.isNotEmpty()) {
-                shareStack.value += ShareEntry(groups, gesture.transitionSpec)
-                shareState.value = BeforeShare.apply { isForward = true }
-            }
+            val keys = gesture.keys.fold("") { a, b -> a + b }
+            val shareEntry = shareStack.value.lastOrNull()
+            val groups = gesture.getElementGroups(entry, endEntry)
+            if (groups.isNotEmpty())
+                if (shareEntry != null && shareEntry.keys == keys)
+                    updateEntry(shareEntry, shareEntry.copy(groups = groups))
+                else {
+                    shareStack.value += ShareEntry(groups, gesture.transitionSpec, keys)
+                    shareState.value = BeforeShare.apply { isForward = true }
+                }
         }
     }
+
+    private fun updateEntry(oldEntry: ShareEntry, newEntry: ShareEntry) {
+        shareStack.value -= oldEntry
+        shareStack.value += newEntry
+    }
+
+    private fun ShareGestureWrap.getElementGroups(entry: PageEntry, endEntry: PageEntry) =
+        keys.mapNotNull {
+            val startTag = "${entry.address.path}_$it"
+            val endTag = "${endEntry.address.path}_$it"
+            val startEle = elements[startTag]
+            val endEle = elements[endTag]
+            startEle?.let { start -> endEle?.let { end -> ShareElementGroup(start, end) } }
+        }
 
     /**
      * 后退共享过程

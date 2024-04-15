@@ -15,6 +15,8 @@ class WindowScope {
     private val listeners = mutableSetOf<LifecycleEventListener>()
 
     internal val isCloseWindow = mutableStateOf(false)
+    internal lateinit var platformRes: Map<String, Any>
+
     internal val pageCache = PageCache()
 
     internal fun onLifeEvent(event: Lifecycle.Event) {
@@ -28,6 +30,8 @@ class WindowScope {
     internal fun removeLifeCycleEventListener(listener: LifecycleEventListener) {
         listeners.remove(listener)
     }
+
+    fun getPlatformRes(key: String) = platformRes[key]
 
     /**
      * 关闭该window

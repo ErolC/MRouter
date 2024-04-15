@@ -338,7 +338,7 @@ fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
  * 一个transform代表的是一次页面变换
  *
  * @param enter 本页面进入的动画
- * @param exit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
+ * @param _exit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
  * @param prevPause 上一个页面在本次变换中的动画
  * @param gesture 手势，可以自定义手势
  */

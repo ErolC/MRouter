@@ -15,13 +15,14 @@ import com.erolc.mrouter.Constants.defaultWindow
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
-class WindowRouter(private val addresses: List<Address>) : Router {
+class WindowRouter(private val addresses: List<Address>,private val platformRes:Map<String,Any>) : Router {
     internal val backStack = BackStack("root")
 
     private fun createEntry(route: Route, address: Address): StackEntry? {
         return if (shouldCreateWindow(route))
             WindowEntry(mutableStateOf(route.windowOptions)).also {
                 it.newPageRouter(route, address)
+                it.scope.platformRes = platformRes
             }
         else null
     }

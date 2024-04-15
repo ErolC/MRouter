@@ -24,7 +24,7 @@ class MRouter private constructor() {
     companion object {
         internal fun getMRouter(startTarget: String,windowOptions: WindowOptions, builder: RegisterBuilder.() -> Unit): MRouter {
             return MRouter().apply {
-                rootRouter = RegisterBuilder().apply(builder).builder(startTarget,windowOptions)
+                rootRouter = RegisterBuilder().apply(builder).build(startTarget,windowOptions)
             }
         }
     }

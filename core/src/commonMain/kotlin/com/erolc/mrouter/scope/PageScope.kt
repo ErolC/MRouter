@@ -67,7 +67,6 @@ open class PageScope {
      */
     open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
         val routeObj = routeBuild(route, builder)
-        loge("tag", "$this -- ")
         router.router(routeObj)
     }
 

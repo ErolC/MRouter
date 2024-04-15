@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
+import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.scope.LocalPageScope
@@ -32,16 +33,16 @@ fun PanelHost(
     modifier: Modifier = Modifier
 ) {
     val scope = LocalPageScope.current
-    val router = rememberInPage("panel_$key",key) {
+    val router = rememberInPage("panel_router_$key", key) {
         scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
     }
     val isAttach = panelState.shouldAttach
-    rememberInPage ("panel_attach",isAttach) {
+    rememberInPage("panel_attach", isAttach) {
         onPanelChange(isAttach)
     }
 
     if (isAttach) {
-        val panel = rememberInPage("panel_$key",key,router) {
+        val panel = rememberInPage("panel_$key", key, router) {
             router.run {
                 route(routeBuild("$key:$startRoute"))
                 getPanel(key)
@@ -91,7 +92,7 @@ fun rememberPanelState(
     windowWidthSize: WindowWidthSize? = WindowWidthSize.Compact,
     windowHeightSize: WindowHeightSize? = null
 ): PanelState {
-    return rememberInPage("panel_state",windowHeightSize, windowWidthSize) {
+    return rememberInPage("panel_state", windowHeightSize, windowWidthSize) {
         PanelState(windowWidthSize, windowHeightSize)
     }
 }
@@ -109,4 +110,24 @@ data class PanelState(
                     (windowWidthSize != null && windowSize.width.value > windowWidthSize.value) ||
                     (windowHeightSize != null && windowSize.height.value > windowHeightSize.value)
         }
+}
+
+
+@Composable
+internal fun LocalPanelHost(key: String = Constants.defaultLocal) {
+    val scope = LocalPageScope.current
+    val router = rememberInPage("panel_router_$key", key) {
+        scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
+    }
+
+    val panel = rememberInPage("panel_$key", key, router) {
+        router.getPanel(key)
+    }
+    Box {
+        router.run { panel.Content(Modifier) }
+    }
+}
+
+internal fun StackEntry.isLocalPanelEntry(): Boolean {
+    return address.path == Constants.defaultPrivateLocal
 }

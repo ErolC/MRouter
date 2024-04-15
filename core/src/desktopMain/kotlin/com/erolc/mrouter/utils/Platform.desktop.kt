@@ -12,6 +12,7 @@ import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.scope.rememberInWindow
+import com.erolc.mrouter.window.Menu
 import com.erolc.mrouter.window.WindowSize
 import com.erolc.mrouter.window.toDimension
 import com.erolc.mrouter.window.toPlacement
@@ -41,7 +42,8 @@ actual fun PlatformWindow(
     val event = if (state.isMinimized) Lifecycle.Event.ON_PAUSE else Lifecycle.Event.ON_RESUME
     entry.scope.onLifeEvent(event)
     entry.scope.windowSize.value = size
-    entry.options.value = options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
+    entry.options.value =
+        options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
     val application = LocalApplicationScope.current
     val isCloseWindow by rememberInWindow("window_close") { entry.scope.isCloseWindow }
     if (!isCloseWindow)
@@ -59,7 +61,7 @@ actual fun PlatformWindow(
             val maximumSize by rememberUpdatedState(options.maximumSize)
             window.minimumSize = minimumSize
             if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
-            //todo 需要考虑menu
+            Menu(options.id)
             content()
         }
     else {

@@ -1,15 +1,14 @@
 package com.erolc.mrouter.backstack
 
-import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
+import com.erolc.mrouter.isLocalPanelEntry
 import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.PostExit
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,7 +68,7 @@ open class BackStack(val name: String) {
     internal fun pop(isDestroy: Boolean = true): Boolean {
         return if (_backstack.value.size > threshold) {
             _backstack.value -= _backstack.value.last().apply {
-                if (this is LocalPageEntry && isPreBack) {
+                if (isLocalPanelEntry() && isPreBack) {
                     isPreBack = false
                 }
                 if (isDestroy) destroy()

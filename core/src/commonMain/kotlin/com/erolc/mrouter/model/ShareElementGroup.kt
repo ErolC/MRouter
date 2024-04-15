@@ -16,4 +16,4 @@ data class ShareElementGroup(val start: ShareElement, val end: ShareElement)
 /**
  * 共享条目
  */
-data class ShareEntry(val groups: List<ShareElementGroup>, val transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>)
+data class ShareEntry(val groups: List<ShareElementGroup>, val transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>,val keys:String)

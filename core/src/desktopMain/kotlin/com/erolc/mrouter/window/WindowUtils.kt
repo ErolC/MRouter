@@ -7,15 +7,36 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import com.erolc.mrouter.Constants
+import com.erolc.mrouter.backstack.entry.LocalWindowScope
+import com.erolc.mrouter.model.WindowMenu
 import com.erolc.mrouter.model.WindowState
+import com.erolc.mrouter.register.RegisterBuilder
 import java.awt.*
 import java.awt.event.ComponentListener
 import java.awt.event.WindowListener
 import java.awt.event.WindowStateListener
 import java.util.*
 import kotlin.math.roundToInt
+
+/**
+ * 注册[windowId]对应的窗口菜单
+ */
+fun RegisterBuilder.windowMenu(
+    windowId: String = Constants.defaultWindow,
+    menu: @Composable FrameWindowScope.() -> Unit
+) {
+    registerPlatformResource(windowId, WindowMenu(windowId, menu))
+}
+
+@Composable
+internal fun FrameWindowScope.Menu(windowId: String) {
+    val windowMenu = LocalWindowScope.current.getPlatformRes(windowId) as? WindowMenu
+    windowMenu?.run { menu() }
+}
 
 
 /**
