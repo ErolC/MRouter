@@ -7,6 +7,8 @@ import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
+import com.erolc.mrouter.route.router.Router
+import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.PostExit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,19 +98,19 @@ open class BackStack(val name: String) {
      * 预后退，page在后退时不可以直接[pop]，因为[pop]是无法做动画的。这里需要先预后退，通知框架需要后退。
      * 待切换动画完成之后再[pop]
      */
-    fun preBack(): Boolean {
+    fun preBack(parentRouter: Router): Boolean {
         return if (_backstack.value.size > threshold) {
             isPreBack = true
             val resumePage = _backstack.value.last() as PageEntry
             resumePage.transformState.value = PostExit
             ShareEleController.exitShare()
             true
-        } else {
+        } else if (parentRouter is WindowRouter) {
             _backstack.value.forEach {
                 (it as? PageEntry)?.isExit?.value = true
             }
             false
-        }
+        } else false
     }
 
     /**

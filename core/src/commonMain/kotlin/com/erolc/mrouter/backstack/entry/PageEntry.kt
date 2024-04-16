@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
-import com.erolc.mrouter.isLocalPanelEntry
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -94,7 +93,10 @@ open class PageEntry internal constructor(
 
             val windowScope = LocalWindowScope.current
             SystemLifecycle(::onEventCall)
-            val state by rememberPrivateInPage("page_transform_state", transformState) { transformState }
+            val state by rememberPrivateInPage(
+                "page_transform_state",
+                transformState
+            ) { transformState }
             if (state == Resume)
                 start()
 
@@ -107,7 +109,7 @@ open class PageEntry internal constructor(
                         ShareEleController.afterShare(this@PageEntry)
                         if (scope.router is PanelRouter)
                             windowScope.removeLifeCycleEventListener(listener)
-                        downFromEvent(Lifecycle.State.CREATED)
+                        handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                     }
                 }
             }
@@ -129,10 +131,7 @@ open class PageEntry internal constructor(
             if (enterStart) transformState.value = Resume
             if (exitFinished && !pageRouter.backStack.pop()) isExit = true
             if (resume) onResume()
-            if (pause) {
-                pause()
-                stop()
-            }
+            if (pause) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
@@ -203,11 +202,13 @@ open class PageEntry internal constructor(
     }
 
     private fun upFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.upFrom(state)?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.upFrom(state)
+            ?.let { handleLifecycleEvent(it) }
     }
 
     private fun downFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.downFrom(state)?.let { handleLifecycleEvent(it) }
+        if (registry.currentState == state) Lifecycle.Event.downFrom(state)
+            ?.let { handleLifecycleEvent(it) }
     }
 
     internal fun create() = upFromEvent(Lifecycle.State.INITIALIZED)

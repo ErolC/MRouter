@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
  * 页面路由器的实现，将管理一个载体（window/panel）内所有的页面
  * @param addresses 存放着该库所注册的所有地址。
  * @param parentRouter 父路由，对于window内的页面路由来说，[WindowRouter]将是其父路由，同理，对于panel内的页面路由来说[PanelRouter]将是其父路由。
- * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [EmptyRouter]
+ * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [PanelRouter]
  */
 open class PageRouter(name: String, private val addresses: List<Address>, override val parentRouter: Router) : Router {
     internal val backStack = BackStack(name)
@@ -47,7 +47,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     }
 
     private fun backPressedImpl(): Boolean {
-        return backStack.preBack()
+        return backStack.preBack(parentRouter)
     }
 
     private fun shouldLoadPage(route: Route): Boolean {
