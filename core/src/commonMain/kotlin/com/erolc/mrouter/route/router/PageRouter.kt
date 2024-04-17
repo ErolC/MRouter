@@ -51,7 +51,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     }
 
     private fun shouldLoadPage(route: Route): Boolean {
-        return (route.layoutKey == null && parentRouter is WindowRouter) || (route.layoutKey != null && parentRouter is PanelRouter)
+        return (route.layoutKey == null && route.level == 0) || (route.layoutKey != null && parentRouter is PanelRouter)
     }
 
     /**

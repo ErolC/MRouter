@@ -1,12 +1,10 @@
 package com.erolc.mrouter.model
 
-import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.route.Args
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.route.emptyArgs
 import com.erolc.mrouter.route.transform.Transform
-import com.erolc.mrouter.route.transform.normal
 
 /**
  * 路由，由[PageScope.route]方法触发并构建，其中包含：
@@ -28,4 +26,7 @@ data class Route internal constructor(
     val onResult: (Args) -> Unit = {},
     val layoutKey: String? = null,
     val transform: Transform = Transform.None,
-)
+) {
+    internal var level: Int = 0
+
+}

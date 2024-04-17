@@ -30,7 +30,7 @@ fun ListDetail() = Page {
         LazyColumn(modifier = Modifier.weight(1f).zIndex(1f).background(Color.Blue)) {
             items(items) {
                 Text(it.name, Modifier.fillMaxWidth().clickable {
-                    route("local:detail?id=${it.id}"){
+                    route("local:detail"){
                         transform = normal()
                     }
                 })

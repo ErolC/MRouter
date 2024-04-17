@@ -69,7 +69,7 @@ class PanelRouter(
 
     override fun dispatchRoute(route: Route): Boolean {
         val isIntercept = parentRouter.dispatchRoute(route)
-        val layoutKey = route.layoutKey
+//        val layoutKey = route.layoutKey
         //如果是内部的路由产生的路由事件，那么将交由内部处理。
         if (!isIntercept && isRoute) {
             val address = addresses.find { it.path == route.address }
@@ -77,11 +77,11 @@ class PanelRouter(
                 loge("MRouter", "not yet register the address：${route.address}")
                 return true
             }
-            val isLocal = layoutKey == Constants.defaultLocal
+//            val isLocal = layoutKey == Constants.defaultLocal
 
             val panel = panelStacks[route.layoutKey]
             // 如果这个时候，panel还是空，那么证明该panel就没有实现
-            if (panel == null) {
+            if (panel == null || !localPanelShow) {
                 val newRoute = route.copy(layoutKey = null)
                 parentRouter.route(newRoute)
                 return true
@@ -91,13 +91,13 @@ class PanelRouter(
                 }
                 it.route(createPageEntry(route, temp, PanelRouter(addresses,it), true))
             }
-            if (isLocal && !localPanelShow) {
-                val routeBuild = routeBuild(Constants.defaultPrivateLocal).copy(flag = route.flag, windowOptions = route.windowOptions, transform = route.transform)
-                val entry = createLocalPanelEntry(routeBuild,this)
-//                val localAddress = addresses.find { it.path == routeBuild.address }
-//                val entry = createPageEntry(routeBuild, localAddress!!, this)
-                parentRouter.route(entry)
-            }
+//            if (isLocal && !localPanelShow) {
+//                val routeBuild = routeBuild(Constants.defaultPrivateLocal).copy(flag = route.flag, windowOptions = route.windowOptions, transform = route.transform)
+//                val entry = createLocalPanelEntry(routeBuild,this)
+////                val localAddress = addresses.find { it.path == routeBuild.address }
+////                val entry = createPageEntry(routeBuild, localAddress!!, this)
+//                parentRouter.route(entry)
+//            }
             return true
         }
         return false

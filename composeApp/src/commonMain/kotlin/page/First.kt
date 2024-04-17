@@ -23,7 +23,7 @@ fun First() = Page {
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             val key = args.getData<String>("key")
-            var route = "local:second"
+            var route = "second"
             if (key == "arg") route += "?value=routeData"
             route(route) {
                 if (key == "arg") {

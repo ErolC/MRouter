@@ -15,10 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.shareele.Element
 import com.erolc.mrouter.route.shareele.ShareState
 import com.erolc.mrouter.route.transform.shareEle
-import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.endTransform
-import com.erolc.mrouter.utils.startTransform
-import com.erolc.mrouter.utils.transform
+import com.erolc.mrouter.scope.EventObserver
+import com.erolc.mrouter.utils.*
 
 /**
  * 建议以这种方式实现
@@ -38,7 +36,7 @@ fun Share() = Page {
 
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
                 Box(modifier = Modifier.fillMaxSize().clickable {
-                    route("local:search") {
+                    route("search") {
                         transform = shareEle("search","label")
                     }
                 }) {
@@ -56,6 +54,9 @@ fun Share() = Page {
 
 @Composable
 fun Search() = Page {
+    EventObserver { lifecycleOwner, event ->
+        logi("tag","$lifecycleOwner $event")
+    }
     Row(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
         Element("label", modifier = Modifier.weight(1f).height(20.dp)){

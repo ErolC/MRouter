@@ -131,12 +131,11 @@ internal fun LocalPanelHost(key: String = Constants.defaultLocal) {
         router.run { panel.Content(Modifier) }
     }
     EventObserver { _, event ->
-        loge("tag","event:$event")
         if (event == Lifecycle.Event.ON_DESTROY) panel.isLocalPageEntry = false
     }
 }
 
 internal fun StackEntry.isLocalPanelEntry(): Boolean {
-//    return address.path == Constants.defaultPrivateLocal
-    return this is LocalPageEntry
+    return address.path == Constants.defaultPrivateLocal
+//    return this is LocalPageEntry
 }
