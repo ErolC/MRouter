@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.LocalPanelHost
 import com.erolc.mrouter.model.PageConfig
+import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.routeBuild
@@ -30,7 +31,30 @@ fun RegisterBuilder.page(
     path: String,
     config: PageConfig = emptyConfig,
     content: @Composable () -> Unit
-) = addAddress(Address(path, config, content))
+) = addAddress(Address(path = path, config = config, content = content))
+
+/**
+ * 构建一个模块
+ */
+fun RegisterBuilder.module(
+    module: String,
+    content: RegisterModuleBuilder.() -> Unit
+) = RegisterModuleBuilder(this, module).apply(content)
+
+
+class RegisterModuleBuilder internal constructor(
+    private val builder: RegisterBuilder,
+    private val module: String
+) {
+
+    fun page(
+        path: String,
+        config: PageConfig = emptyConfig,
+        content: @Composable () -> Unit
+    ) {
+        builder.addAddress(Address("$module/$path", config, content))
+    }
+}
 
 
 /**
@@ -47,13 +71,13 @@ class RegisterBuilder internal constructor() {
     private val platformRes = mutableMapOf<String, Any>()
 
     init {
-        addAddress(Address(Constants.defaultPage, emptyConfig) {
+        addAddress(Address(path = Constants.defaultPage, config = emptyConfig) {
             Box(Modifier.background(Color.White).fillMaxSize())
         })
 
-        addresses.add(Address(Constants.defaultPrivateLocal, emptyConfig) {
-            LocalPanelHost()
-        })
+//        addresses.add(Address(path = Constants.defaultPrivateLocal, config = emptyConfig) {
+//            LocalPanelHost()
+//        })
     }
 
     /**
@@ -67,10 +91,10 @@ class RegisterBuilder internal constructor() {
      * 添加地址，需要注意的是相同path的address会被覆盖
      */
     internal fun addAddress(address: Address) {
-        if (address.path == Constants.defaultPrivateLocal)
-            loge("MRouter", "该地址(${address.path})已被框架占用，请使用其他地址")
-        else
-            addEntryToList(addresses, address) { it.path == address.path }
+//        if (address.path == Constants.defaultPrivateLocal)
+//            loge("MRouter", "该地址(${address.path})已被框架占用，请使用其他地址")
+//        else
+        addEntryToList(addresses, address) { it.path == address.path }
     }
 
 
@@ -89,10 +113,10 @@ class RegisterBuilder internal constructor() {
     /**
      * 构建，window路由器，并分配第一个路由
      */
-    internal fun build(startRoute: String, options: WindowOptions): WindowRouter {
+    internal fun build(route: Route): WindowRouter {
         //构建路由器并路由到初始页面
         return WindowRouter(addresses, platformRes).apply {
-            dispatchRoute(routeBuild(startRoute).copy(windowOptions = options))
+            dispatchRoute(route)
         }
     }
 

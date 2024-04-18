@@ -21,15 +21,9 @@ fun RouteHost(
     windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, ""),
     builder: RegisterBuilder.() -> Unit
 ) {
-    RouteHost(remember(startRoute, builder, windowOptions) {
-        MRouter.getMRouter(startRoute, windowOptions, builder)
-    })
-}
-
-@Composable
-internal fun RouteHost(router: MRouter) {
-    val backStack by router.getRootBlackStack()
-    backStack.forEach {
-        (it as? WindowEntry)?.Content(Modifier)
+    remember(startRoute, builder, windowOptions) {
+        MRouter.build(startRoute, windowOptions, builder)
     }
+    val backStack by MRouter.getRootBlackStack()
+    backStack.forEach { it.Content(Modifier) }
 }
