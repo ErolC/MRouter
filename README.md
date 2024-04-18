@@ -2,7 +2,7 @@
 这是一个可用于compose-multiplatform的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
 
 ## 使用
-我们首先需要再common中创建Compose页面的根部，然后实现各个平台的入口即可。代码如下
+我们首先需要在common中创建Compose页面的根部，然后实现各个平台的入口即可。代码如下
 ### common
 在common中创建RouteHost
 ```kotlin
@@ -45,6 +45,4 @@ fun MainViewController() = LifecycleUIViewController {
     App()
 }
 ```
-由于需要管理页面的生命周期，在内部无法监听ios是否切换到后台，于是ios需要如上述处理。
-### web
-
+由于需要管理页面的生命周期，于是ios需要如上述处理。
