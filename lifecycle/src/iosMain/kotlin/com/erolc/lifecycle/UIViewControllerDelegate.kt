@@ -1,45 +1,28 @@
 package com.erolc.lifecycle
 
 import androidx.compose.ui.uikit.ComposeUIViewControllerDelegate
-import kotlinx.cinterop.ExperimentalForeignApi
-import platform.Foundation.NSNotificationCenter
-import platform.UIKit.UIApplicationDidEnterBackgroundNotification
-import platform.UIKit.UIApplicationWillEnterForegroundNotification
-import platform.objc.sel_registerName
 
 
 /**
  * @author erolc
  * @since 2024/2/5 09:18
  */
-@OptIn(ExperimentalForeignApi::class)
 class UIViewControllerDelegate(
-    private val backgroundDelegate: UIApplicationBackgroundDelegate,
     private val lifecycleDelegate: LifecycleDelegate
 ) : ComposeUIViewControllerDelegate {
 
+    private val applicationStateListener = ApplicationStateListener { isForeground ->
+        if (isForeground) lifecycleDelegate.onResume() else lifecycleDelegate.onPause()
+    }
 
     override fun viewDidLoad() {
         super.viewDidLoad()
         lifecycleDelegate.onCreate()
-        NSNotificationCenter.defaultCenter.addObserver(
-            backgroundDelegate,
-            sel_registerName("foreground"),
-            UIApplicationWillEnterForegroundNotification,
-            null
-        )
-
-        NSNotificationCenter.defaultCenter.addObserver(
-            backgroundDelegate,
-            sel_registerName("background"),
-            UIApplicationDidEnterBackgroundNotification,
-            null
-        )
     }
 
     override fun viewWillAppear(animated: Boolean) {
         super.viewWillAppear(animated)
-        //onStart
+        lifecycleDelegate.onStart()
     }
 
     override fun viewDidAppear(animated: Boolean) {
@@ -55,7 +38,8 @@ class UIViewControllerDelegate(
 
     override fun viewDidDisappear(animated: Boolean) {
         super.viewDidDisappear(animated)
+        lifecycleDelegate.onStop()
         lifecycleDelegate.onDestroy()
-        NSNotificationCenter.defaultCenter.removeObserver(backgroundDelegate)
+        applicationStateListener.dispose()
     }
 }

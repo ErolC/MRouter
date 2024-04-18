@@ -14,14 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
+import com.erolc.mrouter.utils.loge
 
 data class Future(val name: String, val value: String)
 
 @Composable
 fun Home() = Page {
-
+    EventObserver { lifecycleOwner, event ->
+        loge("tag","$event")
+    }
     val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),

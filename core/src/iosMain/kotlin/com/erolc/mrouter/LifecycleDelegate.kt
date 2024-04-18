@@ -1,7 +1,8 @@
-package com.erolc.lifecycle
+package com.erolc.mrouter
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.erolc.lifecycle.Lifecycle
 
 
 /**
@@ -24,9 +25,9 @@ class LifecycleDelegate private constructor() {
     }
 
     companion object {
-        internal val lifecycleDelegate = LifecycleDelegate()
+        val lifecycleDelegate = LifecycleDelegate()
     }
 }
 
-internal val LocalLifecycleDelegate: ProvidableCompositionLocal<LifecycleDelegate> =
+val LocalLifecycleDelegate: ProvidableCompositionLocal<LifecycleDelegate> =
     staticCompositionLocalOf { LifecycleDelegate.lifecycleDelegate }

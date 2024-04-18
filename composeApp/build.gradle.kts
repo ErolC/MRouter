@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -45,7 +44,6 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
-            @OptIn(ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
             implementation(project(":core"))
             implementation(project(":lifecycle"))

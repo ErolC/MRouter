@@ -4,5 +4,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 actual fun SystemLifecycle(call: (Lifecycle.Event) -> Unit) {
-    localLifecycleDelegate.current.onCall(call)
+    LocalLifecycleDelegate.current.onCall(call)
 }
