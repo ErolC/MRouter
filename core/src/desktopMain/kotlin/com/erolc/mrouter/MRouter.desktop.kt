@@ -5,7 +5,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.application
 
 internal val LocalApplicationScope: ProvidableCompositionLocal<ApplicationScope> = staticCompositionLocalOf {

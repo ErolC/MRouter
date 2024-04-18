@@ -41,13 +41,10 @@ fun main() = mRouterApplication {
 由于需要管理window，所以从application开始定义。没错，desktop在使用该库是可以多窗口运行的。
 ### ios
 ```kotlin
-object SwitchBackgroundDelegate :
-    UIApplicationBackgroundDelegate by UIApplicationBackgroundDelegateImpl
-
-fun MainViewController() = MRouterUIViewController(SwitchBackgroundDelegate) {
+fun MainViewController() = LifecycleUIViewController {
     App()
 }
 ```
 由于需要管理页面的生命周期，在内部无法监听ios是否切换到后台，于是ios需要如上述处理。
 ### web
-由于目前web还处于实验性阶段，所以web尚未接入。
+

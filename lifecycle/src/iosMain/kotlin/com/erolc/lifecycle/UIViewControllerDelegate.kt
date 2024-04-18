@@ -8,7 +8,7 @@ import androidx.compose.ui.uikit.ComposeUIViewControllerDelegate
  * @since 2024/2/5 09:18
  */
 class UIViewControllerDelegate(
-    private val lifecycleDelegate: LifecycleDelegate
+    internal val lifecycleDelegate: LifecycleDelegate = LifecycleDelegate.lifecycleDelegate
 ) : ComposeUIViewControllerDelegate {
 
     private val applicationStateListener = ApplicationStateListener { isForeground ->
