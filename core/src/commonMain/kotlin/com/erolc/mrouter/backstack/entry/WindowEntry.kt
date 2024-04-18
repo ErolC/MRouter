@@ -35,7 +35,7 @@ class WindowEntry(
     //页面路由器，管理当前窗口的所有界面
     internal lateinit var pageRouter: PageRouter
 
-    val scope = WindowScope()
+    val scope = WindowScope(address.path)
 
     fun shouldExit(): Boolean {
         return (pageRouter.parentRouter as WindowRouter)

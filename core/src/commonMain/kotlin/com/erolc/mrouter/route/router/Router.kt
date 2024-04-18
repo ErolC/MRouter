@@ -21,7 +21,7 @@ interface Router {
     /**
      * 分配路由
      */
-    fun dispatchRoute(route: Route): Boolean
+    fun dispatchRoute(route: Route)
 
     /**
      * 回退

@@ -5,14 +5,13 @@ typealias RouteResult = (Args) -> Unit
 /**
  * 路由的一些标识，可以指导路由期间内部的一些变化。
  */
-sealed class RouteFlag(val code: Int) {
+sealed interface RouteFlag {
 
-
-    private class RouteFlagImpl(code: Int) : RouteFlag(code) {
+    private class RouteFlagImpl() : RouteFlag {
         private val _flags = mutableListOf<RouteFlag>()
         val flags: List<RouteFlag> get() = _flags
 
-        constructor(flag: RouteFlag, sFlag: RouteFlag) : this(flag.code or sFlag.code) {
+        constructor(flag: RouteFlag, sFlag: RouteFlag) : this() {
             when {
                 flag is RouteFlagImpl && sFlag is RouteFlagImpl -> {
                     _flags += flag._flags
@@ -53,21 +52,21 @@ sealed class RouteFlag(val code: Int) {
 /**
  * 回退栈类型的flag
  */
-sealed class StackFlag(code: Int) : RouteFlag(code)
+sealed class StackFlag : RouteFlag
 
 /**
  * 正常
  */
-data object NormalFlag : RouteFlag(0b1)
+data object NormalFlag : RouteFlag
 
 /**
  * 清空当前栈
  */
-data object ClearTaskFlag : StackFlag(0b10)
+data object ClearTaskFlag : StackFlag()
 
 /**
  * 更换当前回退栈中存在的页面。
  */
-internal data object ReplaceFlag : StackFlag(0b100)
+internal data object ReplaceFlag : StackFlag()
 
 

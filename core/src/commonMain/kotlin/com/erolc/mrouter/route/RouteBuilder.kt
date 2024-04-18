@@ -24,9 +24,11 @@ class RouteBuilder {
 
     private val args = emptyArgs
 
-    var flag:RouteFlag = NormalFlag
+    var flag: RouteFlag = NormalFlag
 
     var transform: Transform = none()
+
+    var panelKey: String? = null
 
     fun transform(body: TransformBuilder.() -> Unit) {
         transform = buildTransform(body)
@@ -69,7 +71,13 @@ class RouteBuilder {
             .build(if (isMobile) Constants.defaultWindow else id, title)
     }
 
-
+    /**
+     * 在当前界面寻找[key]的panel，并将页面路由到其中，该key也可以直接添加在路径上，格式是：key:path
+     * 如果两处都设置，以该方法为准。
+     */
+    fun panel(key: String) {
+        panelKey = key
+    }
 
     internal fun build(route: String): Route {
         val split = route.split("?")
@@ -90,11 +98,10 @@ class RouteBuilder {
             windowOptions,
             args,
             onResult,
-            key,
+            panelKey?:key,
             transform
         )
     }
-
 
     private fun getPaths(path: String): Pair<String?, String> {
         var key: String? = null

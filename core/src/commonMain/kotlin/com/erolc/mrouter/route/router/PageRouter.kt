@@ -50,20 +50,14 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
         return backStack.preBack(parentRouter)
     }
 
-    private fun shouldLoadPage(route: Route): Boolean {
-        return (route.layoutKey == null && route.level == 0) || (route.layoutKey != null && parentRouter is PanelRouter)
-    }
-
     /**
      * 分配路由，将地址分配给不同的路由器并打开
      */
-    override fun dispatchRoute(route: Route): Boolean {
-        val isIntercept = parentRouter.dispatchRoute(route)
-        if (!isIntercept && shouldLoadPage(route)) {
+    override fun dispatchRoute(route: Route) {
+        if (route.windowOptions.id == route.windowOptions.currentWindowId)
             route(route)
-            return true
-        }
-        return false
+        else
+            parentRouter.dispatchRoute(route)
     }
 
     internal fun route(route: Route) {

@@ -1,12 +1,12 @@
 package com.erolc.mrouter.route.router
 
 import androidx.compose.runtime.mutableStateOf
+import com.erolc.mrouter.Constants.defaultWindow
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.Constants.defaultWindow
 
 
 /**
@@ -15,20 +15,14 @@ import com.erolc.mrouter.Constants.defaultWindow
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
-class WindowRouter(private val addresses: List<Address>,private val platformRes:Map<String,Any>) : Router {
+class WindowRouter(private val addresses: List<Address>, private val platformRes: Map<String, Any>) : Router {
     internal val backStack = BackStack("root")
 
-    private fun createEntry(route: Route, address: Address): StackEntry? {
-        return if (shouldCreateWindow(route))
-            WindowEntry(mutableStateOf(route.windowOptions)).also {
-                it.newPageRouter(route, address)
-                it.scope.platformRes = platformRes
-            }
-        else null
-    }
-
-    private fun shouldCreateWindow(route: Route): Boolean {
-        return backStack.isEmpty() || backStack.findEntry(route.windowOptions.id) == null
+    private fun createEntry(route: Route, address: Address): StackEntry {
+        return WindowEntry(mutableStateOf(route.windowOptions)).also {
+            it.newPageRouter(route, address)
+            it.scope.platformRes = platformRes
+        }
     }
 
     /**
@@ -36,11 +30,8 @@ class WindowRouter(private val addresses: List<Address>,private val platformRes:
      */
     override val parentRouter: Router? = null
 
-    override fun dispatchRoute(route: Route): Boolean {
-        val isIntercept = parentRouter?.dispatchRoute(route) ?: false
-
-
-        return shouldDispatchRoute(isIntercept, route) {
+    override fun dispatchRoute(route: Route) {
+        shouldDispatchRoute(route) {
             val address = addresses.find { it.path == route.address }
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
@@ -49,15 +40,12 @@ class WindowRouter(private val addresses: List<Address>,private val platformRes:
         }
     }
 
-    private fun shouldDispatchRoute(isIntercept: Boolean, route: Route, block: (StackEntry?) -> StackEntry?): Boolean {
+    private fun shouldDispatchRoute(route: Route, block: (StackEntry?) -> StackEntry) {
         val oldEntry = backStack.findEntry(route.windowOptions.id)
-        return if (!isIntercept && (oldEntry == null || (oldEntry as WindowEntry).scope.isCloseWindow.value)) {
+        if (oldEntry == null || (oldEntry as WindowEntry).scope.isCloseWindow.value) {
             val entry = block(oldEntry?.takeIf { (it as WindowEntry).scope.isCloseWindow.value })
-            entry?.let {
-                route(it)
-                true
-            } ?: false
-        } else false
+            route(entry)
+        }
     }
 
 

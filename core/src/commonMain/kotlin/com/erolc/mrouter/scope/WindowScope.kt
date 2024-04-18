@@ -2,15 +2,13 @@ package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
 import com.erolc.lifecycle.Lifecycle
-import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.utils.PageCache
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.DefWindowSize
 
 /**
  * 窗口的作用域
  */
-class WindowScope {
+class WindowScope(val id: String = "") {
     val windowSize = mutableStateOf(DefWindowSize)
     private val listeners = mutableSetOf<LifecycleEventListener>()
 

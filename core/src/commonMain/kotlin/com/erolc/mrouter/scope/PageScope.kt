@@ -20,11 +20,12 @@ val LocalPageScope = compositionLocalOf { default }
 /**
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
-open class PageScope:LifecycleOwner{
+open class PageScope : LifecycleOwner {
     internal val args = mutableStateOf(emptyArgs)
     var name: String = ""
         internal set
     private val result = emptyArgs
+    internal var windowId = ""
 
     //当前页面范围是否是LocalPageEntry
     internal var isLocalPageEntry = false
@@ -64,7 +65,9 @@ open class PageScope:LifecycleOwner{
      * 其中只有address是必须的，?后面接的是参数；而key是[GroupScope]的某个layout
      */
     open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
-        val routeObj = routeBuild(route, builder)
+        val routeObj = routeBuild(route, builder).let {
+            it.copy(windowOptions = it.windowOptions.copy(currentWindowId = windowId))
+        }
         router.router(routeObj)
     }
 

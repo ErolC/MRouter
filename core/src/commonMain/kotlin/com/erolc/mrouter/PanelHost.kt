@@ -6,15 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
-import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.rememberInPage
 import com.erolc.mrouter.utils.rememberPrivateInPage
 import com.erolc.mrouter.window.WindowHeightSize
 import com.erolc.mrouter.window.WindowWidthSize
@@ -48,18 +45,17 @@ fun PanelHost(
     if (isAttach) {
         val panel = rememberPrivateInPage("panel_$key", key, router) {
             router.run {
-                route(routeBuild("$key:$startRoute"))
+                route(key, routeBuild(startRoute))
                 getPanel(key)
             }
         }
         Box(modifier) {
             router.run {
-                if (key == Constants.defaultLocal) showWithLocal()
+                showPanel(key)
                 panel.Content(Modifier)
             }
         }
-    } else if (key == Constants.defaultLocal)
-        router.hideWithLocal()
+    } else router.hidePanel(key)
 
 
 }

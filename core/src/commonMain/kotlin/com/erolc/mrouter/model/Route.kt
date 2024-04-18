@@ -14,7 +14,7 @@ import com.erolc.mrouter.route.transform.Transform
  * @param args 携带到下一个页面的数据
  * @param windowOptions 页面负载到对应window的参数
  * @param onResult 页面回退时可将参数从方法传回
- * @param layoutKey 该页面将负载到当前页面的指定局部布局内。
+ * @param panelKey 该页面将负载到当前页面的指定局部布局内。
  * @param transform 变换，页面跳转时的动画以及手势
  */
 data class Route internal constructor(
@@ -24,9 +24,6 @@ data class Route internal constructor(
     val windowOptions: WindowOptions,
     val args: Args = emptyArgs,
     val onResult: (Args) -> Unit = {},
-    val layoutKey: String? = null,
+    val panelKey: String? = null,
     val transform: Transform = Transform.None,
-) {
-    internal var level: Int = 0
-
-}
+)

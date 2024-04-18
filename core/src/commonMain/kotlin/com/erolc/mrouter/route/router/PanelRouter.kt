@@ -6,8 +6,6 @@ import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.backstack.BackStack
-import com.erolc.mrouter.isLocalPanelEntry
-import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.utils.loge
 
 /**
@@ -21,8 +19,7 @@ class PanelRouter(
 ) : Router {
     //这里是当前界面中各个面板的回退栈
     private val panelStacks = mutableMapOf<String, PanelEntry>()
-    private var localPanelShow = false
-    private var isRoute = false
+    private var showPanels = mutableListOf<String>()
 
     init {
         if (panelEntry != null)
@@ -30,7 +27,7 @@ class PanelRouter(
     }
 
     private fun createEntry(route: Route, address: Address): PanelEntry {
-        return PanelEntry(Address(route.layoutKey!!)).also {
+        return PanelEntry(Address(route.panelKey!!)).also {
             it.newPageRouter(route, address)
         }
     }
@@ -41,14 +38,15 @@ class PanelRouter(
                 createPageEntry(
                     route,
                     address,
-                    PanelRouter(addresses,pageRouter)
+                    PanelRouter(addresses, pageRouter)
                 )
             )
         }
     }
 
-    internal fun route(route: Route) {
-        panelStacks[route.layoutKey] ?: initPanel(route)
+    internal fun route(key: String, route: Route) {
+
+        panelStacks[key] ?: initPanel(route.copy(panelKey = key))
     }
 
     private fun initPanel(route: Route) {
@@ -57,69 +55,47 @@ class PanelRouter(
             loge("MRouter", "not yet register the address：${route.address}")
             return
         }
-        panelStacks[route.layoutKey!!] = createEntry(route, address)
+        panelStacks[route.panelKey!!] = createEntry(route, address)
 
     }
 
     override fun router(route: Route) {
-        isRoute = true
         dispatchRoute(route)
-        isRoute = false
     }
 
-    override fun dispatchRoute(route: Route): Boolean {
-        val isIntercept = parentRouter.dispatchRoute(route)
-//        val layoutKey = route.layoutKey
-        //如果是内部的路由产生的路由事件，那么将交由内部处理。
-        if (!isIntercept && isRoute) {
+    override fun dispatchRoute(route: Route) {
+        val panel = panelStacks[route.panelKey]
+        if (panel == null || !showPanels.contains(route.panelKey))
+            parentRouter.dispatchRoute(route)
+        else panel.pageRouter.let {
             val address = addresses.find { it.path == route.address }
             if (address == null) {
                 loge("MRouter", "not yet register the address：${route.address}")
-                return true
+                return
             }
-//            val isLocal = layoutKey == Constants.defaultLocal
-
-            val panel = panelStacks[route.layoutKey]
-            // 如果这个时候，panel还是空，那么证明该panel就没有实现
-            if (panel == null || !localPanelShow) {
-                val newRoute = route.copy(layoutKey = null)
-                parentRouter.route(newRoute)
-                return true
-            } else panel.pageRouter.let {
-                val temp = if (localPanelShow) address else address.let { address ->
-                    address.copy(config = address.config.copy(launchSingleTop = true))
-                }
-                it.route(createPageEntry(route, temp, PanelRouter(addresses,it), true))
-            }
-//            if (isLocal && !localPanelShow) {
-//                val routeBuild = routeBuild(Constants.defaultPrivateLocal).copy(flag = route.flag, windowOptions = route.windowOptions, transform = route.transform)
-//                val entry = createLocalPanelEntry(routeBuild,this)
-////                val localAddress = addresses.find { it.path == routeBuild.address }
-////                val entry = createPageEntry(routeBuild, localAddress!!, this)
-//                parentRouter.route(entry)
-//            }
-            return true
+            it.route(createPageEntry(route, address, PanelRouter(addresses, it), true))
         }
-        return false
+
     }
 
 
-    internal fun showWithLocal() {
-        if (localPanelShow) return
-        localPanelShow = true
-        if (parentRouter.backStack.findTopEntry()?.isLocalPanelEntry() == true)
-            parentRouter.backStack.pop(false)
-        panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
+    internal fun showPanel(panelKey: String) {
+        if (!showPanels.contains(panelKey)) {
+            showPanels.add(panelKey)
+            panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
+        }
     }
 
-    internal fun hideWithLocal() {
-        if (!localPanelShow) return
-        localPanelShow = false
-        panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE) }
+    internal fun hidePanel(panelKey: String) {
+        if (showPanels.remove(panelKey))
+            panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE) }
     }
 
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
-        if (localPanelShow) panelStacks.forEach { it.value.handleLifecycleEvent(event) }
+        panelStacks.forEach { (key, panelEntry) ->
+            if (showPanels.contains(key))
+                panelEntry.handleLifecycleEvent(event)
+        }
     }
 
     override fun backPressed(notInterceptor: () -> Boolean) {

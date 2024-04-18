@@ -24,7 +24,9 @@ fun PanelDemo() = Page {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(onClick = {
-                route("local:first")
+                route("first"){
+                    panel("local")
+                }
             }) {
                 Text("first")
             }

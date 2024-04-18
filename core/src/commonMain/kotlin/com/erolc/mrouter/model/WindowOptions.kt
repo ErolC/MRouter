@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.Constants
 
 /**
  * @param id Window的id
@@ -29,5 +30,6 @@ data class WindowOptions(
     val size: DpSize = DpSize(800.dp, 720.dp),
     val position: DpOffset = DpOffset.Zero,
     val alignment: Alignment? = Alignment.Center,
-    val state: WindowState = WindowState.Floating
+    val state: WindowState = WindowState.Floating,
+    val currentWindowId: String = Constants.defaultWindow
 )

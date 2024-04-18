@@ -15,9 +15,9 @@ import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.SysBackPressed
-import com.erolc.mrouter.route.router.EmptyRouter
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
+import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LifecycleEventListener
@@ -60,11 +60,7 @@ open class PageEntry internal constructor(
     private val isIntercept get() = scope.isIntercept
 
     // 管理当前页面的路由器
-    private val pageRouter: PageRouter
-        get() {
-            val router = scope.router
-            return if (router is PanelRouter) router.parentRouter else router.parentRouter as PageRouter
-        }
+    private val pageRouter: PageRouter get() = scope.router.parentRouter as PageRouter
 
     //生命周期事件监听器
     private val listener = object : LifecycleEventListener {
@@ -87,11 +83,12 @@ open class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
+        val windowScope = LocalWindowScope.current
+        scope.windowId = windowScope.id
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
 
-            val windowScope = LocalWindowScope.current
             SystemLifecycle(::onEventCall)
             val state by rememberPrivateInPage(
                 "page_transform_state",
@@ -129,8 +126,15 @@ open class PageEntry internal constructor(
 
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = Resume
-            if (exitFinished && !pageRouter.backStack.pop()) isExit = true
+
+            if (exitFinished && !pageRouter.backStack.pop())
+                if (pageRouter.parentRouter is WindowRouter)
+                    isExit = true
+                else
+                    pageRouter.parentRouter.backPressed()
+
             if (resume) onResume()
+
             if (pause) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
@@ -153,7 +157,7 @@ open class PageEntry internal constructor(
             }
         }
         state.targetState = transformState.value
-        if (isExit && !isIntercept && scope.router !is EmptyRouter) ExitImpl()
+        if (isExit && !isIntercept) ExitImpl()
     }
 
     @Composable
@@ -219,7 +223,6 @@ open class PageEntry internal constructor(
     override fun destroy() {
         isDestroy.value = true
     }
-
 
     internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
         registry.handleLifecycleEvent(event)
