@@ -1,6 +1,6 @@
 lsi: false
 safe: true
-source: https://github.com/ErolC/MRouter
+source: https://github.com/ErolC/MRouter/docs
 incremental: false
 highlighter: rouge
 gist:
