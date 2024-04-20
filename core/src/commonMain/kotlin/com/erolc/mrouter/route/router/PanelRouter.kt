@@ -6,6 +6,7 @@ import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.backstack.BackStack
+import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.utils.loge
 
 /**
@@ -27,7 +28,7 @@ class PanelRouter(
     }
 
     private fun createEntry(route: Route, address: Address): PanelEntry {
-        return PanelEntry(Address(route.panelKey!!)).also {
+        return PanelEntry(Address(route.panelOptions?.key!!)).also {
             it.newPageRouter(route, address)
         }
     }
@@ -45,8 +46,7 @@ class PanelRouter(
     }
 
     internal fun route(key: String, route: Route) {
-
-        panelStacks[key] ?: initPanel(route.copy(panelKey = key))
+        panelStacks[key] ?: initPanel(route.copy(panelOptions = PanelOptions(key)))
     }
 
     private fun initPanel(route: Route) {
@@ -55,7 +55,7 @@ class PanelRouter(
             loge("MRouter", "not yet register the address：${route.address}")
             return
         }
-        panelStacks[route.panelKey!!] = createEntry(route, address)
+        panelStacks[route.panelOptions?.key!!] = createEntry(route, address)
 
     }
 
@@ -64,8 +64,8 @@ class PanelRouter(
     }
 
     override fun dispatchRoute(route: Route) {
-        val panel = panelStacks[route.panelKey]
-        if (panel == null || !showPanels.contains(route.panelKey))
+        val panel = panelStacks[route.panelOptions?.key]
+        if (panel == null || !showPanels.contains(route.panelOptions?.key))
             parentRouter.dispatchRoute(route)
         else panel.pageRouter.let {
             val address = addresses.find { it.path == route.address }
@@ -73,7 +73,7 @@ class PanelRouter(
                 loge("MRouter", "not yet register the address：${route.address}")
                 return
             }
-            it.route(createPageEntry(route, address, PanelRouter(addresses, it), true))
+            it.route(createPageEntry(route, address, PanelRouter(addresses, it), route.panelOptions?.clearTask == true))
         }
 
     }

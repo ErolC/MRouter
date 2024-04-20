@@ -25,32 +25,34 @@ import kotlin.math.roundToInt
 
 
 /**
- * 手势包裹层，是用于给页面的外部包裹一层手势
+ * 变换包裹层，在这里可以同时控制当前页面和前一个页面的变化。
  */
-abstract class GestureWrap {
+abstract class TransformWrap {
     internal var isUseContent = false
     internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
     internal var gestureModifier = PauseModifierPost { Modifier }
 
-    private val scope = GestureWrapScope()
+    private val scope = TransformWrapScope()
 
     /**
      * 这是内容部分，应当被包裹的部分，必须调用
      */
-    internal var content: @Composable () -> Unit = {}
-        private set
+    private var content: @Composable () -> Unit = {}
         get() {
             isUseContent = true
             return field
         }
 
+    /**
+     * 页面内容其中的content就是注册的compose
+     */
     @Composable
     fun PageContent(modifier: Modifier) {
         Surface(
             modifier.clickable(MutableInteractionSource(), null) { }.fillMaxSize(),
             color = Color.Transparent
         ) {
-            CompositionLocalProvider(LocalGestureWrapScope provides scope) {
+            CompositionLocalProvider(LocalTransformWrapScope provides scope) {
                 content()
             }
         }
@@ -64,8 +66,8 @@ abstract class GestureWrap {
     }
 
     /**
-     * 用于包裹[content]和手势操作的
-     * @param progress 进度，当产生手势操作时务必改变进度，以便更新界面，该进度为关闭页面进度，范围是[0-1]。
+     * 用于包裹[PageContent]和手势操作的
+     * @param progress 进度，当产生手势操作时务必改变进度，以便更新界面，该进度为关闭页面进度，范围是[0-1]。可参考[NormalTransformWrap]和[ModalTransformWrap]
      */
     @Composable
     abstract fun Wrap(modifier: Modifier, progress: (Float) -> Unit)
@@ -95,7 +97,7 @@ abstract class GestureWrap {
 }
 
 /**
- * 由拖拽手势生成的两个modifier，具体可参考[ModalGestureWrap]和[NormalGestureWrap]
+ * 由拖拽手势生成的两个modifier，具体可参考[ModalTransformWrap]和[NormalTransformWrap]
  * 该方法有一定的局限性，如果需要不同的手势操作请自行实现
  * @param orientation 方向
  * @param progress 进度
@@ -104,7 +106,7 @@ abstract class GestureWrap {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GestureWrap.rememberDraggableModifier(
+fun TransformWrap.rememberDraggableModifier(
     orientation: Orientation = Orientation.Horizontal,
     progress: (Float) -> Unit,
     proportion: Float = 1f,

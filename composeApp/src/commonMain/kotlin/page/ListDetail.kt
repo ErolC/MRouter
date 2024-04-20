@@ -2,10 +2,12 @@ package page
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,16 +28,23 @@ fun ListDetail() = Page {
     val items = rememberInPage("") {
         (0..100).map { Content("item$it", it) }
     }
+
     Row {
-        LazyColumn(modifier = Modifier.weight(1f).zIndex(1f).background(Color.Blue)) {
-            items(items) {
-                Text(it.name, Modifier.fillMaxWidth().clickable {
-                    route("local:detail?id=${it.id}"){
-                        transform = normal()
-                    }
-                })
+        Column(modifier = Modifier.weight(1f).zIndex(1f)) {
+            Button(onClick = {
+                backPressed()
+            }) {
+                Text("back")
+            }
+            LazyColumn(modifier = Modifier.background(Color.Blue)) {
+                items(items) {
+                    Text(it.name, Modifier.fillMaxWidth().clickable {
+                        route("local:detail?id=${it.id}")
+                    })
+                }
             }
         }
+
         PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
             loge("tag", "isAttach:$it")
         })
@@ -48,7 +57,7 @@ fun Detail() = Page {
     val id = args.getData<Int>("id")
     Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
     EventObserver { lifecycleOwner, event ->
-        loge("tag","id:$id owner:$lifecycleOwner event:$event")
+        loge("tag", "id:$id owner:$lifecycleOwner event:$event")
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +28,11 @@ fun Transition<ShareState>.padding(isStart:Boolean) = animateDp { it.transform(i
 @Composable
 fun Share() = Page {
     Row(Modifier.fillMaxSize()) {
+        Button(onClick = {
+            backPressed()
+        }){
+            Text("back")
+        }
         Spacer(Modifier.weight(1f))
         Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp)) {
             val corner by animateDp {

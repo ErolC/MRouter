@@ -24,6 +24,6 @@ data class Route internal constructor(
     val windowOptions: WindowOptions,
     val args: Args = emptyArgs,
     val onResult: (Args) -> Unit = {},
-    val panelKey: String? = null,
+    val panelOptions: PanelOptions? = null,
     val transform: Transform = Transform.None,
 )

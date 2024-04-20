@@ -27,18 +27,18 @@ import kotlin.math.roundToInt
 fun modal(scale: Float = 0.9f) = buildTransform {
     enter = slideInVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    gesture = ModalGestureWrap(scale + 0.04f)
+    wrap = ModalTransformWrap(scale + 0.04f)
 }
 
 fun normal() = buildTransform {
     enter = slideInHorizontally { it }
     prevPause = slideOutHorizontally { -it / 7 }
-    gesture = NormalGestureWrap()
+    wrap = NormalTransformWrap()
 }
 
 fun none() = buildTransform {
     enter = slideInHorizontally { it }
-    gesture = NoneGestureWrap()
+    wrap = NoneTransformWrap()
 }
 
 /**
@@ -52,10 +52,10 @@ fun shareEle(
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect> =
         { spring(visibilityThreshold = Rect.VisibilityThreshold) },
-    gesture: GestureWrap = ShareGestureWrap(*keys, transitionSpec = transitionSpec)
+    gesture: TransformWrap = ShareGestureWrap(*keys, transitionSpec = transitionSpec)
 ) = buildTransform {
     enter = fadeIn(animationSpec)
-    this.gesture = gesture
+    this.wrap = gesture
 }
 
 @Stable
@@ -324,9 +324,9 @@ class TransformBuilder {
     var enter: EnterTransition = EnterTransition.None
     var exit: ExitTransition = ExitTransition.None
     var prevPause: ExitTransition = ExitTransition.None
-    var gesture: GestureWrap = NoneGestureWrap()
+    var wrap: TransformWrap = NoneTransformWrap()
     internal fun build(): Transform {
-        return Transform(enter, exit, prevPause, gesture)
+        return Transform(enter, exit, prevPause, wrap)
     }
 }
 
@@ -347,7 +347,7 @@ data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _exit: ExitTransition = ExitTransition.None,
     internal val prevPause: ExitTransition = ExitTransition.None,
-    internal val gesture: GestureWrap = NoneGestureWrap()
+    internal val gesture: TransformWrap = NoneTransformWrap()
 ) {
 
     companion object {
@@ -367,7 +367,7 @@ data class Transform internal constructor(
                         || PauseState isTransitioningTo Resume
                         || PauseState isTransitioningTo PauseState -> prevPause.data
 
-                targetState is Reverse || initialState is Reverse -> prevPause.data
+                targetState is Pausing || initialState is Pausing -> prevPause.data
 //                targetState is TransitionState || initialState is TransitionState -> exit.data
                 else -> TransformData.None
             }
@@ -664,12 +664,12 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
         when (targetState) {
             Resume -> fullSize
             PreEnter, PostExit, PauseState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
-            is Reverse -> {
+            is Pausing -> {
                 val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
                 startValue.compute(targetState.progress, fullSize)
             }
 
-            is TransitionState -> {
+            is Exiting -> {
                 val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
                 var newWidth = startValue.width * 1.0f
                 var newHeight = startValue.height * 1.0f
@@ -702,12 +702,12 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             PreEnter -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
             PostExit -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
             PauseState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            is Reverse -> {
+            is Pausing -> {
                 val start = transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
                 start.compute(targetState.progress)
             }
 
-            is TransitionState -> {
+            is Exiting -> {
                 val start = transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
                 start.compute(targetState.progress)
             }
@@ -874,7 +874,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             when (it) {
                 Resume -> 1f
                 PreEnter, PostExit, PauseState -> transformData.fade?.alpha ?: 1f
-                is TransitionState -> it.progress
+                is Exiting -> it.progress
                 else -> {
                     val startValue = transformData.fade?.alpha ?: 1f
                     it.progress * (1 - startValue) + startValue
@@ -890,7 +890,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             when (it) {
                 Resume -> 1f
                 PreEnter, PostExit, PauseState -> transformData.scale?.scale ?: 1f
-                is TransitionState -> it.progress
+                is Exiting -> it.progress
                 else -> {
                     val startValue = transformData.scale?.scale ?: 1f
                     it.progress * (1 - startValue) + startValue

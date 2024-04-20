@@ -39,7 +39,11 @@ class WindowEntry(
 
     fun shouldExit(): Boolean {
         return (pageRouter.parentRouter as WindowRouter)
-            .backStack.backStack.value.none { !scope.isCloseWindow.value }
+            .backStack.backStack.value.none {
+                it as WindowEntry
+                val isClose by it.scope.isCloseWindow
+                !isClose
+            }
     }
 
     @Composable

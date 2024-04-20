@@ -1,8 +1,7 @@
 package com.erolc.mrouter.route
 
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.dialog.DialogBuilder
-import com.erolc.mrouter.dialog.DialogOptions
+import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.utils.isMobile
 import com.erolc.mrouter.model.WindowOptions
@@ -28,7 +27,7 @@ class RouteBuilder {
 
     var transform: Transform = none()
 
-    var panelKey: String? = null
+    private var panelOptions: PanelOptions? = null
 
     fun transform(body: TransformBuilder.() -> Unit) {
         transform = buildTransform(body)
@@ -74,9 +73,11 @@ class RouteBuilder {
     /**
      * 在当前界面寻找[key]的panel，并将页面路由到其中，该key也可以直接添加在路径上，格式是：key:path
      * 如果两处都设置，以该方法为准。
+     * @param key panel的key
+     * @param clearTask 是否清空页面栈。注意该属性仅仅只会清除panel的页面栈
      */
-    fun panel(key: String) {
-        panelKey = key
+    fun panel(key: String, clearTask: Boolean = true) {
+        panelOptions = PanelOptions(key, clearTask)
     }
 
     internal fun build(route: String): Route {
@@ -98,7 +99,8 @@ class RouteBuilder {
             windowOptions,
             args,
             onResult,
-            panelKey?:key,
+            panelOptions ?: key?.let { PanelOptions(it, false) },
+
             transform
         )
     }

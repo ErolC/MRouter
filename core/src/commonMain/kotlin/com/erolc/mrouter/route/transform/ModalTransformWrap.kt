@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 /**
  * 类ios的Modal手势实现，在页面route时设置[modal]即可使用
  */
-class ModalGestureWrap(private val proportion: Float) : GestureWrap() {
+class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
 

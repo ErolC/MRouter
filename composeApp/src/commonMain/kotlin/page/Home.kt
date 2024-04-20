@@ -17,15 +17,16 @@ import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
+import com.erolc.mrouter.utils.isDesktop
 import com.erolc.mrouter.utils.loge
 
 data class Future(val name: String, val value: String)
 
 @Composable
 fun Home() = Page {
-    EventObserver { lifecycleOwner, event ->
-        loge("tag","$event")
-    }
+//    EventObserver { lifecycleOwner, event ->
+//        loge("tag","$event")
+//    }
     val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),
@@ -36,7 +37,8 @@ fun Home() = Page {
             Future("共享元素", "share"),
             Future("动画", "anim"),
             Future("手势", "gesture"),
-        )
+            if(isDesktop) Future("多窗口","window") else null
+        ).filterNotNull()
     }
     Row(modifier = Modifier.fillMaxWidth()) {
         LazyColumn(
@@ -54,7 +56,9 @@ fun Home() = Page {
                             "share" -> route("share")
                             "anim" -> route("anim")
                             "list" -> route("list")
-                            "gesture" -> {
+                            "gesture" -> route("gesture")
+                            "window" ->route("first"){
+                                window("secondWindow","这是第二个窗口")
                             }
                         }
                     }) {

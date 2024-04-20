@@ -150,7 +150,7 @@ open class PageEntry internal constructor(
                     transformState.value = when (it) {
                         0f -> Resume
                         1f -> PostExit
-                        else -> TransitionState(1 - it)
+                        else -> Exiting(1 - it)
                     }
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
@@ -190,7 +190,7 @@ open class PageEntry internal constructor(
 
             Resume -> updatePrevTransform(entry)
             PauseState -> PauseState
-            else -> Reverse(1 - state.progress)
+            else -> Pausing(1 - state.progress)
         }
     }
 

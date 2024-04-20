@@ -14,36 +14,37 @@ sealed class TransformState(open val progress: Float)
  * 入场前
  */
 @Immutable
-internal data object PreEnter : TransformState(0f)
+data object PreEnter : TransformState(0f)
 
 /**
- * 退出状态/结束状态；代表一个页面已经消亡，即将脱离compose树。
+ * 退出状态/结束状态；transform的结尾
  */
 @Immutable
-internal data object PostExit : TransformState(0f)
+data object PostExit : TransformState(0f)
 
 /**
- * 显示状态，visibility
+ * 显示状态
  */
 @Immutable
-internal data object Resume : TransformState(1f)
+data object Resume : TransformState(1f)
 
 /**
  * 暂停状态；代表后一个页面已经显示了，当前界面已经变为前一个页面，该页面暂停
  */
 @Immutable
-internal data object PauseState : TransformState(0f)
+data object PauseState : TransformState(0f)
 
 /**
- * 从[Resume]到[PostExit]的中间态，用于手势过程
+ * 从[Resume]到[PostExit]的中间态，用于手势过程，代表正在退出
  */
 @Immutable
-internal data class TransitionState(override val progress: Float) : TransformState(progress)
+data class Exiting(override val progress: Float) : TransformState(progress)
+
 /**
- * 从[PauseState]到[Resume]的中间态,用于手势过程
+ * 从[PauseState]到[Resume]的中间态,用于手势过程，代表正在暂停
  */
 @Immutable
-internal data class Reverse(override val progress: Float) : TransformState(progress)
+data class Pausing(override val progress: Float) : TransformState(progress)
 
 /**
  * 获取变换的transition
