@@ -15,11 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.loge
 
 
 @Composable
@@ -93,12 +91,8 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
     val transition = rememberTransformTransition()
     val padding by transition.animateDp {
         when (it) {
-            PreEnter -> 200.dp// 页面进入
-            Resume -> 30.dp// 页面显示
-            PostExit -> 10.dp// 页面退出
-            is Exiting -> (300 - 300 * it.progress).dp// 页面正在手势的过程中，是在Resume到PostExit的过程中 1-0
-            is Pausing -> (300 * it.progress).dp// 页面正在手势的过程中，是在Resume到PauseState的过程中 1-0
-            else -> 0.dp
+            EnterState -> 200.dp// 页面进入
+            else -> it.between(30f, 300f).dp
         }
     }
     Column {
@@ -109,7 +103,8 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
                 modifier = Modifier.padding(top = padding)
             )
 
-            "modal" -> Text("可将手指或鼠标通过拖拽页面的最上方实现向下滑动后退")
+            "modal" -> Text("可将手指或鼠标通过拖拽页面的最上方实现向下滑动后退",
+                modifier = Modifier.padding(top = padding))
             else -> Button(onClick = {
                 backPressed()
             }, modifier = Modifier.padding(top = padding)) {

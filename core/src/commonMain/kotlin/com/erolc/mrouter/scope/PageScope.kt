@@ -8,7 +8,7 @@ import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.route.transform.PreEnter
+import com.erolc.mrouter.route.transform.EnterState
 import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
@@ -37,7 +37,7 @@ open class PageScope : LifecycleOwner {
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
     private lateinit var _lifecycle: Lifecycle
-    internal val transformState = mutableStateOf<TransformState>(PreEnter)
+    internal val transformState = mutableStateOf<TransformState>(EnterState)
     internal var transformTransition: Transition<TransformState>? = null
     internal val isIntercept = mutableStateOf(false)
 

@@ -2,7 +2,6 @@ package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.Snapshot
 import com.erolc.mrouter.scope.LocalPageScope
 
 /**
@@ -22,12 +21,18 @@ class PageCache {
     }
 }
 
+sealed interface CacheState
 
-fun <T : Any> PageCache.cache(key: String, invalid: Boolean, block: () -> T): T {
-    return getValue(key).let {
+internal data object PrivateCache : CacheState
+data object NormalCache : CacheState
+
+
+fun <T : Any> PageCache.cache(key: String, invalid: Boolean, state: CacheState = NormalCache, block: () -> T): T {
+    val realKey = if (state == NormalCache) "cache_$key" else key
+    return getValue(realKey).let {
         if (invalid || it == null) {
             val value = block()
-            updateValue(key, value)
+            updateValue(realKey, value)
             value
         } else it
     } as T
@@ -45,7 +50,7 @@ inline fun <T : Any> rememberInPage(
 ): T {
     val scope = LocalPageScope.current
     return remember(scope) {
-        scope.pageCache.cache("cache_$key", false, calculation)
+        scope.pageCache.cache(key, invalid = false, block = calculation)
     }
 }
 
@@ -59,7 +64,7 @@ inline fun <T : Any> rememberInPage(
     val scope = LocalPageScope.current
     val invalid = currentComposer.changed(key1)
     return remember(key1, scope) {
-        scope.pageCache.cache("cache_$key", invalid, calculation)
+        scope.pageCache.cache(key, invalid, block = calculation)
     }
 }
 
@@ -75,8 +80,8 @@ inline fun <T : Any> rememberInPage(
 
     return remember(key1, key2, scope) {
         scope.pageCache.cache(
-            "cache_$key",
-            invalid, calculation
+            key,
+            invalid, block = calculation
         )
     }
 }
@@ -94,7 +99,7 @@ inline fun <T : Any> rememberInPage(
         )
 
     return remember(key1, key2, key3, scope) {
-        scope.pageCache.cache("cache_$key", invalid, calculation)
+        scope.pageCache.cache(key, invalid, block = calculation)
     }
 }
 
@@ -109,7 +114,7 @@ fun <T : Any> rememberInPage(
     var invalid = false
     for (temp in inputs) invalid = invalid or currentComposer.changed(temp)
     return remember(inputs, scope) {
-        scope.pageCache.cache("cache_$key", invalid, calculation)
+        scope.pageCache.cache(key, invalid, block = calculation)
     }
 }
 
@@ -121,7 +126,7 @@ internal inline fun <T : Any> rememberPrivateInPage(
 ): T {
     val scope = LocalPageScope.current
     return remember(scope) {
-        scope.pageCache.cache(key, false, calculation)
+        scope.pageCache.cache(key, false, PrivateCache, calculation)
     }
 }
 
@@ -135,12 +140,12 @@ internal inline fun <T : Any> rememberPrivateInPage(
     val scope = LocalPageScope.current
     val invalid = currentComposer.changed(key1)
     return remember(key1, scope) {
-        scope.pageCache.cache(key, invalid, calculation)
+        scope.pageCache.cache(key, invalid, PrivateCache, calculation)
     }
 }
 
 @Composable
-inline fun <T : Any> rememberPrivateInPage(
+internal inline fun <T : Any> rememberPrivateInPage(
     key: String,
     key1: Any?, key2: Any?,
     noinline calculation: @DisallowComposableCalls () -> T
@@ -151,7 +156,7 @@ inline fun <T : Any> rememberPrivateInPage(
     return remember(key1, key2, scope) {
         scope.pageCache.cache(
             key,
-            invalid, calculation
+            invalid, PrivateCache, calculation
         )
     }
 }

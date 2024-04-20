@@ -19,7 +19,10 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
 
         val transform = rememberTransformTransition()
         val corner by transform.animateDp {
-            if (it == Resume) 10.dp else 0.dp
+            when(it){
+                EnterState -> 0.dp
+                else -> it.between(10f,0f).dp
+            }
         }
         val (gestureModifier, pageModifier) = rememberDraggableModifier(
             Orientation.Vertical,
@@ -36,14 +39,9 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     override fun prevPauseModifier(): Modifier {
         val transform = rememberTransformTransition()
         val corner by transform.animateDp {
-            when (it) {
-                Resume -> 0.dp
-                PauseState -> 10.dp
-                else -> {
-                    val size = (1 - it.progress) * 10
-                    (if (size<0) 0f else size).dp
-                }
-
+            when(it){
+                EnterState -> 0.dp
+                else -> it.between(0f,10f).dp
             }
         }
         return Modifier.clip(RoundedCornerShape(corner))

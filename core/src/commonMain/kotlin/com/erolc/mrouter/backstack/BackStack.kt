@@ -10,7 +10,7 @@ import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
-import com.erolc.mrouter.route.transform.PostExit
+import com.erolc.mrouter.route.transform.ExitState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -102,7 +102,7 @@ open class BackStack(val name: String) {
         return if (_backstack.value.size > threshold) {
             isPreBack = true
             val resumePage = _backstack.value.last() as PageEntry
-            resumePage.transformState.value = PostExit
+            resumePage.transformState.value = ExitState
             ShareEleController.exitShare()
             true
         } else if (parentRouter is WindowRouter) {

@@ -13,9 +13,8 @@ import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.scope.WindowScope
-import com.erolc.mrouter.route.transform.Resume
+import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.utils.PlatformWindow
-import com.erolc.mrouter.utils.loge
 
 /**
  * window域
@@ -54,7 +53,7 @@ class WindowEntry(
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
                     if (stack.size == 1)
-                        (stack.first() as PageEntry).transformState.value = Resume
+                        (stack.first() as PageEntry).transformState.value = ResumeState
                     else
                         (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
 

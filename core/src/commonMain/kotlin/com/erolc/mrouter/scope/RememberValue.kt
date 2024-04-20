@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
+import com.erolc.mrouter.utils.PrivateCache
 import com.erolc.mrouter.utils.cache
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
@@ -16,7 +17,7 @@ import com.erolc.mrouter.utils.rememberInPage
 internal fun <T : Any> rememberInWindow(key:String,init: () -> T): T {
     val scope = LocalWindowScope.current
     return remember(scope) {
-        scope.pageCache.cache(key,false, init)
+        scope.pageCache.cache(key,false, PrivateCache,init)
     }
 }
 

@@ -7,14 +7,8 @@ import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
-import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
-import com.erolc.mrouter.route.transform.PauseState
-import com.erolc.mrouter.route.transform.Resume
-import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.scope.default
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.logi
+import com.erolc.mrouter.route.transform.ResumeState
 
 /**
  * 局部界面的元素
@@ -32,11 +26,11 @@ class PanelEntry(override val address: Address) : StackEntry {
         Box(modifier.fillMaxSize()) {
             val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
             val last = (stack.last() as PageEntry).also {
-                if (isLocalPageEntry) it.transformState.value = Resume
+                if (isLocalPageEntry) it.transformState.value = ResumeState
             }
 
             if (stack.size == 1)
-                (stack.first() as PageEntry).transformState.value = Resume
+                (stack.first() as PageEntry).transformState.value = ResumeState
             else
                 last.shareTransform(stack.first() as PageEntry)
             stack.forEach { it.Content(Modifier) }

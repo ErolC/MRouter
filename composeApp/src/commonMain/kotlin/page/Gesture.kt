@@ -28,20 +28,16 @@ fun Gesture() = Page {
     }
     val transition = rememberTransformTransition()
     val padding by transition.animateDp {
-        when(it){
-            PreEnter -> 200.dp
-            Resume ->30.dp
-            PostExit -> 10.dp
-            is Exiting -> (300 * it.progress).dp
-            is Pausing -> (300-300 * it.progress).dp
-            else -> 0.dp
+        when (it) {
+            EnterState -> 200.dp
+            else -> it.between(300f, 30f).dp
         }
     }
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Button(onClick = {
             backPressed()
-        },Modifier.padding(top = padding)){
+        }, Modifier.padding(top = padding)) {
             Text("back")
         }
         LazyColumn(
@@ -53,11 +49,11 @@ fun Gesture() = Page {
                     Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
                         when (it.value) {
                             "normal" -> route("target?gesture=normal") {
-                               transform = normal()
+                                transform = normal()
                             }
 
                             "modal" -> route("target?gesture=modal") {
-                               transform = modal()
+                                transform = modal()
                             }
                         }
                     }) {

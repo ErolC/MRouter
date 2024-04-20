@@ -94,7 +94,7 @@ open class PageEntry internal constructor(
                 "page_transform_state",
                 transformState
             ) { transformState }
-            if (state == Resume)
+            if (state == ResumeState)
                 start()
 
             DisposableEffect(this) {
@@ -125,7 +125,7 @@ open class PageEntry internal constructor(
 
 
         val transition = rememberTransition(state).apply {
-            if (enterStart) transformState.value = Resume
+            if (enterStart) transformState.value = ResumeState
 
             if (exitFinished && !pageRouter.backStack.pop())
                 if (pageRouter.parentRouter is WindowRouter)
@@ -148,9 +148,9 @@ open class PageEntry internal constructor(
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
-                        0f -> Resume
-                        1f -> PostExit
-                        else -> Exiting(1 - it)
+                        0f -> ResumeState
+                        1f -> ExitState
+                        else -> ExitingState(1 - it)
                     }
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
@@ -182,15 +182,15 @@ open class PageEntry internal constructor(
             transformState
         }
         entry.transformState.value = when (state) {
-            PreEnter -> Resume
-            PostExit -> {
+            EnterState -> ResumeState
+            ExitState -> {
                 transform.value.gesture.releasePauseModifier()
-                Resume
+                ResumeState
             }
 
-            Resume -> updatePrevTransform(entry)
+            ResumeState -> updatePrevTransform(entry)
             PauseState -> PauseState
-            else -> Pausing(1 - state.progress)
+            else -> PausingState(1 - state.progress)
         }
     }
 
