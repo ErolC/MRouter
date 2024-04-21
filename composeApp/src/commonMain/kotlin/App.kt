@@ -6,8 +6,8 @@ import page.*
 import page.Target
 
 @Composable
-fun App() {
-    MaterialTheme {
+fun App(typography: Typography = MaterialTheme.typography) {
+    MaterialTheme(typography = typography) {
         RouteHost("home") {
             page("home") { Home() }
             page("first") { First() }

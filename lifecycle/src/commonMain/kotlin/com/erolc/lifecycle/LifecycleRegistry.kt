@@ -1,6 +1,5 @@
 package com.erolc.lifecycle
 
-import androidx.annotation.VisibleForTesting
 
 class LifecycleRegistry(private val lifecycleOwner: LifecycleOwner) : Lifecycle() {
 
@@ -196,7 +195,6 @@ class LifecycleRegistry(private val lifecycleOwner: LifecycleOwner) : Lifecycle(
          *
          * Another possible use-case for this method is JVM testing, when main thread is not present.
          */
-        @VisibleForTesting
         fun createUnsafe(owner: LifecycleOwner): LifecycleRegistry {
             return LifecycleRegistry(owner)
         }

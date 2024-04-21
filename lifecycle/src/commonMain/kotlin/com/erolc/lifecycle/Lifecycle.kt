@@ -1,6 +1,5 @@
 package com.erolc.lifecycle
 
-import androidx.annotation.UiThread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +21,6 @@ abstract class Lifecycle {
      *
      * @param observer The observer to notify.
      */
-    @UiThread
     abstract fun addObserver(observer: LifecycleObserver)
 
     /**
@@ -38,7 +36,6 @@ abstract class Lifecycle {
      *
      * @param observer The observer to be removed.
      */
-    @UiThread
     abstract fun removeObserver(observer: LifecycleObserver)
 
     /**
@@ -46,7 +43,6 @@ abstract class Lifecycle {
      *
      * @return The current state of the Lifecycle.
      */
-    @get:UiThread
     abstract val currentState: State
 
     enum class Event {
