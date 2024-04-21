@@ -33,7 +33,7 @@ fun Home() = Page {
             Future("带参的路由跳转", "arg"),
             Future("带返回值的路由跳转", "return"),
             Future("局部路由", "panel"),
-            Future("列表詳情", "list"),
+            Future("列表详情", "list"),
             Future("共享元素", "share"),
             Future("动画", "anim"),
             Future("手势", "gesture"),
