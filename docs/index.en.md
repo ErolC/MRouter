@@ -70,4 +70,4 @@ fun main() {
 }
 ```
 
-Please note that `compose-wasm` is currently experimental and may have more bugs than other platforms. Please use it with caution.
+Please note that `compose-wasm` is currently experimental stage and may have more bugs than other platforms. Please use it with caution.
