@@ -1,14 +1,13 @@
 # MRouter
 
-这是一个可用于compose-multiplatform的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
+This is a routing library suitable for `compose-multiplatform`, which implements a series of basic functions such as routing, parameter transfer, animation, gestures, lifecycle, shared elements, and local routing<br>
+At present, the library supports `Android`, `iOS`, `JVM`, and `web`
 
-## use
-
-我们首先需要在common中创建Compose页面的根部，然后实现各个平台的入口即可。代码如下
+## usage
+We first need to create the root of the `Compose` page in `common`, and then implement the entry points for each platform. 
 
 ### common
-
-在common中创建RouteHost
+Create `RouteHost` in `common`
 
 ```kotlin
 @Composable
@@ -26,8 +25,7 @@ fun App() {
 }
 ```
 
-`RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将展现`home()`页面。
-
+`RouteHost` is the starting point of routing, and `compose` is registered as a page using the `page` method. The above example will first display the `home()` page when opening the app.
 ### android
 
 ```kotlin
@@ -35,7 +33,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            App() // 使用common的App()
+            App() // Using the common App()
         }
     }
 }
@@ -49,7 +47,7 @@ fun main() = mRouterApplication {
 }
 ```
 
-由于需要管理window，所以从application开始定义。没错，desktop在使用该库是可以多窗口运行的。
+Due to the need to manage `window`, define from `application` onwards. That's right, `desktop` can run in multiple windows when using this library.
 
 ### ios
 
@@ -59,7 +57,7 @@ fun MainViewController() = LifecycleUIViewController {
 }
 ```
 
-由于需要管理页面的生命周期，于是ios需要如上述处理。
+Due to the need to manage the lifecycle of pages, `iOS` also needs to do the same.
 
 ### web
 
@@ -72,4 +70,4 @@ fun main() {
 }
 ```
 
-需要注意由于compose-wasm正处于实验性。
+Please note that `compose-wasm` is currently experimental and may have more bugs than other platforms. Please use it with caution.

@@ -323,7 +323,7 @@ private fun Alignment.Vertical.toAlignment() =
 class TransformBuilder {
     var enter: EnterTransition = EnterTransition.None
     var exit: ExitTransition = ExitTransition.None
-    var prevPause: ExitTransition = ExitTransition.None
+    var prevPause: ExitTransition = slideOutHorizontally { 0 }
     var wrap: TransformWrap = NoneTransformWrap()
     internal fun build(): Transform {
         return Transform(enter, exit, prevPause, wrap)
@@ -346,7 +346,7 @@ fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
 data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _exit: ExitTransition = ExitTransition.None,
-    internal val prevPause: ExitTransition = ExitTransition.None,
+    internal val prevPause: ExitTransition = slideOutHorizontally { 0 },
     internal val gesture: TransformWrap = NoneTransformWrap()
 ) {
 
