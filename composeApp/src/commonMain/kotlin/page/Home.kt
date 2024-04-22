@@ -24,9 +24,9 @@ data class Future(val name: String, val value: String)
 
 @Composable
 fun Home() = Page {
-//    EventObserver { lifecycleOwner, event ->
-//        loge("tag","$event")
-//    }
+    EventObserver { lifecycleOwner, event ->
+        loge("tag","$event")
+    }
     val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),

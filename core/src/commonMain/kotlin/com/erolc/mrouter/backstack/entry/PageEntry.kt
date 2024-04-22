@@ -98,14 +98,10 @@ open class PageEntry internal constructor(
                 start()
 
             DisposableEffect(this) {
-                if (scope.router is PanelRouter)
-                    windowScope.addLifecycleEventListener(listener)
                 onDispose {
                     scope.transformTransition = null
                     if (isDestroy.value) {
                         ShareEleController.afterShare(this@PageEntry)
-                        if (scope.router is PanelRouter)
-                            windowScope.removeLifeCycleEventListener(listener)
                         handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                     }
                 }
@@ -219,7 +215,12 @@ open class PageEntry internal constructor(
     internal fun start() = upFromEvent(Lifecycle.State.CREATED)
     internal fun resume() = upFromEvent(Lifecycle.State.STARTED)
     internal fun pause() = downFromEvent(Lifecycle.State.RESUMED)
-    internal fun stop() = downFromEvent(Lifecycle.State.STARTED)
+
+    /**
+     * 这里之所以直接指定事件是因为window在最小化的时候会先调用windowIconified再调用windowLostFocus导致状态会丢失。
+     * 这样做的目的是为了忽略windowLostFocus事件。
+     */
+    internal fun stop() = handleLifecycleEvent(Lifecycle.Event.ON_STOP) //downFromEvent(Lifecycle.State.STARTED)
     override fun destroy() {
         isDestroy.value = true
     }
