@@ -33,11 +33,13 @@ actual fun PlatformWindow(
     entry: WindowEntry,
     content: @Composable () -> Unit
 ) {
-    val dpSize = DpSize(window.outerWidth.dp, window.outerHeight.dp)
-    val size by remember(dpSize) {
-        mutableStateOf(WindowSize.calculateFromSize(dpSize))
+    var size by remember {
+        mutableStateOf(DpSize(window.innerWidth.dp, window.innerWidth.dp))
     }
-    LocalWindowScope.current.windowSize.value = size
+    window.addEventListener("resize") {
+        size = DpSize(window.innerWidth.dp, window.innerWidth.dp)
+    }
+    LocalWindowScope.current.windowSize.value = WindowSize.calculateFromSize(size)
     content()
 }
 

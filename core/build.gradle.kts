@@ -13,6 +13,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
+        applyBinaryen()
         moduleName = "core"
         browser {
             commonWebpackConfig {
@@ -53,8 +54,7 @@ kotlin {
             implementation(libs.androidx.window)
         }
         desktopMain.dependencies {
-            implementation("com.formdev:flatlaf:2.3")
-          runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+            runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
             implementation(compose.desktop.currentOs)
         }
         commonMain.dependencies {
