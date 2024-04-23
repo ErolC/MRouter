@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
 
 /**
  * 类ios的Modal手势实现，在页面route时设置[modal]即可使用
@@ -30,7 +32,7 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
             proportion
         )
         Box(modifier = modifier then pageModifier) {
-            PageContent(Modifier.clip(RoundedCornerShape(corner)))
+            PageContent(Modifier.clip(RoundedCornerShape(Dp(abs(corner.value)))))
             Box(modifier = gestureModifier)
         }
     }
@@ -44,6 +46,6 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
                 else -> it.between(0f,10f).dp
             }
         }
-        return Modifier.clip(RoundedCornerShape(corner))
+        return Modifier.clip(RoundedCornerShape(Dp(abs(corner.value))))
     }
 }

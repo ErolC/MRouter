@@ -24,10 +24,10 @@ import kotlin.math.roundToInt
  * 并在此之上增加了[Transform]，该类描述了一次转换所需要的动画以及手势
  */
 
-fun modal(scale: Float = 0.9f) = buildTransform {
+fun modal(scale: Float = 0.96f) = buildTransform {
     enter = slideInVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    wrap = ModalTransformWrap(scale + 0.04f)
+    wrap = ModalTransformWrap(scale + 0.005f)
 }
 
 fun normal() = buildTransform {
