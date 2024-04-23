@@ -5,7 +5,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowPlacement
@@ -17,6 +16,7 @@ import com.erolc.mrouter.model.WindowState
 import com.erolc.mrouter.register.RegisterBuilder
 import java.awt.*
 import java.awt.event.ComponentListener
+import java.awt.event.WindowFocusListener
 import java.awt.event.WindowListener
 import java.awt.event.WindowStateListener
 import java.util.*
@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
  * 注册[windowId]对应的窗口菜单
  */
 fun RegisterBuilder.windowMenu(
-    windowId: String = Constants.defaultWindow,
+    windowId: String = Constants.DEFAULT_WINDOW,
     menu: @Composable FrameWindowScope.() -> Unit
 ) {
     registerPlatformResource(windowId, WindowMenu(windowId, menu))
@@ -223,6 +223,11 @@ internal fun windowStateListenerRef() = ListenerOnWindowRef<WindowStateListener>
 internal fun windowListenerRef() = ListenerOnWindowRef<WindowListener>(
     register = Window::addWindowListener,
     unregister = Window::removeWindowListener
+)
+
+internal fun windowFocusListenerRef() = ListenerOnWindowRef<WindowFocusListener>(
+    register = Window::addWindowFocusListener,
+    unregister = Window::removeWindowFocusListener
 )
 
 internal fun componentListenerRef() = ListenerOnWindowRef<ComponentListener>(

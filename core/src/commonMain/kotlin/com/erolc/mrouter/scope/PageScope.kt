@@ -27,9 +27,6 @@ open class PageScope : LifecycleOwner {
     private val result = emptyArgs
     internal var windowId = ""
 
-    //当前页面范围是否是LocalPageEntry
-    internal var isLocalPageEntry = false
-
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
     internal lateinit var router: Router
     var pageCache = PageCache()
@@ -51,7 +48,7 @@ open class PageScope : LifecycleOwner {
 
     private fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY && !isLocalPageEntry) {
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 onResult(result)
                 interceptors.clear()
             }
@@ -65,7 +62,7 @@ open class PageScope : LifecycleOwner {
      * 其中只有address是必须的，?后面接的是参数；而key是[GroupScope]的某个layout
      */
     open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
-        val routeObj = routeBuild(route, builder).let {
+        val routeObj = RouteBuilder(windowId).apply(builder).build(route).let {
             it.copy(windowOptions = it.windowOptions.copy(currentWindowId = windowId))
         }
         router.router(routeObj)
@@ -135,7 +132,6 @@ fun rememberArgs(): Args {
 fun EventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val scope = LocalPageScope.current
     rememberPrivateInPage("page_event") {
-        if (!scope.isLocalPageEntry)
-            scope.lifecycle.addEventObserver(body)
+        scope.lifecycle.addEventObserver(body)
     }
 }

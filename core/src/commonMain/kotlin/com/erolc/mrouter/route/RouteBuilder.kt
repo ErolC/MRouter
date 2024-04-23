@@ -17,9 +17,9 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
 /**
  * 路由构建类，用于构建路由到下一个页面所需的一些数据：参数，回调等。
  */
-class RouteBuilder {
+class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
     private var onResult: (Args) -> Unit = {}
-    private var windowOptions: WindowOptions = WindowOptions(Constants.defaultWindow, "")
+    private var windowOptions: WindowOptions = WindowOptions(currentWindowId, "")
 
     private val args = emptyArgs
 
@@ -62,12 +62,12 @@ class RouteBuilder {
      * @param builder 窗口的设置
      */
     fun window(
-        id: String = Constants.defaultWindow,
-        title: String,
+        id: String = Constants.DEFAULT_WINDOW,
+        title: String = "",
         builder: WindowOptionsBuilder.() -> Unit = {}
     ) {
         windowOptions = WindowOptionsBuilder().apply(builder)
-            .build(if (isMobile) Constants.defaultWindow else id, title)
+            .build(if (isMobile) Constants.DEFAULT_WINDOW else id, title)
     }
 
     /**

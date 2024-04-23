@@ -24,7 +24,7 @@ class PanelRouter(
 
     init {
         if (panelEntry != null)
-            panelStacks[Constants.defaultLocal] = panelEntry
+            panelStacks[Constants.DEFAULT_PANEL] = panelEntry
     }
 
     private fun createEntry(route: Route, address: Address): PanelEntry {
@@ -82,13 +82,13 @@ class PanelRouter(
     internal fun showPanel(panelKey: String) {
         if (!showPanels.contains(panelKey)) {
             showPanels.add(panelKey)
-            panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
         }
+        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     internal fun hidePanel(panelKey: String) {
-        if (showPanels.remove(panelKey))
-            panelStacks.forEach { it.value.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE) }
+        showPanels.remove(panelKey)
+        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     }
 
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
@@ -99,7 +99,6 @@ class PanelRouter(
     }
 
     override fun backPressed(notInterceptor: () -> Boolean) {
-        //panel是不需要后退的，如果其子路由已经无法后退，将事件交给他，那么他也是将这事件交给他的父路由处理即可
         if (notInterceptor()) parentRouter.backPressed(notInterceptor)
     }
 

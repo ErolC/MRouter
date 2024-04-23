@@ -20,9 +20,9 @@ import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareele.ShareEleController
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.scope.LifecycleEventListener
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
@@ -44,7 +44,7 @@ open class PageEntry internal constructor(
     //是否已更新transform，避免二次更新
     private var isUpdateTransform = false
 
-    //路由到当前界面的标识，需要在路由完成时（当前界面完全展示时）执行相应的操作
+    //路由到当前界面的flag，需要在路由完成时（当前界面完全展示时）执行相应的操作
     internal var flag: RouteFlag = NormalFlag
 
     // transform的状态
@@ -62,13 +62,6 @@ open class PageEntry internal constructor(
     // 管理当前页面的路由器
     private val pageRouter: PageRouter get() = scope.router.parentRouter as PageRouter
 
-    //生命周期事件监听器
-    private val listener = object : LifecycleEventListener {
-        override fun call(event: Lifecycle.Event) {
-            onEventCall(event)
-        }
-    }
-
     // 生命周期事件处理
     private fun onEventCall(event: Lifecycle.Event) {
         when (event) {
@@ -83,8 +76,7 @@ open class PageEntry internal constructor(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        val windowScope = LocalWindowScope.current
-        scope.windowId = windowScope.id
+        scope.windowId = LocalWindowScope.current.id
         CompositionLocalProvider(LocalPageScope provides scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
@@ -131,16 +123,14 @@ open class PageEntry internal constructor(
 
             if (resume) onResume()
 
-            if (pause) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+            if (stop) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
-        val transform by rememberPrivateInPage("page_transform", this, transform) { transform }
+        val transform by rememberPrivateInPage("page_transform", transform) { transform }
         Box(transition.createModifier(transform, modifier, "Built-in")) {
             transform.gesture.run {
-                rememberPrivateInPage("page_content") {
-                    setContent(RealContent())
-                }
+                setContent(address.content)
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
@@ -164,11 +154,6 @@ open class PageEntry internal constructor(
         resume()
     }
 
-
-    open fun RealContent(): @Composable () -> Unit {
-        return address.content
-    }
-
     /**
      * 和上一个页面共享同一个变换过程
      */
@@ -185,8 +170,8 @@ open class PageEntry internal constructor(
             }
 
             ResumeState -> updatePrevTransform(entry)
-            PauseState -> PauseState
-            else -> PausingState(1 - state.progress)
+            StopState -> StopState
+            else -> StoppingState(1 - state.progress)
         }
     }
 
@@ -194,11 +179,11 @@ open class PageEntry internal constructor(
      * 更新上一个页面的transform
      */
     private fun updatePrevTransform(prev: PageEntry): TransformState {
-        if (prev.isUpdateTransform) return PauseState
+        if (prev.isUpdateTransform) return StopState
         prev.transform.value = prev.transform.value.copy(prevPause = transform.value.prevPause)
         prev.transform.value.gesture.updatePauseModifier(transform.value.gesture.pauseModifierPost)
         prev.isUpdateTransform = true
-        return PauseState
+        return StopState
     }
 
     private fun upFromEvent(state: Lifecycle.State) {

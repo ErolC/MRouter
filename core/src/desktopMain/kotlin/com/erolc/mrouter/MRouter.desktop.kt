@@ -13,7 +13,6 @@ internal val LocalApplicationScope: ProvidableCompositionLocal<ApplicationScope>
 
 
 fun mRouterApplication(content: @Composable ApplicationScope.() -> Unit) {
-//    FlatIntelliJLaf.setup()
     application {
         CompositionLocalProvider(LocalApplicationScope provides this) {
             content()

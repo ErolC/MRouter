@@ -1,7 +1,7 @@
 package com.erolc.mrouter.route.router
 
 import androidx.compose.runtime.mutableStateOf
-import com.erolc.mrouter.Constants.defaultWindow
+import com.erolc.mrouter.Constants.DEFAULT_WINDOW
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
@@ -11,7 +11,7 @@ import com.erolc.mrouter.register.Address
 
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
- * window的路由器管理的是window，对于移动端来说，只有一个window：[defaultWindow].
+ * window的路由器管理的是window，对于移动端来说，只有一个window：[DEFAULT_WINDOW].
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
@@ -45,13 +45,14 @@ class WindowRouter(private val addresses: List<Address>, private val platformRes
         if (oldEntry == null || (oldEntry as WindowEntry).scope.isCloseWindow.value) {
             val entry = block(oldEntry?.takeIf { (it as WindowEntry).scope.isCloseWindow.value })
             route(entry)
+        } else {
+            oldEntry.pageRouter.route(route)
         }
     }
 
 
     override fun backPressed(notInterceptor: () -> Boolean) {
-        if (notInterceptor() && !backPressedImpl())
-            parentRouter?.backPressed(notInterceptor)
+        if (notInterceptor()) parentRouter?.backPressed(notInterceptor)
     }
 
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
@@ -72,12 +73,11 @@ class WindowRouter(private val addresses: List<Address>, private val platformRes
         oldEntry.scope.isCloseWindow.value = false
     }
 
-    fun route(stackEntry: StackEntry) {
+    private fun route(stackEntry: StackEntry) {
         val entry = backStack.findEntry(stackEntry.address.path)
         if (entry == null) backStack.addEntry(stackEntry)
     }
 
-    private fun backPressedImpl() = false
     internal fun getBackStack() = backStack.backStack
 
 }

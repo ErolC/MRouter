@@ -7,13 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.LocalPanelHost
 import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.route.routeBuild
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.logi
 
 /**
@@ -71,13 +67,9 @@ class RegisterBuilder internal constructor() {
     private val platformRes = mutableMapOf<String, Any>()
 
     init {
-        addAddress(Address(path = Constants.defaultPage, config = emptyConfig) {
+        addAddress(Address(path = Constants.DEFAULT_PAGE, config = emptyConfig) {
             Box(Modifier.background(Color.White).fillMaxSize())
         })
-
-//        addresses.add(Address(path = Constants.defaultPrivateLocal, config = emptyConfig) {
-//            LocalPanelHost()
-//        })
     }
 
     /**
@@ -91,9 +83,6 @@ class RegisterBuilder internal constructor() {
      * 添加地址，需要注意的是相同path的address会被覆盖
      */
     internal fun addAddress(address: Address) {
-//        if (address.path == Constants.defaultPrivateLocal)
-//            loge("MRouter", "该地址(${address.path})已被框架占用，请使用其他地址")
-//        else
         addEntryToList(addresses, address) { it.path == address.path }
     }
 

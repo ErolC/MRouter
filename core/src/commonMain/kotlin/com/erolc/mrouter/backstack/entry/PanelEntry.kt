@@ -2,7 +2,9 @@ package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
@@ -19,25 +21,21 @@ import com.erolc.mrouter.route.transform.ResumeState
 class PanelEntry(override val address: Address) : StackEntry {
     //管理该面板的页面路由器
     internal lateinit var pageRouter: PageRouter
-    internal var isLocalPageEntry = false
 
     @Composable
     override fun Content(modifier: Modifier) {
         Box(modifier.fillMaxSize()) {
-            val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
-            val last = (stack.last() as PageEntry).also {
-                if (isLocalPageEntry) it.transformState.value = ResumeState
-            }
+            val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
 
             if (stack.size == 1)
-                (stack.first() as PageEntry).transformState.value = ResumeState
+                stack.first().transformState.value = ResumeState
             else
-                last.shareTransform(stack.first() as PageEntry)
+                stack.last().shareTransform(stack.first())
+
             stack.forEach { it.Content(Modifier) }
 
             if (stack.size == 2)
-                ShareEleController.
-                    initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+                ShareEleController.initShare(stack.first(), stack.last())
 
         }
     }

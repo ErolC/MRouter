@@ -21,7 +21,7 @@ import com.erolc.mrouter.Constants
  */
 data class WindowOptions(
     val id: String,
-    val title: String,
+    val title: String = "",
     val icon: Painter? = null,
     val resizable: Boolean = true,
     val alwaysOnTop: Boolean = false,
@@ -31,5 +31,5 @@ data class WindowOptions(
     val position: DpOffset = DpOffset.Zero,
     val alignment: Alignment? = Alignment.Center,
     val state: WindowState = WindowState.Floating,
-    val currentWindowId: String = Constants.defaultWindow
+    val currentWindowId: String = Constants.DEFAULT_WINDOW
 )

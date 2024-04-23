@@ -1,6 +1,5 @@
 package com.erolc.mrouter.route.router
 
-import com.erolc.mrouter.backstack.entry.LocalPageEntry
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
@@ -50,25 +49,6 @@ internal fun createPageEntry(
             onResult = route.onResult
             this.router = router
             name = route.address
-        }
-    }
-}
-
-/**
- * 创建一个面板的载体页面
- */
-internal fun createLocalPanelEntry(
-    route: Route,
-    router: Router,
-): LocalPageEntry {
-    return LocalPageEntry(getScope()).apply {
-        flag = route.flag
-        transform.value = route.transform
-        scope.run {
-            args.value = route.args
-            onResult = route.onResult
-            this.router = router
-            name = "localPanelEntry"
         }
     }
 }

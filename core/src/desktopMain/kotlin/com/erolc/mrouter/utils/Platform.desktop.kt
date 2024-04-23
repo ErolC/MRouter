@@ -1,28 +1,19 @@
 package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.isSpecified
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
+import com.erolc.lifecycle.WindowLifecycleListener
 import com.erolc.mrouter.LocalApplicationScope
 import com.erolc.mrouter.backstack.entry.WindowEntry
-import com.erolc.mrouter.dialog.DialogOptions
-import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.WindowLifecycleListener
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.scope.rememberInWindow
-import com.erolc.mrouter.window.Menu
-import com.erolc.mrouter.window.WindowSize
-import com.erolc.mrouter.window.toDimension
-import com.erolc.mrouter.window.toPlacement
-import com.sun.java.accessibility.util.SwingEventMonitor
+import com.erolc.mrouter.window.*
 import kotlinx.coroutines.delay
-import java.awt.event.WindowEvent
-import java.awt.event.WindowFocusListener
-import java.awt.event.WindowListener
-import java.util.Locale
+import java.util.*
 
 @Composable
 actual fun PlatformWindow(
@@ -41,10 +32,13 @@ actual fun PlatformWindow(
     val size by remember(state.size) {
         mutableStateOf(WindowSize.calculateFromSize(state.size))
     }
+    val windowListenerRef = remember { windowListenerRef() }
+    val windowFocusListenerRef = remember { windowFocusListenerRef() }
+
     entry.scope.windowSize.value = size
     entry.options.value =
         options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
-    val application = LocalApplicationScope.current
+
     val isCloseWindow by rememberInWindow("window_close") { entry.scope.isCloseWindow }
     if (!isCloseWindow)
         Window(
@@ -63,43 +57,23 @@ actual fun PlatformWindow(
             if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
             Menu(options.id)
             content()
-            remember(window) {
-                window.addWindowListener(WindowLifecycleListener)
-                window.addWindowFocusListener(WindowLifecycleListener)
+            DisposableEffect(window) {
+                windowListenerRef.registerWithAndSet(window, WindowLifecycleListener)
+                windowFocusListenerRef.registerWithAndSet(window, WindowLifecycleListener)
+                onDispose {
+                    windowListenerRef.unregisterFromAndClear(window)
+                    windowFocusListenerRef.unregisterFromAndClear(window)
+                }
             }
         }
     else {
         LaunchedEffect(Unit) {
             delay(10)
         }
-        if (entry.shouldExit())
-            application.exitApplication()
+        if (entry.shouldExit()) LocalApplicationScope.current.exitApplication()
     }
 
 }
-
-@OptIn(ExperimentalComposeUiApi::class)
-fun DialogOptions.asProperties(): DialogProperties {
-    return DialogProperties(
-        dismissOnBackPress,
-        dismissOnClickOutside,
-        false,
-        usePlatformInsets,
-        Color.Transparent
-    )
-}
-
-@Composable
-actual fun PlatformDialog(
-    onDismissRequest: () -> Unit,
-    options: DialogOptions,
-    content: @Composable () -> Unit
-) {
-    Dialog(onDismissRequest, options.asProperties()) {
-        content()
-    }
-}
-
 
 actual fun getPlatform(): Platform {
     val os = System.getProperty("os.name").lowercase(Locale.getDefault())

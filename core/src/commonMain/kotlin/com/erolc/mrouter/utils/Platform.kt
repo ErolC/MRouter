@@ -2,7 +2,6 @@ package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.Composable
 import com.erolc.mrouter.backstack.entry.WindowEntry
-import com.erolc.mrouter.dialog.DialogOptions
 import com.erolc.mrouter.model.WindowOptions
 
 /**
@@ -14,15 +13,6 @@ expect fun PlatformWindow(
     entry: WindowEntry,
     content: @Composable () -> Unit
 )
-
-@Deprecated("")
-@Composable
-expect fun PlatformDialog(
-    onDismissRequest: () -> Unit,
-    options: DialogOptions,
-    content: @Composable () -> Unit
-)
-
 
 sealed interface Platform
 

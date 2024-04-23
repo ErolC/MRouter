@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.erolc.mrouter.Constants.defaultWindow
+import com.erolc.mrouter.Constants.DEFAULT_WINDOW
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
@@ -27,7 +27,7 @@ val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
  * @param address window的地址
  */
 class WindowEntry(
-    val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(defaultWindow, "")),
+    val options: MutableState<WindowOptions> = mutableStateOf(WindowOptions(DEFAULT_WINDOW, "")),
     override val address: Address = Address(options.value.id)
 ) :
     StackEntry {
@@ -51,16 +51,16 @@ class WindowEntry(
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 Box(modifier.fillMaxSize().background(Color.Black)) {
-                    val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value)
+                    val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
                     if (stack.size == 1)
-                        (stack.first() as PageEntry).transformState.value = ResumeState
+                        stack.first().transformState.value = ResumeState
                     else
-                        (stack.last() as PageEntry).shareTransform(stack.first() as PageEntry)
+                        stack.last().shareTransform(stack.first())
 
                     stack.forEach { it.Content(Modifier) }
 
                     if (stack.size == 2)
-                        ShareEleController.initShare(stack.first() as PageEntry, stack.last() as PageEntry)
+                        ShareEleController.initShare(stack.first(), stack.last())
 
                     ShareEleController.Overlay()
                 }

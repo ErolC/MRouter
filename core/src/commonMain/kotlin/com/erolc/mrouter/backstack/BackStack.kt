@@ -2,7 +2,6 @@ package com.erolc.mrouter.backstack
 
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
-import com.erolc.mrouter.isLocalPanelEntry
 import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.route.RouteFlag
@@ -70,9 +69,9 @@ open class BackStack(val name: String) {
     internal fun pop(isDestroy: Boolean = true): Boolean {
         return if (_backstack.value.size > threshold) {
             _backstack.value -= _backstack.value.last().apply {
-                if (isLocalPanelEntry() && isPreBack) {
+                if (isPreBack)
                     isPreBack = false
-                }
+
                 if (isDestroy) destroy()
             }
             true
@@ -85,13 +84,6 @@ open class BackStack(val name: String) {
                 is ClearTaskFlag, is ReplaceFlag -> clearTask()
             }
         }
-    }
-
-    /**
-     * 重置回退栈
-     */
-    internal fun reset(stackEntry: StackEntry? = null) {
-        _backstack.value = listOf(stackEntry ?: _backstack.value.first())
     }
 
     /**

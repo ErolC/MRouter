@@ -363,11 +363,11 @@ data class Transform internal constructor(
                 EnterState isTransitioningTo EnterState -> enter.data
                 EnterState isTransitioningTo ResumeState || ResumeState isTransitioningTo ResumeState -> enter.data
                 ResumeState isTransitioningTo ExitState -> exit.data
-                ResumeState isTransitioningTo PauseState
-                        || PauseState isTransitioningTo ResumeState
-                        || PauseState isTransitioningTo PauseState -> prevPause.data
+                ResumeState isTransitioningTo StopState
+                        || StopState isTransitioningTo ResumeState
+                        || StopState isTransitioningTo StopState -> prevPause.data
 
-                targetState is PausingState || initialState is PausingState -> prevPause.data
+                targetState is StoppingState || initialState is StoppingState -> prevPause.data
 //                targetState is TransitionState || initialState is TransitionState -> exit.data
                 else -> TransformData.None
             }
@@ -543,8 +543,8 @@ internal val Transition<TransformState>.resume
 internal val Transition<TransformState>.enterStart
     get() = currentState == EnterState && targetState == EnterState
 
-internal val Transition<TransformState>.pause
-    get() = currentState == PauseState && targetState == PauseState
+internal val Transition<TransformState>.stop
+    get() = currentState == StopState && targetState == StopState
 
 @OptIn(InternalAnimationApi::class)
 @Composable
@@ -663,8 +663,8 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     fun sizeByState(targetState: TransformState, fullSize: IntSize): IntSize =
         when (targetState) {
             ResumeState -> fullSize
-            EnterState, ExitState, PauseState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
-            is PausingState -> {
+            EnterState, ExitState, StopState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            is StoppingState -> {
                 val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
                 startValue.compute(targetState.progress, fullSize)
             }
@@ -701,8 +701,8 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             ResumeState -> IntOffset.Zero
             EnterState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
             ExitState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            PauseState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
-            is PausingState -> {
+            StopState -> transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
+            is StoppingState -> {
                 val start = transformData.slide?.slideOffset?.invoke(fullSize) ?: IntOffset.Zero
                 start.compute(targetState.progress)
             }
@@ -736,7 +736,7 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
             else -> when (targetState) {
                 ResumeState -> IntOffset.Zero
                 EnterState -> IntOffset.Zero
-                ExitState, PauseState -> transformData.changeSize?.let {
+                ExitState, StopState -> transformData.changeSize?.let {
                     val endSize = it.size(fullSize)
                     val targetOffset = alignment!!.align(
                         fullSize,
@@ -873,7 +873,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         ) {
             when (it) {
                 ResumeState -> 1f
-                EnterState, ExitState, PauseState -> transformData.fade?.alpha ?: 1f
+                EnterState, ExitState, StopState -> transformData.fade?.alpha ?: 1f
                 is ExitingState -> it.progress
                 else -> {
                     val startValue = transformData.fade?.alpha ?: 1f
@@ -889,7 +889,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         ) {
             when (it) {
                 ResumeState -> 1f
-                EnterState, ExitState, PauseState -> transformData.scale?.scale ?: 1f
+                EnterState, ExitState, StopState -> transformData.scale?.scale ?: 1f
                 is ExitingState -> it.progress
                 else -> {
                     val startValue = transformData.scale?.scale ?: 1f
@@ -905,7 +905,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
         val transformOrigin = transformOriginAnimation?.animate({ spring() }) {
             when (it) {
                 ResumeState -> transformOriginWhenVisible
-                EnterState, ExitState, PauseState -> transformData.scale?.transformOrigin
+                EnterState, ExitState, StopState -> transformData.scale?.transformOrigin
                 else -> null
             } ?: TransformOrigin.Center
         }

@@ -1,8 +1,7 @@
 package com.erolc.mrouter
 
 object Constants {
-    const val  defaultWindow = "defWindow"
-    const val defaultPage = "defaultPage"
-    const val defaultLocal= "local"
-    const val defaultPrivateLocal= "private_local"
+    const val DEFAULT_WINDOW = "defWindow"
+    const val DEFAULT_PAGE = "main"
+    const val DEFAULT_PANEL = "local"
 }

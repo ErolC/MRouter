@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.erolc.mrouter.Constants
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.utils.rememberInPage
@@ -26,6 +27,7 @@ fun First() = Page {
             var route = "second"
             if (key == "arg") route += "?value=routeData"
             route(route) {
+                window(Constants.DEFAULT_WINDOW)
                 if (key == "arg") {
                     arg("value1", "otherData")
                 }

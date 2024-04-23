@@ -20,6 +20,7 @@ object MRouter {
     private var rootRouter: WindowRouter? = null
 
     private var startRoute: Route? = null
+    private var registerBlock: (RegisterBuilder.() -> Unit)? = null
 
     /**
      * 主后退栈，也是window后退栈，window节点将会保存在这里。
@@ -32,7 +33,10 @@ object MRouter {
         builder: RegisterBuilder.() -> Unit
     ) {
         val route = routeBuild(startTarget).copy(windowOptions = windowOptions)
-        rootRouter = RegisterBuilder().apply(builder).build(route)
+        rootRouter = RegisterBuilder().apply {
+            registerBlock?.invoke(this)
+            builder()
+        }.build(route)
         startRoute?.let {
             route(it)
             startRoute = null
@@ -55,10 +59,14 @@ object MRouter {
      * 在compose外部（各个平台）使用该方法可路由到对应页面，但无法路由到对应页面的对应面板/局部（panel)中。
      */
     fun route(route: String, block: RouteBuilder.() -> Unit = {}) {
-        val routeObj = routeBuild(route, block)
+        val routeObj = routeBuild(route,block)
         if (rootRouter == null)
             startRoute = routeObj
         else
             route(routeObj)
+    }
+
+    fun registerBuilder(block: RegisterBuilder.() -> Unit) {
+        registerBlock = block
     }
 }

@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
  * @param name 元素的名称
  * @param content 元素的compose
  * @param address 元素所在地址
+ * @param position element的位置和尺寸
  */
 @Immutable
-data class ShareElement(
+data class ShareElement internal constructor(
     val name: String,
     val content: @Composable Transition<ShareState>.() -> Unit,
     val address: String,

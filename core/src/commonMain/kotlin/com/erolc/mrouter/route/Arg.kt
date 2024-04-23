@@ -62,14 +62,9 @@ class Args : Iterable<Arg> {
         if (size != args.size)
             return false
 
-        if (!strict && list.containsAll(args.list))
-            return true
+        if (!strict) return list.containsAll(args.list)
 
-        if (strict) {
-            return toString() == args.toString()
-        }
-
-        return false
+        return toString() == args.toString()
     }
 
 

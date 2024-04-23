@@ -20,10 +20,10 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     internal fun route(stackEntry: StackEntry) {
         stackEntry as PageEntry
         if (stackEntry.address.config.launchSingleTop)
-            backStack.findTopEntry()?.let { entry ->
-                if (entry.address.path == stackEntry.address.path) {
-                    entry as PageEntry
-                    entry.scope.run {
+            backStack.findTopEntry()?.let {
+                if (it.address.path == stackEntry.address.path) {
+                    it as PageEntry
+                    it.scope.run {
                         args.value = stackEntry.scope.args.value
                         router = stackEntry.scope.router
                         onResult = stackEntry.scope.onResult
@@ -35,20 +35,14 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
             backStack.addEntry(stackEntry.apply { create() })
     }
 
-    private fun createEntry(route: Route, address: Address): StackEntry {
-        return createPageEntry(route, address, PanelRouter(addresses, this))
-    }
-
     /**
      * 获取展示的stack
      */
     internal fun getPlayStack() = backStack.backStack.map {
-        it.takeLast(2)
+        it.takeLast(2).map { it as PageEntry }
     }
 
-    private fun backPressedImpl(): Boolean {
-        return backStack.preBack(parentRouter)
-    }
+    private fun backPressedImpl() = backStack.preBack(parentRouter)
 
     /**
      * 分配路由，将地址分配给不同的路由器并打开
@@ -66,7 +60,7 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
             loge("MRouter", "not yet register the address：${route.address}")
             return
         }
-        val entry = createEntry(route, address)
+        val entry = createPageEntry(route, address, PanelRouter(addresses, this))
         route(entry)
     }
 

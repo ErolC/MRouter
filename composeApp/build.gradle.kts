@@ -51,6 +51,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         desktopMain.dependencies {
+            implementation("com.formdev:flatlaf:2.3")
             implementation(compose.desktop.currentOs)
         }
         commonMain.dependencies {

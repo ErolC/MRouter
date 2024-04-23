@@ -1,3 +1,7 @@
 package com.erolc.mrouter.model
 
+/**
+ * @param key panel的key
+ * @param clearTask 是否清空panel的栈
+ */
 data class PanelOptions(val key: String, val clearTask: Boolean = true)

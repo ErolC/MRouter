@@ -27,6 +27,7 @@ fun Transition<ShareState>.padding(isStart:Boolean) = animateDp { it.transform(i
 
 @Composable
 fun Share() = Page {
+    loge("tag","Share")
     Row(Modifier.fillMaxSize()) {
         Button(onClick = {
             backPressed()
@@ -60,9 +61,10 @@ fun Share() = Page {
 
 @Composable
 fun Search() = Page {
-    EventObserver { lifecycleOwner, event ->
-        logi("tag","$lifecycleOwner $event")
-    }
+    loge("tag","Search")
+//    EventObserver { lifecycleOwner, event ->
+//        logi("tag","$lifecycleOwner $event")
+//    }
     Row(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
         Element("label", modifier = Modifier.weight(1f).height(20.dp)){
