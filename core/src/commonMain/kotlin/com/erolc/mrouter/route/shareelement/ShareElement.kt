@@ -1,4 +1,4 @@
-package com.erolc.mrouter.route.shareele
+package com.erolc.mrouter.route.shareelement
 
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.updateTransition
@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,9 +17,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import com.erolc.mrouter.model.ShareElement
 import com.erolc.mrouter.scope.LocalPageScope
-import com.erolc.mrouter.utils.loge
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * 共享元素
@@ -36,9 +33,9 @@ fun Element(name: String, modifier: Modifier, content: @Composable Transition<Sh
     val position = remember { MutableStateFlow(Rect(Offset.Zero, Size.Zero)) }
     remember(name, scope) {
         val element = ShareElement(name, content, scope.name, position)
-        ShareEleController.addElement(element)
+        ShareElementController.addElement(element)
     }
-    val state by ShareEleController.rememberShareState()
+    val state by ShareElementController.rememberShareState()
     Box(modifier = modifier.background(Color.Transparent).onGloballyPositioned {
         position.value = it.boundsInRoot()
     }) {

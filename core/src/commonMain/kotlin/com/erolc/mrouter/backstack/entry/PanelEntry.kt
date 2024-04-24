@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
-import com.erolc.mrouter.route.shareele.ShareEleController
+import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.ResumeState
 
 /**
@@ -35,7 +35,7 @@ class PanelEntry(override val address: Address) : StackEntry {
             stack.forEach { it.Content(Modifier) }
 
             if (stack.size == 2)
-                ShareEleController.initShare(stack.first(), stack.last())
+                ShareElementController.initShare(stack.first(), stack.last())
 
         }
     }

@@ -19,7 +19,7 @@ object WindowLifecycleListener : WindowListener, WindowFocusListener {
     }
 
     override fun windowDeiconified(e: WindowEvent?) {
-        delegate.onStart()
+        delegate.onResume()
     }
 
     override fun windowActivated(e: WindowEvent?) {
@@ -30,9 +30,9 @@ object WindowLifecycleListener : WindowListener, WindowFocusListener {
 //        delegate.onPause()
     }
 
+
     override fun windowGainedFocus(e: WindowEvent?) {
         delegate.onResume()
-
     }
 
     override fun windowLostFocus(e: WindowEvent?) {

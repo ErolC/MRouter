@@ -1,4 +1,4 @@
-package com.erolc.mrouter.route.shareele
+package com.erolc.mrouter.route.shareelement
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.Box
@@ -17,7 +17,6 @@ import com.erolc.mrouter.route.transform.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlin.math.roundToInt
 
 
@@ -26,7 +25,7 @@ import kotlin.math.roundToInt
  * 控制共享元素的变动。
  *
  */
-internal object ShareEleController {
+internal object ShareElementController {
     /**
      * 用于保存所有已产生的共享元素
      */

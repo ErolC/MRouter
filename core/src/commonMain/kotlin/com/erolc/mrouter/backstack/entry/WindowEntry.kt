@@ -11,7 +11,7 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.route.shareele.ShareEleController
+import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.utils.PlatformWindow
@@ -60,9 +60,9 @@ class WindowEntry(
                     stack.forEach { it.Content(Modifier) }
 
                     if (stack.size == 2)
-                        ShareEleController.initShare(stack.first(), stack.last())
+                        ShareElementController.initShare(stack.first(), stack.last())
 
-                    ShareEleController.Overlay()
+                    ShareElementController.Overlay()
                 }
             }
         }

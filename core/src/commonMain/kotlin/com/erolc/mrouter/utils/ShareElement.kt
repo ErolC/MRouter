@@ -1,6 +1,6 @@
 package com.erolc.mrouter.utils
 
-import com.erolc.mrouter.route.shareele.ShareState
+import com.erolc.mrouter.route.shareelement.ShareState
 
 /**
  * 共享元素是两个页面的两个相似元素在动画的帮助下像是一个元素似的，如此便有开始的元素和结束的元素，该方法只用于开始元素

@@ -4,7 +4,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Rect
-import com.erolc.mrouter.route.shareele.ShareState
+import com.erolc.mrouter.route.shareelement.ShareState
 
 /**
  * 一个共享组

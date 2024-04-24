@@ -13,10 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.erolc.mrouter.route.shareele.Element
-import com.erolc.mrouter.route.shareele.ShareState
+import com.erolc.mrouter.route.shareelement.Element
+import com.erolc.mrouter.route.shareelement.ShareState
 import com.erolc.mrouter.route.transform.shareEle
-import com.erolc.mrouter.scope.EventObserver
 import com.erolc.mrouter.utils.*
 
 /**

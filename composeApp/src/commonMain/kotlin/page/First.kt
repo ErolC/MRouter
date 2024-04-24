@@ -2,6 +2,7 @@ package page
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -15,7 +16,7 @@ import com.erolc.mrouter.utils.rememberInPage
 @Composable
 fun First() = Page {
     val args = rememberArgs()
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().safeContentPadding()) {
         var result by rememberInPage("data") { mutableStateOf("") }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             backPressed()

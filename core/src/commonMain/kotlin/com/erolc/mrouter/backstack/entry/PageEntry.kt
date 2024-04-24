@@ -18,11 +18,10 @@ import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.route.shareele.ShareEleController
+import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
@@ -62,18 +61,6 @@ open class PageEntry internal constructor(
     // 管理当前页面的路由器
     private val pageRouter: PageRouter get() = scope.router.parentRouter as PageRouter
 
-    // 生命周期事件处理
-    private fun onEventCall(event: Lifecycle.Event) {
-        when (event) {
-            Lifecycle.Event.ON_START -> start()
-            Lifecycle.Event.ON_RESUME -> resume()
-            Lifecycle.Event.ON_PAUSE -> pause()
-            Lifecycle.Event.ON_STOP -> stop()
-            Lifecycle.Event.ON_DESTROY -> destroy()
-            else -> {}
-        }
-    }
-
     @Composable
     override fun Content(modifier: Modifier) {
         scope.windowId = LocalWindowScope.current.id
@@ -81,7 +68,7 @@ open class PageEntry internal constructor(
             SysBackPressed { scope.backPressed() }
             Page(modifier)
 
-            SystemLifecycle(::onEventCall)
+            SystemLifecycle(::handleLifecycleEvent)
             val state by rememberPrivateInPage(
                 "page_transform_state",
                 transformState
@@ -93,7 +80,7 @@ open class PageEntry internal constructor(
                 onDispose {
                     scope.transformTransition = null
                     if (isDestroy.value) {
-                        ShareEleController.afterShare(this@PageEntry)
+                        ShareElementController.afterShare(this@PageEntry)
                         handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                     }
                 }
@@ -143,7 +130,10 @@ open class PageEntry internal constructor(
             }
         }
         state.targetState = transformState.value
-        if (isExit && !isIntercept) ExitImpl()
+        if (isExit && !isIntercept) {
+            ExitImpl()
+            isExit = false
+        }
     }
 
     @Composable
@@ -205,7 +195,8 @@ open class PageEntry internal constructor(
      * 这里之所以直接指定事件是因为window在最小化的时候会先调用windowIconified再调用windowLostFocus导致状态会丢失。
      * 这样做的目的是为了忽略windowLostFocus事件。
      */
-    internal fun stop() = handleLifecycleEvent(Lifecycle.Event.ON_STOP) //downFromEvent(Lifecycle.State.STARTED)
+    internal fun stop() = downFromEvent(Lifecycle.State.STARTED)
+
     override fun destroy() {
         isDestroy.value = true
     }

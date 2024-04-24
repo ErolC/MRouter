@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import com.erolc.mrouter.route.shareele.ShareState
+import com.erolc.mrouter.route.shareelement.ShareState
 
 /**
  * 共享手势，目前共享过程中不支持手势
