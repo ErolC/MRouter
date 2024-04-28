@@ -15,7 +15,6 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
-import com.erolc.mrouter.route.shareelement.ShareState
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
@@ -47,7 +46,7 @@ fun none() = buildTransform {
  * @param animationSpec 页面转换动画使用
  * @param transitionSpec 共享元素变换使用,控制共享元素尺寸的变化
  */
-fun shareEle(
+fun share(
     vararg keys: String,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect> =

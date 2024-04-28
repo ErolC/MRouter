@@ -123,7 +123,9 @@ open class PageEntry internal constructor(
                     transformState.value = when (it) {
                         0f -> ResumeState
                         1f -> ExitState
-                        else -> ExitingState(1 - it)
+                        else -> {
+                            ExitingState(1 - it)
+                        }
                     }
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }

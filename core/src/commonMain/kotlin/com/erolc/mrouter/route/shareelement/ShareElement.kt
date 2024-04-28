@@ -15,31 +15,40 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import com.erolc.lifecycle.Lifecycle
+import com.erolc.lifecycle.addEventObserver
 import com.erolc.mrouter.model.ShareElement
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.utils.*
+import com.erolc.mrouter.utils.Init
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * 共享元素
- * @param name 共享元素的名称
+ * @param key 共享元素的标识
  * @param modifier 共享元素的修饰符
  * @param content 共享元素的界面
  * 需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置,
  * 也就是共享元素的大小将由[Element]决定，而其内部的[content]只需要沾满[Element]即可
  */
 @Composable
-fun Element(name: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
+fun Element(key: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
     val scope = LocalPageScope.current
     val position = remember { MutableStateFlow(Rect(Offset.Zero, Size.Zero)) }
-    remember(name, scope) {
-        val element = ShareElement(name, content, scope.name, position)
+    val element = remember(key, scope) {
+        val element = ShareElement(key, content, scope.name, position)
         ShareElementController.addElement(element)
+        element
     }
-    val state by ShareElementController.rememberShareState()
+    LocalPageScope.current.lifecycle.addEventObserver { _, event ->
+        if (event == Lifecycle.Event.ON_DESTROY) {
+            ShareElementController.removeElement(element.tag)
+        }
+    }
+    val state by element.state
     Box(modifier = modifier.background(Color.Transparent).onGloballyPositioned {
         position.value = it.boundsInRoot()
     }) {
-        if (state == Init || state == BeforeShare || state == AfterShare)
-            content(updateTransition(Init))
+        if (state == Init || state == BeforeStart || state == BeforeEnd) content(updateTransition(state))
     }
 }

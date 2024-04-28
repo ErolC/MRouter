@@ -14,10 +14,10 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         applyBinaryen()
-        moduleName = "core"
+        moduleName = "mrouter"
         browser {
             commonWebpackConfig {
-                outputFileName = "core.js"
+                outputFileName = "mrouter.js"
             }
         }
         binaries.executable()
@@ -39,7 +39,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "core"
+            baseName = "mrouter"
             isStatic = true
         }
     }
