@@ -30,7 +30,9 @@ fun Share() = Page {
         Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp)) {
             val corner by animateDp {
                 loge("tag", "Share__::$it")
-                it.run { 100.dp between 10.dp }
+//                it.run { 100.dp between 10.dp }
+                it.run { 100f with 10f }.dp
+
             }
 
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
@@ -76,7 +78,8 @@ fun Search() = Page {
         Element("search", Modifier.padding(20.dp).weight(4f).height(50.dp)) {
             val corner by animateDp {
                 loge("tag", "Search+++::$it")
-                it.run { 10.dp between 100.dp }
+//                it.run { 10.dp between 100.dp }
+                it.run { 10f with 100f }.dp
             }
 
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
@@ -111,7 +114,9 @@ fun Search1() = Page {
         }
         Element("search", Modifier.padding(100.dp).weight(4f).height(50.dp)) {
             val corner by animateDp {
-                it.run { 100.dp between 10.dp }
+//                it.run { 100.dp between 10.dp }
+                it.run { 100f with 10f }.dp
+
             }
 
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {

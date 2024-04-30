@@ -1,4 +1,4 @@
-package com.erolc.mrouter.route.transform
+package com.erolc.mrouter.route.transform.share
 
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
@@ -9,10 +9,12 @@ import androidx.compose.ui.geometry.Rect
 import com.erolc.mrouter.utils.ShareState
 
 /**
- * 共享手势，目前共享过程中不支持手势
- * @param keys 在该次页面转换过程中共享的控件的key
+ * 无手势的共享元素变换包装
  */
-open class ShareGestureWrap(vararg val keys: String,val transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>) : TransformWrap() {
+class NoneShareTransformWrap(
+    transitionSpec: @Composable (Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>),
+    vararg keys: String
+) : ShareTransformWrap(transitionSpec,*keys) {
 
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {

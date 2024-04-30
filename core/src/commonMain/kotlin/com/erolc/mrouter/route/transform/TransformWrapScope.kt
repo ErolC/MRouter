@@ -1,9 +1,10 @@
 package com.erolc.mrouter.route.transform
 
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalTransformWrapScope = staticCompositionLocalOf { TransformWrapScope() }
+val LocalTransformWrapScope = compositionLocalOf { TransformWrapScope() }
 
 /**
  * 手势包裹层的作用域，该类主要是管理一些工作，比如：让页面内容也可以控制页面的手势

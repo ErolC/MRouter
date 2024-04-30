@@ -121,9 +121,13 @@ open class PageEntry internal constructor(
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
                 Wrap(pageModifier) {
                     transformState.value = when (it) {
-                        0f -> ResumeState
+                        0f -> {
+                            ShareElementController.reset()
+                            ResumeState
+                        }
                         1f -> ExitState
                         else -> {
+                            ShareElementController.sharing(1 - it)
                             ExitingState(1 - it)
                         }
                     }

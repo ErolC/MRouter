@@ -15,7 +15,7 @@ import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.model.ShareElement
 import com.erolc.mrouter.model.ShareElementGroup
 import com.erolc.mrouter.model.ShareEntry
-import com.erolc.mrouter.route.transform.*
+import com.erolc.mrouter.route.transform.share.ShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlinx.coroutines.flow.*
 import kotlin.math.roundToInt
@@ -129,7 +129,7 @@ internal object ShareElementController {
      */
     fun initShare(entry: PageEntry, endEntry: PageEntry) {
         val gesture = endEntry.transform.value.gesture
-        if (gesture is ShareGestureWrap) {
+        if (gesture is ShareTransformWrap) {
             val keys = gesture.keys.makeKeys()
             val shareEntry = shareStack.value.lastOrNull()
             val startAddress = entry.address.path
@@ -158,7 +158,17 @@ internal object ShareElementController {
         val endTag = "${end}_$key"
         val startEle = elements[startTag]
         val endEle = elements[endTag]
-        return startEle?.let { it -> endEle?.let { end -> ShareElementGroup(it, end, key) } }
+        return startEle?.let { endEle?.let { end -> ShareElementGroup(it, end, key) } }
+    }
+
+    internal fun sharing(progress: Float) {
+        if (shareStack.value.isNotEmpty())
+            shareState.value = Sharing(progress)
+    }
+
+    internal fun reset() {
+        if (shareStack.value.isNotEmpty())
+            shareState.value = ExitShare
     }
 
     /**
@@ -201,25 +211,25 @@ internal fun ShareElementController.Overlay() {
     }
 
     shareStack.value.lastOrNull()?.run {
-    var resetState by remember { resetState }
-    transition.segment.apply {
-        when {
-            Init isTransitioningTo BeforeStart -> {
-                resetState = ExitShare
-                shareState.value = PreShare
-            }
+        var resetState by remember { resetState }
+        transition.segment.apply {
+            when {
+                Init isTransitioningTo BeforeStart -> {
+                    resetState = ExitShare
+                    shareState.value = PreShare
+                }
 
-            Init isTransitioningTo BeforeEnd -> {
-                resetState = PreShare
-                shareState.value = ExitShare
-            }
+                Init isTransitioningTo BeforeEnd -> {
+                    resetState = PreShare
+                    shareState.value = ExitShare
+                }
 
-            BeforeStart isTransitioningTo PreShare -> shareState.value = ExitShare
-            BeforeEnd isTransitioningTo ExitShare -> shareState.value = PreShare
+                BeforeStart isTransitioningTo PreShare -> shareState.value = ExitShare
+                BeforeEnd isTransitioningTo ExitShare -> shareState.value = PreShare
+            }
         }
-    }
-    if (transition.currentState == resetState && transition.targetState == resetState) {
-        shareState.value = Init
+        if (transition.currentState == resetState && transition.targetState == resetState) {
+            shareState.value = Init
             groups.forEach {
                 it.start._state.value = if (resetState == ExitShare) resetState else Init
                 it.end._state.value = Init
@@ -237,7 +247,11 @@ private fun Transition<ShareState>.ShareElement(
     val startPosition by group.start.position.collectAsState()
     val endPosition by group.end.position.collectAsState()
     val rect by animateRect(label = "", transitionSpec = transitionSpec) {
-        if (it == PreShare || it == BeforeStart) startPosition else endPosition
+        when (it) {
+            PreShare, BeforeStart -> startPosition
+            is Sharing -> it.updateRect(startPosition, endPosition)
+            else -> endPosition
+        }
     }
     var target by remember { mutableStateOf<ShareElement?>(group.start) }
     target = if (currentState is BeforeStart) group.start else group.end

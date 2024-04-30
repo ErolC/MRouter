@@ -1,6 +1,7 @@
 package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Rect
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.LocalPageScope
 
@@ -34,7 +35,7 @@ fun onUpdateElement(block: (Array<out String>) -> Unit) {
 /**
  * 定义共享控件的状态
  */
-sealed interface ShareState{
+sealed interface ShareState {
 
     /**
      * current between target
@@ -43,31 +44,52 @@ sealed interface ShareState{
     infix fun <T> T.between(target: T): T {
         return if (!preShare) this else target
     }
+
+    infix fun Float.with(target: Float): Float {
+        return if (!preShare) {
+            if (this@ShareState is Sharing) {
+                target - (target - this) * progress
+            } else this
+        } else target
+    }
 }
 
 /**
  * 无状态，显示原本的控件
  */
-internal data object Init : ShareState
+data object Init : ShareState
 
 /**
  * 共享之前，在共享之前，需要显示共享控件，但是原本的控件也不能隐藏
  */
-internal data object BeforeStart : ShareState
+data object BeforeStart : ShareState
 
-internal data object BeforeEnd : ShareState
+data object BeforeEnd : ShareState
 
 /**
  *开始共享
  */
-internal data object PreShare : ShareState
+data object PreShare : ShareState
+
+data class Sharing(val progress: Float) : ShareState
 
 /**
  * 共享结束
  */
-internal data object ExitShare : ShareState
+data object ExitShare : ShareState
 
 val ShareState.preShare get() = this is PreShare
 
 
+internal fun Sharing.updateRect(startRect: Rect, endRect: Rect): Rect {
+    val sTop = startRect.top
+    val sLeft = startRect.left
+    val sRight = startRect.right
+    val sBottom = startRect.bottom
+    val eTop = endRect.top
+    val eLeft = endRect.left
+    val eRight = endRect.right
+    val eBottom = endRect.bottom
+    return Rect(eLeft with sLeft, eTop with sTop, eRight with sRight, eBottom with sBottom)
+}
 
