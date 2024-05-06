@@ -370,7 +370,7 @@ data class Transform internal constructor(
                         || StopState isTransitioningTo StopState -> prevPause.data
 
                 targetState is StoppingState || initialState is StoppingState -> prevPause.data
-//                targetState is TransitionState || initialState is TransitionState -> exit.data
+                targetState is ExitingState || initialState is ExitingState -> exit.data
                 else -> TransformData.None
             }
         }

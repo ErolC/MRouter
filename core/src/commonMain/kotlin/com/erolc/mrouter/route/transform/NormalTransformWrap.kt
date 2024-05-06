@@ -3,6 +3,7 @@ package com.erolc.mrouter.route.transform
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 /**
@@ -11,11 +12,11 @@ import androidx.compose.ui.Modifier
 class NormalTransformWrap : TransformWrap() {
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
-        val (gestureModifier, pageModifier) = rememberDraggableModifier(
+        val gestureModifier = rememberDraggableModifier(
             Orientation.Horizontal,
             progress
         )
-        Box(modifier = modifier then pageModifier) {
+        Box(modifier = modifier) {
             PageContent(Modifier) // 页面内容
             Box(modifier = gestureModifier) // 手势触发部分
         }

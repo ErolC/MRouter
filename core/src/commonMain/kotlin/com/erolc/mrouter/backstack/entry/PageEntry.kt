@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import com.erolc.lifecycle.Lifecycle
 import com.erolc.lifecycle.LifecycleRegistry
 import com.erolc.lifecycle.SystemLifecycle
@@ -22,6 +25,7 @@ import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
@@ -89,6 +93,8 @@ open class PageEntry internal constructor(
 
     }
 
+    private val wrapScope = TransformWrapScope()
+
     @OptIn(ExperimentalTransitionApi::class)
     @Composable
     private fun Page(modifier: Modifier) {
@@ -119,16 +125,21 @@ open class PageEntry internal constructor(
             transform.gesture.run {
                 setContent(address.content)
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
-                Wrap(pageModifier) {
-                    transformState.value = when (it) {
-                        0f -> {
-                            ShareElementController.reset()
-                            ResumeState
-                        }
-                        1f -> ExitState
-                        else -> {
-                            ShareElementController.sharing(1 - it)
-                            ExitingState(1 - it)
+                CompositionLocalProvider(LocalTransformWrapScope provides wrapScope) {
+                    Wrap(pageModifier.onGloballyPositioned {
+                        wrapScope.setSize(it.boundsInRoot())
+                    }) {
+                        transformState.value = when (it) {
+                            0f -> {
+                                ShareElementController.reset()
+                                ResumeState
+                            }
+
+                            1f -> ExitState
+                            else -> {
+                                ShareElementController.sharing(1 - it)
+                                ExitingState(1 - it)
+                            }
                         }
                     }
                 }

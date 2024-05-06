@@ -33,8 +33,6 @@ abstract class TransformWrap {
     internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
     internal var gestureModifier = PauseModifierPost { Modifier }
 
-    private val scope = TransformWrapScope()
-
     /**
      * 这是内容部分，应当被包裹的部分，必须调用
      */
@@ -53,17 +51,8 @@ abstract class TransformWrap {
             modifier.clickable(MutableInteractionSource(), null) { }.fillMaxSize(),
             color = Color.Transparent
         ) {
-            CompositionLocalProvider(LocalTransformWrapScope provides scope) {
-                content()
-            }
+            content()
         }
-    }
-
-    @Composable
-    fun getProgress(draggableProgress: Float): Float {
-        var state by scope.progress
-        state = draggableProgress
-        return state
     }
 
     /**
@@ -103,8 +92,8 @@ abstract class TransformWrap {
  * @param orientation 方向
  * @param progress 进度
  * @param proportion 比例
- * @param paddingValue padding的值，根据方向的不同，padding将放置在不同的地方，且当该值设置是[proportion]将失效
- * @return first - 应用在手势控件的Modifier，second - 应用在页面上的Modifier，可改变页面位置
+ * @param reverseDirection 翻转
+ * @return 应用在手势控件的Modifier，
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -112,26 +101,11 @@ fun TransformWrap.rememberDraggableModifier(
     orientation: Orientation = Orientation.Horizontal,
     progress: (Float) -> Unit,
     proportion: Float = 1f,
-    paddingValue: Dp? = null
-): Pair<Modifier, Modifier> {
-    val squareSize = with(LocalWindowScope.current.windowSize.value) {
-        if (orientation == Orientation.Horizontal) width.size else height.size
-    }
-    val padding = paddingValue ?: ((1 - proportion) * squareSize)
-
-    val max = with(LocalDensity.current) {
-        squareSize.toPx() - padding.toPx()
-    }
-    val anchorsDraggableState = rememberAnchoredDraggableState(0f, DraggableAnchors {
-        1f at max
-        0f at 0f
-    })
-    val offset = anchorsDraggableState.requireOffset()
-    loge("tag","$offset --- $this")
-    val offsetProgress = getProgress(offset / max) //0-1
-    remember(offsetProgress) {
-        //1-postExit;0-resume
-        progress(offsetProgress)
+    reverseDirection:Boolean = false
+): Modifier {
+    val scope = LocalTransformWrapScope.current
+    val anchoredDraggableState = scope.run {
+        rememberDraggableState(proportion, progress, orientation)
     }
     val modifier =
         if (orientation == Orientation.Horizontal)
@@ -140,17 +114,10 @@ fun TransformWrap.rememberDraggableModifier(
             Modifier.fillMaxWidth().height(15.dp)
 
     return modifier.anchoredDraggable(
-        state = anchorsDraggableState,
+        state = anchoredDraggableState,
         orientation = orientation,
-    ) to Modifier.padding(
-        top = if (orientation == Orientation.Vertical) padding else 0.dp,
-        start = if (orientation == Orientation.Horizontal) padding else 0.dp
-    ).offset {
-        if (orientation == Orientation.Vertical)
-            IntOffset(0, (max * offsetProgress).roundToInt())
-        else
-            IntOffset((max * offsetProgress).roundToInt(), 0)
-    }
+        reverseDirection = reverseDirection
+    )
 }
 
 
@@ -171,7 +138,8 @@ fun <T : Any> TransformWrap.rememberAnchoredDraggableState(
     velocityThreshold: () -> Float = { 10f },
     confirmValueChange: (T) -> Boolean = { true },
 ): AnchoredDraggableState<T> {
-    return rememberSaveable(this,
+    return rememberSaveable(
+        this,anchors,
         saver = AnchoredDraggableState.Saver(
             animationSpec,
             positionalThreshold,

@@ -24,13 +24,13 @@ class NormalShareTransformWrap(
 
     @Composable
     override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
-        val (gestureModifier, _) = rememberDraggableModifier(
+        val gestureModifier = rememberDraggableModifier(
             Orientation.Horizontal,
             progress
         )
         Box(modifier) {
             PageContent(Modifier)
-            Box(modifier = gestureModifier.background(Color.Red)) // 手势触发部分
+            Box(modifier = gestureModifier) // 手势触发部分
         }
     }
 }
