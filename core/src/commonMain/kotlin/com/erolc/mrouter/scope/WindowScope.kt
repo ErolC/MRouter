@@ -1,9 +1,7 @@
 package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
-import com.erolc.lifecycle.Lifecycle
 import com.erolc.mrouter.utils.PageCache
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.window.DefWindowSize
 
 /**

@@ -14,8 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
 import com.erolc.mrouter.PanelHost
-import com.erolc.mrouter.route.transform.normal
-import com.erolc.mrouter.scope.EventObserver
+import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.utils.loge
@@ -56,7 +55,7 @@ fun Detail() = Page {
     val args = rememberArgs()
     val id = args.getData<Int>("id")
     Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
-    EventObserver { lifecycleOwner, event ->
+    LifecycleObserver { lifecycleOwner, event ->
         loge("tag", "id:$id owner:$lifecycleOwner event:$event")
     }
 }

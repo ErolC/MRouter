@@ -2,9 +2,11 @@ package com.erolc.mrouter.scope
 
 import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.*
-import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.LifecycleOwner
-import com.erolc.lifecycle.addEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import com.erolc.mrouter.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
@@ -20,7 +22,7 @@ val LocalPageScope = compositionLocalOf { default }
 /**
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
-open class PageScope : LifecycleOwner {
+open class PageScope {
     internal val args = mutableStateOf(emptyArgs)
     var name: String = ""
         internal set
@@ -33,20 +35,11 @@ open class PageScope : LifecycleOwner {
         private set
     internal var onResult: RouteResult = {}
     private val interceptors = mutableListOf<BackInterceptor>()
-    private lateinit var _lifecycle: Lifecycle
     internal val transformState = mutableStateOf<TransformState>(EnterState)
     internal var transformTransition: Transition<TransformState>? = null
     internal val isIntercept = mutableStateOf(false)
 
-    //生命周期
-    override var lifecycle: Lifecycle
-        internal set(value) {
-            initLifeCycle(value)
-            _lifecycle = value
-        }
-        get() = _lifecycle
-
-    private fun initLifeCycle(lifecycle: Lifecycle) {
+    internal fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_DESTROY) {
                 onResult(result)
@@ -129,9 +122,16 @@ fun rememberArgs(): Args {
  * 添加生命周期事件监听
  */
 @Composable
-fun EventObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
-    val scope = LocalPageScope.current
-    rememberPrivateInPage("page_event") {
-        scope.lifecycle.addEventObserver(body)
+fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { owner, event ->
+            body(owner, event)
+        }
+
+        owner.lifecycle.addObserver(observer)
+        onDispose {
+            owner.lifecycle.removeObserver(observer)
+        }
     }
 }

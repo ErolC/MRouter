@@ -15,9 +15,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.addEventObserver
+import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.model.ShareElement
+import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.*
 import com.erolc.mrouter.utils.Init
@@ -40,7 +40,7 @@ fun Element(key: String, modifier: Modifier, content: @Composable Transition<Sha
         ShareElementController.addElement(element)
         element
     }
-    LocalPageScope.current.lifecycle.addEventObserver { _, event ->
+    LifecycleObserver { _, event ->
         if (event == Lifecycle.Event.ON_DESTROY) {
             ShareElementController.removeElement(element.tag)
         }

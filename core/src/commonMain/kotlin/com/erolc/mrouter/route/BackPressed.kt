@@ -1,7 +1,7 @@
 package com.erolc.mrouter.route
 
 import androidx.compose.runtime.*
-import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
+//import com.erolc.mrouter.lifecycle.rememberPageCoroutineScope
 import com.erolc.mrouter.scope.LocalPageScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,7 +90,7 @@ fun Exit(
     delayTime: Duration = 1000.milliseconds,
     block: @Composable () -> Unit = {}
 ) {
-    val scope = rememberPageCoroutineScope()
+    val scope = rememberCoroutineScope()
     var interceptEnable by remember(enable) { enable }
 
     BackHandler(interceptEnable) {

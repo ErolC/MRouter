@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import com.erolc.lifecycle.Lifecycle
-import com.erolc.lifecycle.LifecycleRegistry
-import com.erolc.lifecycle.SystemLifecycle
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
+//import com.erolc.mrouter.lifecycle.SystemLifecycle
+//import com.erolc.mrouter.lifecycle.handleLifecycleEvent
+import com.erolc.mrouter.lifecycle.withEventStr
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -33,12 +35,14 @@ import com.erolc.mrouter.utils.rememberPrivateInPage
  */
 open class PageEntry internal constructor(
     val scope: PageScope,
-    override val address: Address
+    override val address: Address,
+    private val lifecycleOwnerDelegate: LifecycleOwnerDelegate
 ) : StackEntry {
-    private val registry: LifecycleRegistry = LifecycleRegistry(scope)
+
+    private val lifecycle = lifecycleOwnerDelegate.lifecycle
 
     init {
-        scope.lifecycle = registry
+        scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
     }
 
     //transform中的prev在下一个页面打开的时候才会被赋值
@@ -68,11 +72,10 @@ open class PageEntry internal constructor(
     @Composable
     override fun Content(modifier: Modifier) {
         scope.windowId = LocalWindowScope.current.id
-        CompositionLocalProvider(LocalPageScope provides scope) {
+        lifecycleOwnerDelegate.SystemLifecycle()
+        CompositionLocalProvider(LocalPageScope provides scope, LocalLifecycleOwner provides lifecycleOwnerDelegate) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
-
-            SystemLifecycle(::handleLifecycleEvent)
             val state by rememberPrivateInPage(
                 "page_transform_state",
                 transformState
@@ -103,8 +106,6 @@ open class PageEntry internal constructor(
         }
         var isExit by rememberPrivateInPage("page_exit") { isExit }
         val isIntercept by rememberPrivateInPage("page_intercept") { isIntercept }
-
-
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = ResumeState
 
@@ -194,12 +195,12 @@ open class PageEntry internal constructor(
     }
 
     private fun upFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.upFrom(state)
+        if (lifecycle.currentState == state) Lifecycle.Event.upFrom(state)
             ?.let { handleLifecycleEvent(it) }
     }
 
     private fun downFromEvent(state: Lifecycle.State) {
-        if (registry.currentState == state) Lifecycle.Event.downFrom(state)
+        if (lifecycle.currentState == state) Lifecycle.Event.downFrom(state)
             ?.let { handleLifecycleEvent(it) }
     }
 
@@ -219,7 +220,7 @@ open class PageEntry internal constructor(
     }
 
     internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
-        registry.handleLifecycleEvent(event)
+        lifecycleOwnerDelegate.handleLifecycleEvent(withEventStr(event))
         if (event != Lifecycle.Event.ON_CREATE)
             (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
     }

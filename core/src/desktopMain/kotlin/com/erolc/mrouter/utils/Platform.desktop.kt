@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import com.erolc.lifecycle.WindowLifecycleListener
+//import com.erolc.lifecycle.WindowLifecycleListener
 import com.erolc.mrouter.LocalApplicationScope
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
@@ -57,14 +57,14 @@ actual fun PlatformWindow(
             if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
             Menu(options.id)
             content()
-            DisposableEffect(window) {
-                windowListenerRef.registerWithAndSet(window, WindowLifecycleListener)
-                windowFocusListenerRef.registerWithAndSet(window, WindowLifecycleListener)
-                onDispose {
-                    windowListenerRef.unregisterFromAndClear(window)
-                    windowFocusListenerRef.unregisterFromAndClear(window)
-                }
-            }
+//            DisposableEffect(window) {
+//                windowListenerRef.registerWithAndSet(window, WindowLifecycleListener)
+//                windowFocusListenerRef.registerWithAndSet(window, WindowLifecycleListener)
+//                onDispose {
+//                    windowListenerRef.unregisterFromAndClear(window)
+//                    windowFocusListenerRef.unregisterFromAndClear(window)
+//                }
+//            }
         }
     else {
         LaunchedEffect(Unit) {

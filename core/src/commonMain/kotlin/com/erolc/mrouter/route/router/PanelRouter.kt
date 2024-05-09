@@ -1,6 +1,6 @@
 package com.erolc.mrouter.route.router
 
-import com.erolc.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route

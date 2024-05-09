@@ -101,7 +101,7 @@ internal object ShareElementController {
             val group = it.groups.first()
             val start = group.start.address
             val end = group.end.address
-            val newGroup = keys.getElementGroups(start, end)
+            val newGroup = getElementGroups(keys,start, end)
             val keyStr = keys.makeKeys()
             if (newGroup.size == keys.size) {
                 it.copy(groups = newGroup, keys = keyStr)
@@ -134,9 +134,16 @@ internal object ShareElementController {
             val shareEntry = shareStack.value.lastOrNull()
             val startAddress = entry.address.path
             val endAddress = endEntry.address.path
-            val groups = gesture.keys.getElementGroups(startAddress, endAddress)
+            val groups = getElementGroups(gesture.keys,startAddress, endAddress)
+            val findEntry = findEntry(keys, startAddress, endAddress)
             if (groups.isNotEmpty())
-                if (shareEntry != null && shareEntry.equalTag(keys, startAddress, endAddress))
+                if (findEntry != null && !findEntry.equalEntry(shareEntry)) {
+                    val copy = findEntry.copy(groups = groups)
+                    val index = shareStack.value.indexOf(findEntry)
+                    shareStack.value = shareStack.value.subList(0, index) +
+                            copy +
+                            shareStack.value.subList(index + 1, shareStack.value.size)
+                } else if (shareEntry != null && shareEntry.equalTag(keys, startAddress, endAddress))
                     shareStack.updateEntry(shareEntry.copy(groups = groups))
                 else {
                     shareStack.value += ShareEntry(groups, gesture.transitionSpec, startAddress, endAddress, keys)
@@ -145,13 +152,18 @@ internal object ShareElementController {
         }
     }
 
+    private fun findEntry(key: String, startAddress: String, endAddress: String): ShareEntry? {
+        return shareStack.value.find { it.equalTag(key, startAddress, endAddress) }
+    }
+
+
     private fun MutableStateFlow<List<ShareEntry>>.updateEntry(newEntry: ShareEntry) {
         value -= value.last()
         value += newEntry
     }
 
-    private fun Array<out String>.getElementGroups(start: String, end: String) =
-        mapNotNull { getElementGroup(it, start, end) }
+    private fun getElementGroups(keys:Array<out String>,start: String, end: String) =
+        keys.mapNotNull { getElementGroup(it, start, end) }
 
     private fun getElementGroup(key: String, start: String, end: String): ShareElementGroup? {
         val startTag = "${start}_$key"

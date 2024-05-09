@@ -28,4 +28,5 @@ data class ShareEntry(
     val resetState :MutableState<ShareState> = mutableStateOf(PreShare)
 ){
     fun equalTag(key: String,startAddress: String,endAddress: String) = this.keys == key && this.startAddress == startAddress && this.endAddress == endAddress
+    fun equalEntry(entry: ShareEntry?) = entry != null && entry.keys == keys && entry.startAddress == startAddress && entry.endAddress == endAddress
 }
