@@ -1,5 +1,11 @@
 package com.erolc.mrouter.route.router
 
+import androidx.annotation.RestrictTo
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
@@ -35,6 +41,36 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
             backStack.addEntry(stackEntry.apply { create() })
     }
 
+    internal var lifecycleOwner: LifecycleOwner? = null
+
+    internal var hostLifecycleState: Lifecycle.State = Lifecycle.State.INITIALIZED
+        get() {
+            // A LifecycleOwner is not required by PageRouter.
+            // In the cases where one is not provided, always keep the host lifecycle at CREATED
+            return if (lifecycleOwner == null) {
+                Lifecycle.State.CREATED
+            } else {
+                field
+            }
+        }
+
+    private val lifecycleObserver: LifecycleObserver = LifecycleEventObserver { _, event ->
+        hostLifecycleState = event.targetState
+        for (entry in backStack.backStack.value) {
+            (entry as PageEntry).handleLifecycleEvent(event)
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setLifecycleOwner(owner: LifecycleOwner) {
+        if (owner == lifecycleOwner) {
+            return
+        }
+        lifecycleOwner?.lifecycle?.removeObserver(lifecycleObserver)
+        lifecycleOwner = owner
+        owner.lifecycle.addObserver(lifecycleObserver)
+    }
+
     /**
      * 获取展示的stack
      */
@@ -60,7 +96,12 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
             loge("MRouter", "not yet register the address：${route.address}")
             return
         }
-        val entry = createPageEntry(route, address, PanelRouter(addresses, this))
+        val entry = MRouter.createEntry(
+            route,
+            address,
+            PanelRouter(addresses, this, hostLifecycleState = hostLifecycleState),
+            hostLifecycleState = hostLifecycleState
+        )
         route(entry)
     }
 

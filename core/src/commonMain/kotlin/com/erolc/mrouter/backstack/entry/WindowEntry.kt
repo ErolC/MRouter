@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.erolc.mrouter.Constants.DEFAULT_WINDOW
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
@@ -51,8 +52,15 @@ class WindowEntry(
         CompositionLocalProvider(LocalWindowScope provides scope) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    // Setup the pageRouter with proper owners
+                    pageRouter.setLifecycleOwner(lifecycleOwner)
+                    onDispose { }
+                }
                 Box(modifier.fillMaxSize().background(Color.Black)) {
-                    val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
+                    val stack by pageRouter.getPlayStack()
+                        .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
                     if (stack.size == 1)
                         stack.first().transformState.value = ResumeState
                     else

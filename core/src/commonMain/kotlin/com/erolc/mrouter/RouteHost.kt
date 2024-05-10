@@ -1,9 +1,14 @@
 package com.erolc.mrouter
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.RegisterBuilder
 
@@ -19,9 +24,31 @@ fun RouteHost(
     startWindowOptions: WindowOptions = WindowOptions(Constants.DEFAULT_WINDOW, ""),
     builder: RegisterBuilder.() -> Unit
 ) {
+    val viewModelStoreOwner = LocalViewModelStoreOwner.current ?: rememberViewModelStoreOwner()
+    MRouter.setViewModelStore(viewModelStoreOwner.viewModelStore)
     remember(startRoute, builder, startWindowOptions) {
         MRouter.build(startRoute, startWindowOptions, builder)
     }
     val backStack by MRouter.getRootBlackStack()
     backStack.forEach { it.Content(Modifier) }
+}
+
+
+private class ComposeViewModelStoreOwner: ViewModelStoreOwner {
+    override val viewModelStore: ViewModelStore = ViewModelStore()
+    fun dispose() { viewModelStore.clear() }
+}
+
+/**
+ * Return remembered [ViewModelStoreOwner] with the scope of current composable.
+ *
+ * TODO: Consider to move it to `lifecycle-viewmodel-compose` and upstream this to AOSP.
+ */
+@Composable
+private fun rememberViewModelStoreOwner(): ViewModelStoreOwner {
+    val viewModelStoreOwner = remember { ComposeViewModelStoreOwner() }
+    DisposableEffect(viewModelStoreOwner) {
+        onDispose { viewModelStoreOwner.dispose() }
+    }
+    return viewModelStoreOwner
 }

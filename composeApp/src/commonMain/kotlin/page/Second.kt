@@ -9,12 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.route.Arg
+import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
+import com.erolc.mrouter.utils.loge
 
 @Composable
 
 fun Second() = Page {
+    LifecycleObserver { _, event ->
+        loge("tag","second - $event")
+    }
     val args = rememberArgs()
     Box {
 

@@ -12,6 +12,7 @@ import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.EnterState
 import com.erolc.mrouter.utils.PageCache
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 internal val default get() = PageScope()
@@ -124,14 +125,13 @@ fun rememberArgs(): Args {
 @Composable
 fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val owner = LocalLifecycleOwner.current
-    DisposableEffect(owner) {
-        val observer = LifecycleEventObserver { owner, event ->
+    val observer = rememberPrivateInPage("lifecycle_observer") {
+        LifecycleEventObserver { owner, event ->
             body(owner, event)
         }
-
+    }
+    rememberPrivateInPage("lifecycle") {
+        owner.lifecycle.removeObserver(observer)
         owner.lifecycle.addObserver(observer)
-        onDispose {
-            owner.lifecycle.removeObserver(observer)
-        }
     }
 }

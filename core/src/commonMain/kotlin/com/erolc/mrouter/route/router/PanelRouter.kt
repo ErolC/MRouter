@@ -2,6 +2,7 @@ package com.erolc.mrouter.route.router
 
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
@@ -16,7 +17,8 @@ import com.erolc.mrouter.utils.loge
 class PanelRouter(
     private val addresses: List<Address>,
     override val parentRouter: PageRouter,
-    panelEntry: PanelEntry? = null
+    panelEntry: PanelEntry? = null,
+    private val hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
 ) : Router {
     //这里是当前界面中各个面板的回退栈
     private val panelStacks = mutableMapOf<String, PanelEntry>()
@@ -25,6 +27,7 @@ class PanelRouter(
     init {
         if (panelEntry != null)
             panelStacks[Constants.DEFAULT_PANEL] = panelEntry
+
     }
 
     private fun createEntry(route: Route, address: Address): PanelEntry {
@@ -35,11 +38,14 @@ class PanelRouter(
 
     private fun PanelEntry.newPageRouter(route: Route, address: Address) {
         pageRouter = PageRouter("panelBackStack", addresses, this@PanelRouter).also { pageRouter ->
+            pageRouter.setLifecycleOwner(this@PanelRouter.parentRouter.lifecycleOwner!!)
+            pageRouter.hostLifecycleState = hostLifecycleState
             pageRouter.route(
-                createPageEntry(
+                MRouter.createEntry(
                     route,
                     address,
-                    PanelRouter(addresses, pageRouter)
+                    PanelRouter(addresses, pageRouter, hostLifecycleState = hostLifecycleState),
+                    hostLifecycleState = hostLifecycleState
                 )
             )
         }
@@ -73,7 +79,14 @@ class PanelRouter(
                 loge("MRouter", "not yet register the address：${route.address}")
                 return
             }
-            it.route(createPageEntry(route, address, PanelRouter(addresses, it), route.panelOptions?.clearTask == true))
+            it.route(
+                MRouter.createEntry(
+                    route,
+                    address,
+                    PanelRouter(addresses, it),
+                    route.panelOptions?.clearTask == true,hostLifecycleState
+                )
+            )
         }
 
     }

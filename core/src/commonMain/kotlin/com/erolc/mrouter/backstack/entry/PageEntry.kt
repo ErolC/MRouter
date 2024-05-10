@@ -6,15 +6,15 @@ import androidx.compose.animation.core.rememberTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
+import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
-//import com.erolc.mrouter.lifecycle.SystemLifecycle
-//import com.erolc.mrouter.lifecycle.handleLifecycleEvent
-import com.erolc.mrouter.lifecycle.withEventStr
+import com.erolc.mrouter.lifecycle.LocalOwnersProvider
+
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
@@ -25,7 +25,6 @@ import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
-import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
 import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
@@ -38,12 +37,11 @@ open class PageEntry internal constructor(
     override val address: Address,
     private val lifecycleOwnerDelegate: LifecycleOwnerDelegate
 ) : StackEntry {
-
-    private val lifecycle = lifecycleOwnerDelegate.lifecycle
-
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
     }
+
+    val id get() = lifecycleOwnerDelegate.id
 
     //transform中的prev在下一个页面打开的时候才会被赋值
     internal val transform = mutableStateOf(Transform.None)
@@ -72,21 +70,16 @@ open class PageEntry internal constructor(
     @Composable
     override fun Content(modifier: Modifier) {
         scope.windowId = LocalWindowScope.current.id
-        lifecycleOwnerDelegate.SystemLifecycle()
-        CompositionLocalProvider(LocalPageScope provides scope, LocalLifecycleOwner provides lifecycleOwnerDelegate) {
+        val saveableStateHolder = rememberSaveableStateHolder()
+        lifecycleOwnerDelegate.LocalOwnersProvider(saveableStateHolder, scope) {
             SysBackPressed { scope.backPressed() }
             Page(modifier)
-            val state by rememberPrivateInPage(
-                "page_transform_state",
-                transformState
-            ) { transformState }
-            if (state == ResumeState)
-                start()
 
             DisposableEffect(this) {
                 onDispose {
                     scope.transformTransition = null
                     if (isDestroy.value) {
+                        MRouter.clear(id)
                         ShareElementController.afterShare(this@PageEntry)
                         handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                     }
@@ -108,7 +101,6 @@ open class PageEntry internal constructor(
         val isIntercept by rememberPrivateInPage("page_intercept") { isIntercept }
         val transition = rememberTransition(state).apply {
             if (enterStart) transformState.value = ResumeState
-
             if (exitFinished && !pageRouter.backStack.pop())
                 if (pageRouter.parentRouter is WindowRouter)
                     isExit = true
@@ -117,7 +109,7 @@ open class PageEntry internal constructor(
 
             if (resume) onResume()
 
-            if (stop) handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+            if (stop) updateMaxState(Lifecycle.State.CREATED)
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
@@ -154,12 +146,12 @@ open class PageEntry internal constructor(
         }
     }
 
-    @Composable
     private fun onResume() {
         pageRouter.backStack.execute(flag)
         flag = NormalFlag
         isUpdateTransform = false
-        resume()
+        updateMaxState(Lifecycle.State.RESUMED)
+//        handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     /**
@@ -194,35 +186,20 @@ open class PageEntry internal constructor(
         return StopState
     }
 
-    private fun upFromEvent(state: Lifecycle.State) {
-        if (lifecycle.currentState == state) Lifecycle.Event.upFrom(state)
-            ?.let { handleLifecycleEvent(it) }
+    private fun updateMaxState(state: Lifecycle.State) {
+        lifecycleOwnerDelegate.maxLifecycle = state
     }
 
-    private fun downFromEvent(state: Lifecycle.State) {
-        if (lifecycle.currentState == state) Lifecycle.Event.downFrom(state)
-            ?.let { handleLifecycleEvent(it) }
-    }
+    internal fun create() = updateMaxState(Lifecycle.State.CREATED)
 
-    internal fun create() = upFromEvent(Lifecycle.State.INITIALIZED)
-    internal fun start() = upFromEvent(Lifecycle.State.CREATED)
-    internal fun resume() = upFromEvent(Lifecycle.State.STARTED)
-    internal fun pause() = downFromEvent(Lifecycle.State.RESUMED)
-
-    /**
-     * 这里之所以直接指定事件是因为window在最小化的时候会先调用windowIconified再调用windowLostFocus导致状态会丢失。
-     * 这样做的目的是为了忽略windowLostFocus事件。
-     */
-    internal fun stop() = downFromEvent(Lifecycle.State.STARTED)
 
     override fun destroy() {
         isDestroy.value = true
     }
 
     internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
-        lifecycleOwnerDelegate.handleLifecycleEvent(withEventStr(event))
-        if (event != Lifecycle.Event.ON_CREATE)
-            (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
+        lifecycleOwnerDelegate.handleLifecycleEvent(event)
+        (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
     }
 
 

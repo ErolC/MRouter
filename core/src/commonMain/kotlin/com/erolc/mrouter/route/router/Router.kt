@@ -1,7 +1,9 @@
 package com.erolc.mrouter.route.router
 
+import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
+import com.erolc.mrouter.lifecycle.MRouterViewModelStoreProvider
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ReplaceFlag
@@ -37,11 +39,13 @@ internal fun createPageEntry(
     route: Route,
     address: Address,
     router: Router,
-    isReplace:Boolean = false
+    isReplace: Boolean = false,
+    hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+    viewModelStoreProvider: MRouterViewModelStoreProvider?
 ): PageEntry {
     return PageEntry(
         getScope(),
-        address, LifecycleOwnerDelegate()
+        address, LifecycleOwnerDelegate(viewModelStoreProvider,hostLifecycleState)
     ).apply {
         flag = if (isReplace) route.flag + ReplaceFlag else route.flag
         transform.value = route.transform

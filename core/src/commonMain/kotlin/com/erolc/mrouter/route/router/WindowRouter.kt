@@ -2,11 +2,13 @@ package com.erolc.mrouter.route.router
 
 import androidx.compose.runtime.mutableStateOf
 import com.erolc.mrouter.Constants.DEFAULT_WINDOW
+import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.utils.loge
 
 
 /**
@@ -58,10 +60,11 @@ class WindowRouter(private val addresses: List<Address>, private val platformRes
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
         pageRouter = PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
             pageRouter.route(
-                createPageEntry(
+                MRouter.createEntry(
                     route,
                     address,
-                    PanelRouter(addresses, pageRouter)
+                    PanelRouter(addresses, pageRouter, hostLifecycleState = pageRouter.hostLifecycleState),
+                    hostLifecycleState = pageRouter.hostLifecycleState
                 )
             )
         }

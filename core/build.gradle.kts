@@ -63,7 +63,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)
-            api(libs.lifecycle.runtime)
+            implementation(libs.lifecycle.runtime)
 //            implementation(project(":lifecycle"))
         }
     }

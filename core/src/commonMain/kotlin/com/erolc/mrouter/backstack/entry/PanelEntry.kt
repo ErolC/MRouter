@@ -25,7 +25,8 @@ class PanelEntry(override val address: Address) : StackEntry {
     @Composable
     override fun Content(modifier: Modifier) {
         Box(modifier.fillMaxSize()) {
-            val stack by pageRouter.getPlayStack().collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
+            val stack by pageRouter.getPlayStack()
+                .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
 
             if (stack.size == 1)
                 stack.first().transformState.value = ResumeState
@@ -44,16 +45,10 @@ class PanelEntry(override val address: Address) : StackEntry {
      * 处理生命周期事件
      */
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
-        val pageEntry = (pageRouter.backStack.findTopEntry() as PageEntry)
-        when (event) {
-            Lifecycle.Event.ON_START -> pageEntry.start()
-            Lifecycle.Event.ON_RESUME -> pageEntry.resume()
-            Lifecycle.Event.ON_PAUSE -> pageEntry.pause()
-            Lifecycle.Event.ON_STOP -> pageEntry.stop()
-            Lifecycle.Event.ON_DESTROY -> pageEntry.destroy()
-            else -> {}
+        pageRouter.backStack.backStack.value.forEach {
+            it as PageEntry
+            it.handleLifecycleEvent(event)
         }
-
     }
 
     override fun destroy() {

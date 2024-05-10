@@ -59,8 +59,9 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.components.resources)
+            implementation(libs.lifecycle.viewmodel.compose)
             implementation(project(":core"))
-            implementation(project(":lifecycle"))
+//            implementation(project(":lifecycle"))
         }
     }
 }

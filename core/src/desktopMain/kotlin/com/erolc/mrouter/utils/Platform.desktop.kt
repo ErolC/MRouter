@@ -14,6 +14,9 @@ import com.erolc.mrouter.scope.rememberInWindow
 import com.erolc.mrouter.window.*
 import kotlinx.coroutines.delay
 import java.util.*
+import kotlin.experimental.and
+import kotlin.experimental.or
+import kotlin.random.Random
 
 @Composable
 actual fun PlatformWindow(
@@ -84,3 +87,26 @@ actual fun getPlatform(): Platform {
         else -> UnKnow
     }
 }
+
+
+@OptIn(ExperimentalStdlibApi::class)
+fun randomUUID(): String {
+    val bytes = Random.nextBytes(16).also {
+        it[6] = it[6] and 0x0f // clear version
+        it[6] = it[6] or 0x40 // set to version 4
+        it[8] = it[8] and 0x3f // clear variant
+        it[8] = it[8] or 0x80.toByte() // set to IETF variant
+    }
+    return StringBuilder(36)
+        .append(bytes.toHexString(0, 4))
+        .append('-')
+        .append(bytes.toHexString(4, 6))
+        .append('-')
+        .append(bytes.toHexString(6, 8))
+        .append('-')
+        .append(bytes.toHexString(8, 10))
+        .append('-')
+        .append(bytes.toHexString(10))
+        .toString()
+}
+

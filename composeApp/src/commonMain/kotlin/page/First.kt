@@ -9,12 +9,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
+import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberInPage
 
 @Composable
 fun First() = Page {
+    LifecycleObserver { _, event ->
+        loge("tag","first - $event")
+    }
     val args = rememberArgs()
     Column(modifier = Modifier.fillMaxWidth().safeContentPadding()) {
         var result by rememberInPage("data") { mutableStateOf("") }
