@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
@@ -54,17 +52,17 @@ kotlin {
             implementation(libs.androidx.window)
         }
         desktopMain.dependencies {
-            runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+            runtimeOnly(libs.kotlinx.coroutines.swing)
             implementation(compose.desktop.currentOs)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime)
-//            implementation(project(":lifecycle"))
         }
     }
 }

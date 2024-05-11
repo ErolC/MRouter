@@ -55,7 +55,9 @@ class TransformWrapScope {
             }
         }
         val anchoredDraggableState = rememberAnchoredDraggableState(0f, anchors)
-        val offset = anchoredDraggableState.requireOffset()
+        var offset = anchoredDraggableState.offset
+        if (offset.isNaN())
+            offset = 0f
         val offsetProgress = if (max == 0f) 0f else offset / max //0-1
         remember(offsetProgress) {
             //1-postExit;0-resume

@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.get
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlin.reflect.KClass
 
 internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModelStoreProvider {
 
@@ -57,5 +59,11 @@ internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModel
             val viewModelProvider = ViewModelProvider.create(viewModelStore, FACTORY)
             return viewModelProvider.get()
         }
+    }
+}
+
+class DefaultViewModelProviderFactory:ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+        return super.create(modelClass, extras)
     }
 }
