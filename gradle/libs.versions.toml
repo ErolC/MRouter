@@ -1,7 +1,7 @@
 [versions]
 annotation = "1.7.1"
 compose = "1.5.4"
-compose-plugin = "1.6.2"
+compose-plugin = "1.6.10-rc01"
 compose-compiler = "1.5.5"
 agp = "8.2.0"
 android-minSdk = "24"
