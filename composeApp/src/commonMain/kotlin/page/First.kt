@@ -29,26 +29,31 @@ fun First() = Page {
             Text("回退:${this@Page.name}")
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
-            val key = args.getData<String>("key")
+            val key = args.getString("key")
             var route = "second"
             if (key == "arg") route += "?value=routeData"
             route(route) {
                 window(Constants.DEFAULT_WINDOW)
-                if (key == "arg") {
-                    arg("value1", "otherData")
-                }
-                if (key == "return") {
-                    arg("return", "true")
-                    onResult {
-                        result = it.getData<String>("back_data")
+                argBuild {
+                    if (key == "arg") {
+                        putString("value1", "otherData")
+                    }
+                    if (key == "return") {
+                        putBoolean("return", true)
+                    }
+
+                    if (key == "return") {
+                        onResult {
+                            result = it.getString("back_data", "")
+                        }
                     }
                 }
             }
         }) {
-            val key = args.getData<String>("key")
+            val key = args.getString("key")
             Text("前往下一个页面${if (key == "arg") "并携带数据" else ""}")
         }
-        val key = args.getData<String>("key")
+        val key = args.getString("key")
         if (key == "return") {
             Text("这是由Second页面回传的数据：${result}")
         }

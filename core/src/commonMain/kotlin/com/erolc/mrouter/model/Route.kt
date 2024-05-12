@@ -1,9 +1,9 @@
 package com.erolc.mrouter.model
 
-import com.erolc.mrouter.route.Args
+import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.route.emptyArgs
 import com.erolc.mrouter.route.transform.Transform
 
 /**
@@ -22,8 +22,8 @@ data class Route internal constructor(
     val address: String,
     val flag: RouteFlag,
     val windowOptions: WindowOptions,
-    val args: Args = emptyArgs,
-    val onResult: (Args) -> Unit = {},
+    val args: Bundle = bundleOf(),
+    val onResult: (Bundle) -> Unit = {},
     val panelOptions: PanelOptions? = null,
     val transform: Transform = Transform.None,
 )

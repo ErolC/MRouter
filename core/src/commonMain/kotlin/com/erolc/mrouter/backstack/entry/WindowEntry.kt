@@ -47,6 +47,10 @@ class WindowEntry(
             }
     }
 
+    fun dispatchOnAddressChange() {
+        pageRouter.dispatchOnAddressChange()
+    }
+
     @Composable
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalWindowScope provides scope) {

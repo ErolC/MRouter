@@ -3,6 +3,8 @@ package com.erolc.mrouter.scope
 import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -24,10 +26,10 @@ val LocalPageScope = compositionLocalOf { default }
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
 open class PageScope {
-    internal val args = mutableStateOf(emptyArgs)
+    internal val args = mutableStateOf(bundleOf())
     var name: String = ""
         internal set
-    private val result = emptyArgs
+    private val result = bundleOf()
     internal var windowId = ""
 
     //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
@@ -62,26 +64,11 @@ open class PageScope {
         router.router(routeObj)
     }
 
-
     /**
      * 设置[backPressed]时返回给上一个页面的数据
      */
-    fun setResult(args: Args) {
-        result += args
-    }
-
-    /**
-     * 设置[backPressed]时返回给上一个页面的数据
-     */
-    fun setResult(arg: Arg) {
-        result += arg
-    }
-
-    /**
-     * 设置[backPressed]时返回给上一个页面的数据
-     */
-    fun setResult(pair: Pair<String, Any>) {
-        result += pair.toArg()
+    fun setResult(block: Bundle.() -> Unit) {
+        result.block()
     }
 
     /**
@@ -114,7 +101,7 @@ open class PageScope {
  * 获取上一个页面传递过来的数据
  */
 @Composable
-fun rememberArgs(): Args {
+fun rememberArgs(): Bundle {
     val args by LocalPageScope.current.args
     return args
 }
@@ -130,7 +117,7 @@ fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
             body(owner, event)
         }
     }
-    rememberPrivateInPage("lifecycle") {
+    rememberPrivateInPage("lifecycle", observer) {
         owner.lifecycle.removeObserver(observer)
         owner.lifecycle.addObserver(observer)
     }

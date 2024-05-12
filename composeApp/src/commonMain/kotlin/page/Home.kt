@@ -7,29 +7,43 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.SaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.utils.isDesktop
 import com.erolc.mrouter.utils.loge
+import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 data class Future(val name: String, val value: String)
 
+class TestViewModel(holder: SavedStateHandle):ViewModel(){
+
+    val state = mutableStateOf(true)
+}
+
 @Composable
 fun Home() = Page {
     LifecycleObserver { _, event ->
-        loge("tag","$event")
+        loge("tag","home $event")
     }
+    val vm = viewModel(TestViewModel::class)
+    var state by  vm.state
+    loge("tag","$state --- ")
     val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),
@@ -52,7 +66,10 @@ fun Home() = Page {
                 Column(Modifier.fillMaxWidth()) {
                     Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
                         when (it.value) {
-                            "normal" -> route("first")
+                            "normal" -> {
+                                state = false
+                                route("first")
+                            }
                             "arg" -> route("first?key=arg")
                             "return" -> route("first?key=return")
                             "panel" -> route("panel")

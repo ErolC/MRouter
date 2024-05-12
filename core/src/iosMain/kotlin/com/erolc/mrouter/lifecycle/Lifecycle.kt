@@ -3,6 +3,7 @@ package com.erolc.mrouter.lifecycle
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
@@ -26,16 +27,32 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
 
     private var viewModelStoreProvider: MRouterViewModelStoreProvider? = null
 
+
     private val savedState: Bundle? = null
+
+    private var immutableArgs: Bundle? = null
+
+    actual val arguments: Bundle?
+        get() = if (immutableArgs == null) {
+            null
+        } else {
+            Bundle(immutableArgs?: bundleOf())
+        }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     actual constructor(
         viewModelStoreProvider: MRouterViewModelStoreProvider?,
-        hostLifecycleState: Lifecycle.State
+        hostLifecycleState: Lifecycle.State,args:Bundle?
     ) : super() {
         loge("tag", "create:$hostLifecycleState")
         this.viewModelStoreProvider = viewModelStoreProvider
         this.hostLifecycleState = hostLifecycleState
+        immutableArgs = args
+    }
+
+    actual fun resetLifecycle(){
+        hostLifecycleState = Lifecycle.State.INITIALIZED
+        maxLifecycle = Lifecycle.State.INITIALIZED
     }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -63,9 +80,9 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             val extras = MutableCreationExtras()
             extras[SAVED_STATE_REGISTRY_OWNER_KEY] = this
             extras[VIEW_MODEL_STORE_OWNER_KEY] = this
-//            arguments?.let { args ->
-//                extras[DEFAULT_ARGS_KEY] = args
-//            }
+            arguments?.let { args ->
+                extras[DEFAULT_ARGS_KEY] = args
+            }
             return extras
         }
     override val viewModelStore: ViewModelStore

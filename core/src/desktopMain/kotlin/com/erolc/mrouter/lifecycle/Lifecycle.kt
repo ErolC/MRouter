@@ -3,6 +3,7 @@ package com.erolc.mrouter.lifecycle
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
@@ -13,6 +14,8 @@ import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.randomUUID
 import kotlin.math.max
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.createInstance
 
 
 actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
@@ -29,14 +32,23 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
 
     private val savedState: Bundle? = null
 
+    private var immutableArgs: Bundle? = null
+
+    actual val arguments: Bundle?
+        get() = if (immutableArgs == null) {
+            null
+        } else {
+            Bundle(immutableArgs?: bundleOf())
+        }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     actual constructor(
         viewModelStoreProvider: MRouterViewModelStoreProvider?,
-        hostLifecycleState: Lifecycle.State
+        hostLifecycleState: Lifecycle.State,args:Bundle?
     ) : super() {
-        loge("tag","create:$hostLifecycleState")
         this.viewModelStoreProvider = viewModelStoreProvider
         this.hostLifecycleState = hostLifecycleState
+        immutableArgs = args
     }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -52,13 +64,26 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
+    actual fun resetLifecycle(){
+        hostLifecycleState = Lifecycle.State.INITIALIZED
+        maxLifecycle = Lifecycle.State.INITIALIZED
+    }
+
     actual fun handleLifecycleEvent(event: Lifecycle.Event) {
         hostLifecycleState = event.targetState
         updateState()
     }
 
     override val defaultViewModelProviderFactory = object : ViewModelProvider.Factory {
-        // Use default implementation
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+            val constructors = modelClass.constructors
+            return constructors.singleOrNull { it.parameters.all(KParameter::isOptional) }
+                ?.callBy(emptyMap())
+                ?: constructors.singleOrNull {
+                    it.parameters.filter { it.type.classifier != SavedStateHandle::class }
+                        .all(KParameter::isOptional)
+                }?.call(extras.createSavedStateHandle()) ?: super.create(modelClass, extras)
+        }
     }
 
     override val defaultViewModelCreationExtras: CreationExtras

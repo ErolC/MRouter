@@ -23,7 +23,7 @@ import com.erolc.mrouter.route.router.createPageEntry
  */
 object MRouter {
 
-    private var rootRouter: WindowRouter? = null
+    private var rootRouter: WindowRouter = WindowRouter()
 
     private var startRoute: Route? = null
     private var registerBlock: (RegisterBuilder.() -> Unit)? = null
@@ -40,10 +40,10 @@ object MRouter {
         builder: RegisterBuilder.() -> Unit
     ) {
         val route = routeBuild(startTarget).copy(windowOptions = windowOptions)
-        rootRouter = RegisterBuilder().apply {
+        RegisterBuilder().apply {
             registerBlock?.invoke(this)
             builder()
-        }.build(route)
+        }.build(rootRouter,route)
         startRoute?.let {
             route(it)
             startRoute = null
@@ -52,11 +52,11 @@ object MRouter {
 
     @Composable
     internal fun getRootBlackStack(): State<List<StackEntry>> {
-        return rootRouter!!.getBackStack().collectAsState(listOf<WindowEntry>())
+        return rootRouter.getBackStack().collectAsState(listOf<WindowEntry>())
     }
 
     private fun route(route: Route) {
-        rootRouter?.run {
+        rootRouter.run {
             val entry = backStack.findEntry(route.windowOptions.id) as? WindowEntry
             entry?.pageRouter?.dispatchRoute(route) ?: dispatchRoute(route)
         }
@@ -67,7 +67,7 @@ object MRouter {
      */
     fun route(route: String, block: RouteBuilder.() -> Unit = {}) {
         val routeObj = routeBuild(route, block)
-        if (rootRouter == null)
+        if (rootRouter.addresses.isEmpty())
             startRoute = routeObj
         else
             route(routeObj)

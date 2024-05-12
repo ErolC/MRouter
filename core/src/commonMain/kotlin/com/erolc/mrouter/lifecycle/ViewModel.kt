@@ -8,7 +8,7 @@ interface MRouterViewModelStoreProvider {
 }
 
 internal expect class MRouterControllerViewModel:ViewModel, MRouterViewModelStoreProvider {
-    fun clear(backStackEntryId: String)
+    fun clear(entryId: String)
 
     companion object {
         fun getInstance(viewModelStore: ViewModelStore): MRouterControllerViewModel

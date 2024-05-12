@@ -10,6 +10,8 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
@@ -35,10 +37,11 @@ import com.erolc.mrouter.utils.rememberPrivateInPage
 open class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address,
-    private val lifecycleOwnerDelegate: LifecycleOwnerDelegate
+    internal val lifecycleOwnerDelegate: LifecycleOwnerDelegate
 ) : StackEntry {
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
+        scope.args.value = lifecycleOwnerDelegate.arguments?: bundleOf()
     }
 
     val id get() = lifecycleOwnerDelegate.id

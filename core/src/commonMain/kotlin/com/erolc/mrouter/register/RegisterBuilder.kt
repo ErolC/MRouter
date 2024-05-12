@@ -100,13 +100,10 @@ class RegisterBuilder internal constructor() {
     }
 
     /**
-     * 构建，window路由器，并分配第一个路由
+     * 并分配第一个路由
      */
-    internal fun build(route: Route): WindowRouter {
-        //构建路由器并路由到初始页面
-        return WindowRouter(addresses, platformRes).apply {
-            dispatchRoute(route)
-        }
+    internal fun build(windowRouter: WindowRouter, route: Route) {
+        windowRouter.setResource(addresses, platformRes, route)
     }
 
 }

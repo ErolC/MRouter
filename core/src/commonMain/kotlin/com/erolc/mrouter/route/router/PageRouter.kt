@@ -20,7 +20,11 @@ import kotlinx.coroutines.flow.map
  * @param parentRouter 父路由，对于window内的页面路由来说，[WindowRouter]将是其父路由，同理，对于panel内的页面路由来说[PanelRouter]将是其父路由。
  * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [PanelRouter]
  */
-open class PageRouter(name: String, private val addresses: List<Address>, override val parentRouter: Router) : Router {
+open class PageRouter(
+    name: String,
+    private val addresses: List<Address>,
+    override val parentRouter: Router
+) : Router {
     internal val backStack = BackStack(name)
 
     internal fun route(stackEntry: StackEntry) {
@@ -115,5 +119,13 @@ open class PageRouter(name: String, private val addresses: List<Address>, overri
     }
 
     internal fun getBackStack() = backStack.backStack
+
+    fun dispatchOnAddressChange() {
+        backStack.backStack.value.forEach {
+            (it as PageEntry).lifecycleOwnerDelegate.resetLifecycle()
+        }
+
+    }
+
 
 }

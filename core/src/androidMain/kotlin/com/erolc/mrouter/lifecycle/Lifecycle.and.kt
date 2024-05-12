@@ -12,6 +12,9 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.erolc.mrouter.utils.loge
 import java.util.UUID.randomUUID
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
 
 
 actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
@@ -21,6 +24,14 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
     actual val id: String = randomUUID().toString()
     private var hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
+    private var immutableArgs: Bundle? = null
+
+    actual val arguments: Bundle?
+        get() = if (immutableArgs == null) {
+            null
+        } else {
+            Bundle(immutableArgs)
+        }
 
     private var savedStateRegistryAttached = false
 
@@ -31,11 +42,17 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     actual constructor(
         viewModelStoreProvider: MRouterViewModelStoreProvider?,
-        hostLifecycleState: Lifecycle.State
+        hostLifecycleState: Lifecycle.State,
+        args: Bundle?
     ) : super() {
-        loge("tag", "create:$hostLifecycleState")
         this.viewModelStoreProvider = viewModelStoreProvider
         this.hostLifecycleState = hostLifecycleState
+        this.immutableArgs = args
+    }
+
+    actual fun resetLifecycle(){
+        hostLifecycleState = Lifecycle.State.INITIALIZED
+        maxLifecycle = Lifecycle.State.INITIALIZED
     }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -57,7 +74,15 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
     }
 
     override val defaultViewModelProviderFactory = object : ViewModelProvider.Factory {
-        // Use default implementation
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+            val constructors = modelClass.constructors
+            return constructors.singleOrNull { it.parameters.all(KParameter::isOptional) }
+                ?.callBy(emptyMap())
+                ?: constructors.singleOrNull {
+                    it.parameters.filter { it.type.classifier != SavedStateHandle::class }
+                        .all(KParameter::isOptional)
+                }?.call(extras.createSavedStateHandle()) ?: super.create(modelClass, extras)
+        }
     }
 
     override val defaultViewModelCreationExtras: CreationExtras
@@ -65,18 +90,14 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             val extras = MutableCreationExtras()
             extras[SAVED_STATE_REGISTRY_OWNER_KEY] = this
             extras[VIEW_MODEL_STORE_OWNER_KEY] = this
-//            arguments?.let { args ->
-//                extras[DEFAULT_ARGS_KEY] = args
-//            }
+            arguments?.let { args ->
+                extras[DEFAULT_ARGS_KEY] = args
+            }
             return extras
         }
     override val viewModelStore: ViewModelStore
         /**
          * {@inheritDoc}
-         *
-         * @throws IllegalStateException if called before the [lifecycle] has moved to
-         * [Lifecycle.State.CREATED] or before the [com.erolc.mrouter.RouteHost] has called
-         * [androidx.navigation.NavHostController.setViewModelStore].
          */
         get() {
             check(savedStateRegistryAttached) {
@@ -123,6 +144,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
         }
     }
 
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     actual fun updateState() {
         if (!savedStateRegistryAttached) {
@@ -135,7 +157,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             // and specifically *before* we move up the Lifecycle
             savedStateRegistryController.performRestore(savedState)
         }
-//        loge("tag","$hostLifecycleState $maxLifecycle $this")
+//        loge("tag","$hostLifecycleState $maxLifecycle ${_lifecycle.currentState}")
         if (hostLifecycleState.ordinal < maxLifecycle.ordinal) {
             _lifecycle.currentState = hostLifecycleState
         } else {

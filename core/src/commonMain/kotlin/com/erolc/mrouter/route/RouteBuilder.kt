@@ -1,6 +1,9 @@
 package com.erolc.mrouter.route
 
+import androidx.core.bundle.Bundle
+import androidx.core.bundle.bundleOf
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.Constants.PATH_ARGS
 import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.utils.isMobile
@@ -18,10 +21,10 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
  * 路由构建类，用于构建路由到下一个页面所需的一些数据：参数，回调等。
  */
 class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
-    private var onResult: (Args) -> Unit = {}
+    private var onResult: (Bundle) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(currentWindowId, "")
 
-    private val args = emptyArgs
+    private val args = bundleOf()
 
     var flag: RouteFlag = NormalFlag
 
@@ -33,23 +36,12 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
         transform = buildTransform(body)
     }
 
-    fun arg(key: String, value: Any) {
-        args += (key to value).toArg()
+    fun argBuild(block: Bundle.() -> Unit) {
+        args.block()
     }
 
-    fun args(vararg pair: Pair<String, Any>) {
-        args += pair.toMap().toArgs()
-    }
-
-    fun arg(arg: Arg) {
-        args += arg
-    }
-
-    fun args(args: Args) {
-        this.args += args
-    }
-
-    fun onResult(body: (Args) -> Unit) {
+    fun getArgs() = args
+    fun onResult(body: (Bundle) -> Unit) {
         onResult = body
 
     }
@@ -85,12 +77,13 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
         val path = split[0]
         val (key, address) = getPaths(path)
         if (split.size == 2) {
-            args += split[1].split("&").map {
+            val pathArgs = split[1].split("&").map {
                 val (aKey, value) = it.split("=")
                 aKey to value
             }.filter {
                 it.second.isNotEmpty()
-            }.toMap().toArgs()
+            }.toBundle()
+            args.putBundle(PATH_ARGS, pathArgs)
         }
         return Route(
             route,

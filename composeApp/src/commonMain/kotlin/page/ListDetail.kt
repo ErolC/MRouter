@@ -53,7 +53,7 @@ fun ListDetail() = Page {
 @Composable
 fun Detail() = Page {
     val args = rememberArgs()
-    val id = args.getData<Int>("id")
+    val id = args.getInt("id")
     Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
     LifecycleObserver { lifecycleOwner, event ->
         loge("tag", "id:$id owner:$lifecycleOwner event:$event")

@@ -8,6 +8,7 @@ import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.utils.isDesktop
 import com.erolc.mrouter.utils.loge
 
 
@@ -17,13 +18,32 @@ import com.erolc.mrouter.utils.loge
  * 而对于桌面端来说，可以有多个窗口。
  * @param addresses 所注册的所有地址
  */
-class WindowRouter(private val addresses: List<Address>, private val platformRes: Map<String, Any>) : Router {
+class WindowRouter : Router {
     internal val backStack = BackStack("root")
+    internal var addresses: List<Address> = listOf()
+        private set
+    private var platformRes: Map<String, Any> = mapOf()
 
     private fun createEntry(route: Route, address: Address): StackEntry {
         return WindowEntry(mutableStateOf(route.windowOptions)).also {
             it.newPageRouter(route, address)
             it.scope.platformRes = platformRes
+        }
+    }
+
+    internal fun setResource(addresses: List<Address>,res:Map<String,Any>,route: Route){
+        this.addresses = addresses
+        platformRes = res
+        if (backStack.isEmpty()){
+            dispatchRoute(route)
+        }else{
+         dispatchOnAddressChange()
+        }
+    }
+
+    private fun dispatchOnAddressChange(){
+        backStack.backStack.value.forEach {
+            (it as WindowEntry).dispatchOnAddressChange()
         }
     }
 
@@ -47,7 +67,7 @@ class WindowRouter(private val addresses: List<Address>, private val platformRes
         if (oldEntry == null || (oldEntry as WindowEntry).scope.isCloseWindow.value) {
             val entry = block(oldEntry?.takeIf { (it as WindowEntry).scope.isCloseWindow.value })
             route(entry)
-        } else {
+        } else if (isDesktop) {
             oldEntry.pageRouter.route(route)
         }
     }

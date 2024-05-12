@@ -96,7 +96,7 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
         }
     }
     Column {
-        val gesture = args.getData<String>("gesture")
+        val gesture = args.getString("gesture")
         when (gesture) {
             "normal" -> Text(
                 "可将手指或鼠标通过拖拽页面的最左侧实现右滑动后退",
