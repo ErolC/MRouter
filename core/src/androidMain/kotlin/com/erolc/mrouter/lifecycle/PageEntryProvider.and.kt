@@ -47,7 +47,7 @@ private fun SaveableStateHolder.SaveableStateProvider(content: @Composable () ->
     )
     // Stash a reference to the SaveableStateHolder in the ViewModel so that
     // it is available when the ViewModel is cleared, marking the permanent removal of this
-    // NavBackStackEntry from the back stack. Which, because of animations,
+    // PageEntry from the back stack. Which, because of animations,
     // only happens after this leaves composition. Which means we can't rely on
     // DisposableEffect to clean up this reference (as it'll be cleaned up too early)
     viewModel.saveableStateHolderRef = WeakReference(this)

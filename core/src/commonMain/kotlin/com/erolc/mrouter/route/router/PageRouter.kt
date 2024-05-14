@@ -97,7 +97,9 @@ open class PageRouter(
     internal fun route(route: Route) {
         val address = addresses.find { it.path == route.address }
         if (address == null) {
-            loge("MRouter", "not yet register the address：${route.address}")
+            if (!MRouter.routeToPlatform(route)) {
+                loge("MRouter", "not yet register the address：${route.address}")
+            }
             return
         }
         val entry = MRouter.createEntry(

@@ -76,7 +76,9 @@ class PanelRouter(
         else panel.pageRouter.let {
             val address = addresses.find { it.path == route.address }
             if (address == null) {
-                loge("MRouter", "not yet register the address：${route.address}")
+                if (!MRouter.routeToPlatform(route)) {
+                    loge("MRouter", "not yet register the address：${route.address}")
+                }
                 return
             }
             it.route(

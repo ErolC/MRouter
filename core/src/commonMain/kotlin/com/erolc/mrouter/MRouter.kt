@@ -4,10 +4,12 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.core.bundle.Bundle
 import androidx.lifecycle.*
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.lifecycle.MRouterControllerViewModel
+import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.Address
@@ -43,7 +45,7 @@ object MRouter {
         RegisterBuilder().apply {
             registerBlock?.invoke(this)
             builder()
-        }.build(rootRouter,route)
+        }.build(rootRouter, route)
         startRoute?.let {
             route(it)
             startRoute = null
@@ -86,14 +88,30 @@ object MRouter {
         registerBlock = block
     }
 
-    internal fun clear(entryId:String){
+    internal fun clear(entryId: String) {
         viewModel?.clear(entryId)
     }
+
     internal fun createEntry(
         route: Route,
         address: Address,
         router: Router,
         isReplace: Boolean = false,
         hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
-    ) = createPageEntry(route, address, router, isReplace,hostLifecycleState, viewModel)
+    ) = createPageEntry(route, address, router, isReplace, hostLifecycleState, viewModel)
+
+    internal fun routeToPlatform(route: Route): Boolean {
+        val platformRoute = rootRouter.platformRes[route.address] as? PlatformRoute
+        return platformRoute?.let {
+            rootRouter.route(it, route.args, route.onResult)
+            true
+        } ?: false
+    }
 }
+
+
+internal expect fun WindowRouter.route(
+    route: PlatformRoute,
+    args: Bundle,
+    onResult: (Bundle) -> Unit
+)

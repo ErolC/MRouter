@@ -22,7 +22,8 @@ class WindowRouter : Router {
     internal val backStack = BackStack("root")
     internal var addresses: List<Address> = listOf()
         private set
-    private var platformRes: Map<String, Any> = mapOf()
+    internal var platformRes: Map<String, Any> = mapOf()
+        private set
 
     private fun createEntry(route: Route, address: Address): StackEntry {
         return WindowEntry(mutableStateOf(route.windowOptions)).also {
@@ -31,17 +32,26 @@ class WindowRouter : Router {
         }
     }
 
-    internal fun setResource(addresses: List<Address>,res:Map<String,Any>,route: Route){
-        this.addresses = addresses
-        platformRes = res
-        if (backStack.isEmpty()){
-            dispatchRoute(route)
-        }else{
-         dispatchOnAddressChange()
+    internal fun setPlatformRes(key: String, value: Any) {
+        platformRes += key to value
+        backStack.backStack.value.forEach {
+            it as WindowEntry
+            it.scope.platformRes = platformRes
         }
     }
 
-    private fun dispatchOnAddressChange(){
+
+    internal fun setResource(addresses: List<Address>, res: Map<String, Any>, route: Route) {
+        this.addresses = addresses
+        platformRes = res
+        if (backStack.isEmpty()) {
+            dispatchRoute(route)
+        } else {
+            dispatchOnAddressChange()
+        }
+    }
+
+    private fun dispatchOnAddressChange() {
         backStack.backStack.value.forEach {
             (it as WindowEntry).dispatchOnAddressChange()
         }
@@ -58,7 +68,10 @@ class WindowRouter : Router {
             require(address != null) {
                 "can't find the address with ‘${route.path}’"
             }
-            it?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(route, address)
+            it?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(
+                route,
+                address
+            )
         }
     }
 
@@ -78,16 +91,21 @@ class WindowRouter : Router {
     }
 
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
-        pageRouter = PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
-            pageRouter.route(
-                MRouter.createEntry(
-                    route,
-                    address,
-                    PanelRouter(addresses, pageRouter, hostLifecycleState = pageRouter.hostLifecycleState),
-                    hostLifecycleState = pageRouter.hostLifecycleState
+        pageRouter =
+            PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
+                pageRouter.route(
+                    MRouter.createEntry(
+                        route,
+                        address,
+                        PanelRouter(
+                            addresses,
+                            pageRouter,
+                            hostLifecycleState = pageRouter.hostLifecycleState
+                        ),
+                        hostLifecycleState = pageRouter.hostLifecycleState
+                    )
                 )
-            )
-        }
+            }
     }
 
     private fun updateEntry(oldEntry: WindowEntry, route: Route, address: Address) {

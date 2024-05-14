@@ -9,12 +9,9 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.erolc.mrouter.utils.loge
 import java.util.UUID.randomUUID
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.createType
 
 
 actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
@@ -111,7 +108,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             }
             checkNotNull(viewModelStoreProvider) {
                 "You must call setViewModelStore() on your MRouter before " +
-                        "accessing the ViewModelStore of a navigation graph."
+                        "accessing the ViewModelStore of a route register."
             }
             return viewModelStoreProvider!!.getViewModelStore(id)
         }

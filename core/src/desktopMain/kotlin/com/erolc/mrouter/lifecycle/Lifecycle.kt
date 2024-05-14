@@ -97,13 +97,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             return extras
         }
     override val viewModelStore: ViewModelStore
-        /**
-         * {@inheritDoc}
-         *
-         * @throws IllegalStateException if called before the [lifecycle] has moved to
-         * [Lifecycle.State.CREATED] or before the [com.erolc.mrouter.RouteHost] has called
-         * [androidx.navigation.NavHostController.setViewModelStore].
-         */
+
         get() {
             check(savedStateRegistryAttached) {
                 "You cannot access the PageEntry's ViewModels until it is added to " +
@@ -116,7 +110,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             }
             checkNotNull(viewModelStoreProvider) {
                 "You must call setViewModelStore() on your MRouter before " +
-                        "accessing the ViewModelStore of a navigation graph."
+                        "accessing the ViewModelStore of a route register."
             }
             return viewModelStoreProvider!!.getViewModelStore(id)
         }

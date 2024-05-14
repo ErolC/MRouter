@@ -1,11 +1,13 @@
 package com.erolc.example
 
 import App
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -26,16 +28,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
+import com.erolc.mrouter.MRouter
+import com.erolc.mrouter.intent
+import com.erolc.mrouter.route
+import com.erolc.mrouter.routeActivity
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MRouter.registerBuilder {
+            routeActivity("test_activity", ActivityResultContracts.StartActivityForResult()) {
+                it.route(TestActivity::class)
+            }
+        }
+
         setContent {
             App()
-//            AnimatedScreen()
         }
+
     }
 }
 
@@ -44,7 +55,6 @@ class MainActivity : ComponentActivity() {
 fun AppAndroidPreview() {
     App()
 }
-
 
 
 @Composable
@@ -58,7 +68,7 @@ fun AnimatedScreen() {
             tween(durationMillis = 500)
         }
     ) { offsetX ->
-        offsetX/100
+        offsetX / 100
     }
 
     val offsetXConstraint = if (offsetX == 0f) 0f else 200f

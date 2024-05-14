@@ -2,6 +2,7 @@ package com.erolc.mrouter.route
 
 import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
+import com.erolc.mrouter.Constants
 
 typealias RouteResult = (Bundle) -> Unit
 
@@ -206,3 +207,5 @@ inline fun <reified T> getBasicData(value: Any): T? {
 }
 
 fun List<Pair<String,String>>.toBundle() = bundleOf(*toTypedArray())
+
+fun Bundle.pathArgs():Bundle = getBundle(Constants.PATH_ARGS)?: bundleOf()
