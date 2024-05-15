@@ -91,9 +91,9 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             val extras = MutableCreationExtras()
             extras[SAVED_STATE_REGISTRY_OWNER_KEY] = this
             extras[VIEW_MODEL_STORE_OWNER_KEY] = this
-//            arguments?.let { args ->
-//                extras[DEFAULT_ARGS_KEY] = args
-//            }
+            arguments?.let { args ->
+                extras[DEFAULT_ARGS_KEY] = args
+            }
             return extras
         }
     override val viewModelStore: ViewModelStore
