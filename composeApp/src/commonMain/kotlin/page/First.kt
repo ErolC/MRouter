@@ -33,7 +33,7 @@ fun First() = Page {
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             val key = bundle.getString("key")
-            var route = "second"
+            var route = "test"
             if (key == "arg") route += "?value=routeData"
             route(route) {
                 window(Constants.DEFAULT_WINDOW)

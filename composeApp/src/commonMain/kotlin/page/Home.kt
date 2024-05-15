@@ -41,9 +41,9 @@ fun Home() = Page {
     LifecycleObserver { _, event ->
         loge("tag","home $event")
     }
-    val vm = viewModel(TestViewModel::class)
-    var state by  vm.state
-    loge("tag","$state --- ")
+//    val vm = viewModel(TestViewModel::class)
+//    var state by  vm.state
+//    loge("tag","$state --- ")
     val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),
@@ -67,7 +67,7 @@ fun Home() = Page {
                     Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
                         when (it.value) {
                             "normal" -> {
-                                state = false
+//                                state = false
                                 route("first")
                             }
                             "arg" -> route("first?key=arg")

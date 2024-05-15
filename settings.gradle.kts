@@ -30,4 +30,4 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":core")
-include(":lifecycle")
+//include(":lifecycle")

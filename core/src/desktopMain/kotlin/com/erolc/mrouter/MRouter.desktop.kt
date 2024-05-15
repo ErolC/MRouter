@@ -22,11 +22,3 @@ fun mRouterApplication(content: @Composable ApplicationScope.() -> Unit) {
         }
     }
 }
-
-internal actual fun WindowRouter.route(
-    route: PlatformRoute,
-    args: Bundle,
-    onResult: (Bundle) -> Unit
-) {
-
-}

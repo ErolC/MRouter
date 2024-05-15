@@ -7,6 +7,8 @@ import androidx.compose.ui.window.CanvasBasedWindow
 import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.readResourceBytes
 import androidx.compose.material.Typography
+import com.erolc.mrouter.MRouter
+import com.erolc.mrouter.route.platformRoute
 
 //通过引入中文字体解决中文显示问题
 @OptIn(InternalResourceApi::class)
@@ -22,6 +24,9 @@ suspend fun loadFont(): FontFamily {
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    MRouter.registerBuilder {
+        platformRoute("test","https://www.baidu.com")
+    }
     CanvasBasedWindow(canvasElementId = "ComposeTarget") {
         var typography by remember { mutableStateOf<Typography?>(null) }
         LaunchedEffect(Unit) {

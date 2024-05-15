@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.core.bundle.Bundle
 import androidx.lifecycle.*
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
@@ -12,6 +11,7 @@ import com.erolc.mrouter.lifecycle.MRouterControllerViewModel
 import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
+import com.erolc.mrouter.platform.route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.register.RegisterBuilder
 import com.erolc.mrouter.route.RouteBuilder
@@ -108,10 +108,3 @@ object MRouter {
         } ?: false
     }
 }
-
-
-internal expect fun WindowRouter.route(
-    route: PlatformRoute,
-    args: Bundle,
-    onResult: (Bundle) -> Unit
-)
