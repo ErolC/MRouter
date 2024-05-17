@@ -9,7 +9,7 @@ import androidx.compose.ui.window.WindowState
 import com.erolc.mrouter.LocalApplicationScope
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.scope.rememberInWindow
+import com.erolc.mrouter.utils.rememberInWindow
 import com.erolc.mrouter.window.*
 import kotlinx.coroutines.delay
 import java.util.*

@@ -6,7 +6,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.erolc.mrouter.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
@@ -49,7 +48,6 @@ open class PageScope {
             }
         }
     }
-
 
     /**
      * 路由到下一个页面
@@ -111,13 +109,7 @@ fun rememberArgs(): Bundle {
 @Composable
 fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val owner = LocalLifecycleOwner.current
-    val observer = rememberPrivateInPage("lifecycle_observer") {
-        LifecycleEventObserver { owner, event ->
-            body(owner, event)
-        }
-    }
-    rememberPrivateInPage("lifecycle", observer) {
-        owner.lifecycle.removeObserver(observer)
-        owner.lifecycle.addObserver(observer)
+    rememberPrivateInPage("lifecycle"){
+    owner.lifecycle.addEventObserver(body)
     }
 }

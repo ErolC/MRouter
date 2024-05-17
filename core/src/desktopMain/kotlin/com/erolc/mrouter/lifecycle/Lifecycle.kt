@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.platform.randomUUID
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -153,7 +154,6 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             // and specifically *before* we move up the Lifecycle
             savedStateRegistryController.performRestore(savedState)
         }
-//        loge("tag","$hostLifecycleState $maxLifecycle $this")
         if (hostLifecycleState.ordinal < maxLifecycle.ordinal) {
             _lifecycle.currentState = hostLifecycleState
         } else {

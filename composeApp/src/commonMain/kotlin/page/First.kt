@@ -35,7 +35,6 @@ fun First() = Page {
             var route = "second"
             if (key == "arg") route += "?value=routeData"
             route(route) {
-                window(Constants.DEFAULT_WINDOW)
                 argBuild {
                     if (key == "arg") {
                         putString("value1", "otherData")

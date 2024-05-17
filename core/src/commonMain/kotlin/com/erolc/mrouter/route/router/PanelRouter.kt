@@ -86,7 +86,7 @@ class PanelRouter(
                     route,
                     address,
                     PanelRouter(addresses, it),
-                    route.panelOptions?.clearTask == true,hostLifecycleState
+                    route.panelOptions?.clearTask == true, hostLifecycleState
                 )
             )
         }
@@ -98,12 +98,14 @@ class PanelRouter(
         if (!showPanels.contains(panelKey)) {
             showPanels.add(panelKey)
         }
-        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+//        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.RESUMED)
     }
 
     internal fun hidePanel(panelKey: String) {
         showPanels.remove(panelKey)
-        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+//        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.STARTED)
     }
 
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {

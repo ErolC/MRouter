@@ -2,6 +2,7 @@ package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
+import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.scope.LocalPageScope
 
 /**
@@ -27,10 +28,10 @@ internal data object PrivateCache : CacheState
 data object NormalCache : CacheState
 
 
-fun <T : Any> PageCache.cache(key: String, invalid: Boolean, state: CacheState = NormalCache, block: () -> T): T {
+fun <T : Any> PageCache.cache(key: String, state: CacheState = NormalCache, block: () -> T): T {
     val realKey = if (state == NormalCache) "cache_$key" else key
     return getValue(realKey).let {
-        if (invalid || it == null) {
+        if (it == null) {
             val value = block()
             updateValue(realKey, value)
             value
@@ -50,7 +51,7 @@ inline fun <T : Any> rememberInPage(
 ): T {
     val scope = LocalPageScope.current
     return remember(scope) {
-        scope.pageCache.cache(key, invalid = false, block = calculation)
+        scope.pageCache.cache(key, block = calculation)
     }
 }
 
@@ -62,9 +63,8 @@ inline fun <T : Any> rememberInPage(
     noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid = currentComposer.changed(key1)
     return remember(key1, scope) {
-        scope.pageCache.cache(key, invalid, block = calculation)
+        scope.pageCache.cache(key, block = calculation)
     }
 }
 
@@ -76,12 +76,9 @@ inline fun <T : Any> rememberInPage(
     noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid = currentComposer.changed(key1) or currentComposer.changed(key2)
-
     return remember(key1, key2, scope) {
         scope.pageCache.cache(
-            key,
-            invalid, block = calculation
+            key, block = calculation
         )
     }
 }
@@ -93,13 +90,8 @@ inline fun <T : Any> rememberInPage(
     noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid =
-        currentComposer.changed(key1) or currentComposer.changed(key2) or currentComposer.changed(
-            key3
-        )
-
     return remember(key1, key2, key3, scope) {
-        scope.pageCache.cache(key, invalid, block = calculation)
+        scope.pageCache.cache(key, block = calculation)
     }
 }
 
@@ -114,7 +106,7 @@ fun <T : Any> rememberInPage(
     var invalid = false
     for (temp in inputs) invalid = invalid or currentComposer.changed(temp)
     return remember(inputs, scope) {
-        scope.pageCache.cache(key, invalid, block = calculation)
+        scope.pageCache.cache(key, block = calculation)
     }
 }
 
@@ -126,7 +118,7 @@ internal inline fun <T : Any> rememberPrivateInPage(
 ): T {
     val scope = LocalPageScope.current
     return remember(scope) {
-        scope.pageCache.cache(key, false, PrivateCache, calculation)
+        scope.pageCache.cache(key, PrivateCache, calculation)
     }
 }
 
@@ -138,9 +130,8 @@ internal inline fun <T : Any> rememberPrivateInPage(
     noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid = currentComposer.changed(key1)
     return remember(key1, scope) {
-        scope.pageCache.cache(key, invalid, PrivateCache, calculation)
+        scope.pageCache.cache(key, PrivateCache, calculation)
     }
 }
 
@@ -151,12 +142,20 @@ internal inline fun <T : Any> rememberPrivateInPage(
     noinline calculation: @DisallowComposableCalls () -> T
 ): T {
     val scope = LocalPageScope.current
-    val invalid = currentComposer.changed(key1) or currentComposer.changed(key2)
-
     return remember(key1, key2, scope) {
         scope.pageCache.cache(
-            key,
-            invalid, PrivateCache, calculation
+            key, PrivateCache, calculation
         )
+    }
+}
+
+/**
+ * 记忆在pageScope中，使得对象和页面的生命周期中保持一致。
+ */
+@Composable
+internal fun <T : Any> rememberInWindow(key: String, init: () -> T): T {
+    val scope = LocalWindowScope.current
+    return remember(scope) {
+        scope.pageCache.cache(key, PrivateCache, init)
     }
 }

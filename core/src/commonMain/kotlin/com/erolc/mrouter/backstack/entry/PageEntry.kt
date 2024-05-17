@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.LocalOwnersProvider
+import com.erolc.mrouter.platform.loge
 
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
@@ -39,7 +40,7 @@ open class PageEntry internal constructor(
 ) : StackEntry {
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
-        scope.args.value = lifecycleOwnerDelegate.arguments?: bundleOf()
+        scope.args.value = lifecycleOwnerDelegate.arguments ?: bundleOf()
     }
 
     val id get() = lifecycleOwnerDelegate.id
@@ -152,7 +153,6 @@ open class PageEntry internal constructor(
         flag = NormalFlag
         isUpdateTransform = false
         updateMaxState(Lifecycle.State.RESUMED)
-//        handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
     /**

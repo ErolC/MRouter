@@ -47,10 +47,8 @@ fun PanelHost(
             }
         }
         Box(modifier) {
-            router.run {
-                showPanel(key)
-                panel.Content(Modifier)
-            }
+            router.showPanel(key)
+            panel.Content(Modifier)
         }
     } else router.hidePanel(key)
 

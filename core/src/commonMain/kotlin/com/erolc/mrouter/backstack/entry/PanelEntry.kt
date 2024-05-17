@@ -51,6 +51,11 @@ class PanelEntry(override val address: Address) : StackEntry {
         }
     }
 
+    internal fun maxLifecycle(state: Lifecycle.State) {
+        (pageRouter.backStack.backStack.value.lastOrNull() as? PageEntry)?.lifecycleOwnerDelegate?.maxLifecycle =
+            state
+    }
+
     override fun destroy() {
         (pageRouter.backStack.findTopEntry() as PageEntry).handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         pageRouter.backStack.pop()

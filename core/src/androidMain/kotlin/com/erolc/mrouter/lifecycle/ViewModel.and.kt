@@ -1,12 +1,18 @@
 package com.erolc.mrouter.lifecycle
 
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.get
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.savedstate.SavedStateRegistryOwner
 import java.lang.StringBuilder
+import kotlin.reflect.KClass
 
 internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModelStoreProvider {
 
@@ -60,3 +66,21 @@ internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModel
         }
     }
 }
+
+internal class SimpleViewModelFactory(owner: SavedStateRegistryOwner) :
+    AbstractSavedStateViewModelFactory(owner, null) {
+    override fun <T : ViewModel> create(
+        key: String,
+        modelClass: Class<T>,
+        handle: SavedStateHandle
+    ): T {
+        throw RuntimeException("")
+    }
+
+    override fun <VM : ViewModel> create(modelClass: KClass<VM>, extras: CreationExtras): VM {
+        return extras[EmptyCreateKey]?.invoke() as? VM
+            ?: extras[SavedStateHandleCreateKey]?.invoke(extras.createSavedStateHandle()) as? VM
+            ?: super.create(modelClass, extras)
+    }
+}
+

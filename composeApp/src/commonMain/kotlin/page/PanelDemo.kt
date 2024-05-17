@@ -23,14 +23,14 @@ fun PanelDemo() = Page {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(onClick = {
-                route("first") {
-                    panel("local", false)
+                route("local:first") {
+//                    panel("local", false)
                 }
             }) {
                 Text("first")
             }
             Button(onClick = {
-                route("second") {
+                route("local:second") {
                     panel("local", true)
                 }
             }) {

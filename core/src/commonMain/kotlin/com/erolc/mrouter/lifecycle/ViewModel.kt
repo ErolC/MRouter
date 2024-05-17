@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
+import com.erolc.mrouter.platform.getViewModelProvider
+import com.erolc.mrouter.platform.isAndroid
 import kotlin.reflect.KClass
 
 interface MRouterViewModelStoreProvider {
@@ -85,14 +87,7 @@ object SavedStateHandleCreateKey : CreationExtras.Key<SSHConstructor>
 /**
  * 用于构造简单的ViewModel的工厂
  */
-private class SimpleViewModelFactory(owner: SavedStateRegistryOwner) :
-    AbstractSavedStateViewModelFactory(owner, null) {
-    override fun <VM : ViewModel> create(modelClass: KClass<VM>, extras: CreationExtras): VM {
-        return extras[EmptyCreateKey]?.invoke() as? VM
-            ?: extras[SavedStateHandleCreateKey]?.invoke(extras.createSavedStateHandle()) as? VM
-            ?: super.create(modelClass, extras)
-    }
-}
+
 
 @Composable
 fun <VM : ViewModel> ViewModelStoreOwner.createVM(
@@ -101,8 +96,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.createVM(
     extras: CreationExtras
 ): VM {
     val owner = LocalLifecycleOwner.current as SavedStateRegistryOwner
-    val provider =
-        ViewModelProvider.create(this.viewModelStore, SimpleViewModelFactory(owner), extras)
+    val provider = getViewModelProvider(viewModelStore, owner, extras)
     return if (key != null) {
         provider[key, modelClass]
     } else {
