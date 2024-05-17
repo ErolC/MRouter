@@ -1,4 +1,4 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.platform
 
 expect fun log(tag:String,msg:String)
 expect fun logi(tag:String,msg:String)

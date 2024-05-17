@@ -4,7 +4,6 @@ import androidx.core.bundle.Bundle
 import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.model.WebRoute
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.utils.loge
 import kotlinx.browser.window
 
 

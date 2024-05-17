@@ -10,7 +10,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.MRouter
@@ -28,7 +27,6 @@ import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**

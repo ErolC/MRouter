@@ -1,4 +1,4 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.platform
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

@@ -29,6 +29,8 @@ internal expect class MRouterControllerViewModel : ViewModel, MRouterViewModelSt
 }
 
 
+inline fun <reified T : Any> getKClassForGenericType(): KClass<T> = T::class
+
 /**
  * 用于构造具有空构造函数的ViewModel，如果需要更加强大的构造方式可以使用其他第三方库，比如koin
  * ```
@@ -39,7 +41,7 @@ internal expect class MRouterControllerViewModel : ViewModel, MRouterViewModelSt
 inline fun <reified VM : ViewModel> viewModel(
     noinline block: () -> VM,
     key: String? = null
-) = viewModel(VM::class, emptyBlock = block, key = key)
+): VM = viewModelImpl(getKClassForGenericType(), emptyBlock = block, key = key)
 
 /**
  * 用于构造有且只有[SavedStateHandle]作为参数的构造函数的ViewModel
@@ -51,11 +53,10 @@ inline fun <reified VM : ViewModel> viewModel(
 inline fun <reified VM : ViewModel> viewModel(
     noinline block: (SavedStateHandle) -> VM,
     key: String? = null
-) = viewModel(VM::class, block = block, key = key)
-
+): VM = viewModelImpl(getKClassForGenericType(), block = block, key = key)
 
 @Composable
-fun <T : ViewModel> viewModel(
+fun <T : ViewModel> viewModelImpl(
     modelClass: KClass<T>,
     emptyBlock: (() -> T)? = null,
     block: ((SavedStateHandle) -> T)? = null,

@@ -1,12 +1,15 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.platform
 
+import android.util.Log
 
 actual fun log(tag: String, msg: String) {
-    println("$tag:$msg")
+    Log.d(tag, msg)
 }
+
 actual fun logi(tag: String, msg: String) {
-    println("$tag:$msg")
+    Log.i(tag, msg)
 }
+
 actual fun loge(tag: String, msg: String) {
-    println("$tag:$msg")
+    Log.e(tag, msg)
 }

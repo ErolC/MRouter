@@ -8,8 +8,7 @@ import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.utils.isDesktop
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.isDesktop
 
 
 /**
@@ -43,7 +42,7 @@ class WindowRouter : Router {
 
     internal fun setResource(addresses: List<Address>, res: Map<String, Any>, route: Route) {
         this.addresses = addresses
-        platformRes = res
+        platformRes += res
         if (backStack.isEmpty()) {
             dispatchRoute(route)
         } else {

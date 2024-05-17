@@ -17,7 +17,7 @@ import com.erolc.mrouter.PanelHost
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.utils.rememberInPage
 
 data class Content(val name: String, val id: Int)

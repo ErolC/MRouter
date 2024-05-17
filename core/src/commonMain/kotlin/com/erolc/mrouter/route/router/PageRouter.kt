@@ -11,7 +11,7 @@ import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 import kotlinx.coroutines.flow.map
 
 /**

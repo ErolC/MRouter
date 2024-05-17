@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.get
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.erolc.mrouter.utils.loge
 import java.lang.StringBuilder
 
 internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModelStoreProvider {

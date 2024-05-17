@@ -7,26 +7,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.erolc.mrouter.lifecycle.viewModel
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.isDesktop
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.isDesktop
+import com.erolc.mrouter.platform.loge
 
 data class Future(val name: String, val value: String)
 
-class TestViewModel(handle: SavedStateHandle):ViewModel(){
+class TestViewModel():ViewModel(){
 
     val state = mutableStateOf(true)
 }
@@ -36,12 +33,13 @@ fun Home() = Page {
     LifecycleObserver { _, event ->
         loge("tag","home $event")
     }
+//    testVM(::TestViewModel)
     val vm = viewModel(::TestViewModel)
-    var state by  vm.state
-    loge("tag","$state")
-    val list = remember(state) {
+//    var state by  vm.state
+//    loge("tag","$state")
+    val list = remember() {
         listOf(
-            Future("普通的路由跳转$state", "normal"),
+            Future("普通的路由跳转", "normal"),
             Future("带参的路由跳转", "arg"),
             Future("带返回值的路由跳转", "return"),
             Future("局部路由", "panel"),
@@ -62,7 +60,6 @@ fun Home() = Page {
                     Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
                         when (it.value) {
                             "normal" -> {
-                                state = false
                                 route("first")
                             }
                             "arg" -> route("first?key=arg")

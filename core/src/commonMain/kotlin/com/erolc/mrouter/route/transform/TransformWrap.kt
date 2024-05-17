@@ -15,14 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
-import com.erolc.mrouter.backstack.entry.LocalWindowScope
-import com.erolc.mrouter.utils.loge
-import kotlin.math.roundToInt
 
 
 /**

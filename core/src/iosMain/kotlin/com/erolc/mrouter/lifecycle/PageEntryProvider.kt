@@ -13,7 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.randomUUID
+import com.erolc.mrouter.platform.randomUUID
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 

@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
 import com.erolc.mrouter.PanelHost
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 
 @Composable
 fun PanelDemo() = Page {

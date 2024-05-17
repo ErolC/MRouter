@@ -25,7 +25,8 @@ import com.erolc.mrouter.route.router.createPageEntry
  */
 object MRouter {
 
-    private var rootRouter: WindowRouter = WindowRouter()
+    var rootRouter: WindowRouter = WindowRouter()
+        private set
 
     private var startRoute: Route? = null
     private var registerBlock: (RegisterBuilder.() -> Unit)? = null

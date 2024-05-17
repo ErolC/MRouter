@@ -10,10 +10,9 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.randomUUID
+import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.platform.randomUUID
 import kotlin.reflect.KClass
-import kotlin.reflect.cast
 
 
 actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
@@ -45,7 +44,6 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
         viewModelStoreProvider: MRouterViewModelStoreProvider?,
         hostLifecycleState: Lifecycle.State, args: Bundle?
     ) : super() {
-        loge("tag", "create:$")
         this.viewModelStoreProvider = viewModelStoreProvider
         this.hostLifecycleState = hostLifecycleState
         immutableArgs = args

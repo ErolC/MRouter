@@ -16,7 +16,7 @@ import com.erolc.mrouter.route.shareelement.Overlay
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.ResumeState
-import com.erolc.mrouter.utils.PlatformWindow
+import com.erolc.mrouter.platform.PlatformWindow
 
 /**
  * window域

@@ -7,7 +7,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import com.erolc.mrouter.utils.loge
 
 val LocalTransformWrapScope = compositionLocalOf { TransformWrapScope() }
 

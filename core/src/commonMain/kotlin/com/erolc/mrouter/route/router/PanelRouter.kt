@@ -8,7 +8,7 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.model.PanelOptions
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 
 /**
  * 面板路由/局部路由。将管理一个页面中所有的面板，这些面板不存在上下级关系，所以并不会以[BackStack]作为其存储工具。

@@ -13,7 +13,7 @@ import com.erolc.mrouter.route.pathArgs
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.utils.rememberInPage
 
 @Composable
@@ -23,7 +23,6 @@ fun First() = Page {
     }
     val args = rememberArgs()
     val bundle = args.pathArgs()
-    loge("tag","$args - $bundle")
     Column(modifier = Modifier.fillMaxWidth().safeContentPadding()) {
         var result by rememberInPage("data") { mutableStateOf("") }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
@@ -33,7 +32,7 @@ fun First() = Page {
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             val key = bundle.getString("key")
-            var route = "test"
+            var route = "second"
             if (key == "arg") route += "?value=routeData"
             route(route) {
                 window(Constants.DEFAULT_WINDOW)

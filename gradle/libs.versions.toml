@@ -1,7 +1,8 @@
 [versions]
 annotation = "1.7.1"
-compose = "1.5.4"
-compose-plugin = "1.6.10-rc01"
+compose = "1.6.4"
+compose-plugin = "1.6.2"
+#compose-plugin = "1.6.10-rc01"
 compose-compiler = "1.5.5"
 agp = "8.2.0"
 android-minSdk = "24"
@@ -11,9 +12,9 @@ androidx-activityCompose = "1.9.0"
 coreBundleVersion = "1.0.0-rc01"
 kotlin = "1.9.23"
 junit = "4.13.2"
-android-window="1.2.0"
+android-window = "1.2.0"
 kotlinxCoroutinesSwing = "1.7.3"
-lifecycle-viewmodel="2.8.0-rc01"
+lifecycle-viewmodel = "2.8.0-rc01"
 
 
 [libraries]
@@ -27,10 +28,10 @@ compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
-androidx-window = {module="androidx.window:window",version.ref = "android-window"}
+androidx-window = { module = "androidx.window:window", version.ref = "android-window" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }
-lifecycle-viewmodel-compose = {module="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose",version.ref = "lifecycle-viewmodel"}
-lifecycle-runtime = {module="org.jetbrains.androidx.lifecycle:lifecycle-runtime",version.ref = "lifecycle-viewmodel"}
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel" }
+lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle-viewmodel" }
 
 
 

@@ -1,4 +1,5 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.platform
+
 
 actual fun log(tag: String, msg: String) {
     println("$tag:$msg")

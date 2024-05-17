@@ -2,16 +2,13 @@ package com.erolc.mrouter.route.transform.share
 
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.route.transform.rememberDraggableModifier
 import com.erolc.mrouter.utils.ShareState
-import com.erolc.mrouter.utils.loge
 
 /**
  * 普通的（手势区在页面左侧）共享元素变换包装

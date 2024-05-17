@@ -51,12 +51,10 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.window)
             implementation(libs.jetbrains.core.bundle)
-            implementation(libs.kotlin.reflect)
         }
         desktopMain.dependencies {
             runtimeOnly(libs.kotlinx.coroutines.swing)
             implementation(compose.desktop.currentOs)
-            implementation(libs.kotlin.reflect)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -66,6 +64,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.runtime)
+            implementation(libs.kotlin.reflect)
         }
 
     }

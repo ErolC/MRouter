@@ -6,7 +6,7 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.Constants.PATH_ARGS
 import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.utils.isMobile
+import com.erolc.mrouter.platform.isMobile
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.window.WindowOptionsBuilder

@@ -1,35 +1,34 @@
-package com.erolc.mrouter.utils
+package com.erolc.mrouter.platform
 
-
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.window.WindowSize
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.useContents
-import platform.UIKit.UIScreen
+import kotlinx.browser.window
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.random.Random
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun PlatformWindow(
     options: WindowOptions,
     entry: WindowEntry,
     content: @Composable () -> Unit
 ) {
-    entry.scope.windowSize.value = UIScreen.mainScreen.bounds.useContents {
-        val size = DpSize(size.width.dp, size.height.dp)
-        WindowSize.calculateFromSize(size)
+    var size by remember {
+        mutableStateOf(DpSize(window.innerWidth.dp, window.innerWidth.dp))
     }
+    window.addEventListener("resize") {
+        size = DpSize(window.innerWidth.dp, window.innerWidth.dp)
+    }
+    LocalWindowScope.current.windowSize.value = WindowSize.calculateFromSize(size)
     content()
 }
 
-actual fun getPlatform(): Platform = Ios
-
+actual fun getPlatform(): Platform = Web
 
 @OptIn(ExperimentalStdlibApi::class)
 fun randomUUID(): String {
@@ -50,5 +49,16 @@ fun randomUUID(): String {
         .append('-')
         .append(bytes.toHexString(10))
         .toString()
+}
+
+
+internal class WeakReference<T : Any> (
+    private var reference: T?
+) {
+    fun get(): T? = reference
+
+    fun clear() {
+        reference = null
+    }
 }
 

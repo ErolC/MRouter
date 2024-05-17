@@ -11,11 +11,10 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import com.erolc.mrouter.utils.WeakReference
-import com.erolc.mrouter.utils.randomUUID
+import com.erolc.mrouter.platform.WeakReference
+import com.erolc.mrouter.platform.randomUUID
 
 @Composable
 actual fun LifecycleOwnerDelegate.LocalOwnersProvider(

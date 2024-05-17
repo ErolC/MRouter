@@ -6,9 +6,6 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import androidx.core.bundle.Bundle
-import com.erolc.mrouter.model.PlatformRoute
-import com.erolc.mrouter.route.router.WindowRouter
 
 internal val LocalApplicationScope: ProvidableCompositionLocal<ApplicationScope> = staticCompositionLocalOf {
     throw RuntimeException("请使用mRouterApplication替代原本的application")

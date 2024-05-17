@@ -14,7 +14,6 @@ import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.EnterState
 import com.erolc.mrouter.utils.PageCache
-import com.erolc.mrouter.utils.loge
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 internal val default get() = PageScope()

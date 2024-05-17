@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
-import com.erolc.mrouter.utils.loge
+import com.erolc.mrouter.platform.loge
 
 @Composable
 

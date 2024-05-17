@@ -10,12 +10,9 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.erolc.mrouter.utils.loge
-import com.erolc.mrouter.utils.randomUUID
-import kotlin.math.max
+import com.erolc.mrouter.platform.randomUUID
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.createInstance
 
 
 actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,

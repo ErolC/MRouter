@@ -10,7 +10,7 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.model.PageConfig
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.utils.logi
+import com.erolc.mrouter.platform.logi
 
 /**
  * 空白的页面配置

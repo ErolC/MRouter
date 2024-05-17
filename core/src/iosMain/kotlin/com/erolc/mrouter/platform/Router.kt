@@ -1,13 +1,13 @@
 package com.erolc.mrouter.platform
 
 import androidx.core.bundle.Bundle
-import androidx.core.bundle.bundleOf
 import com.erolc.mrouter.getRootViewController
-import com.erolc.mrouter.model.IosRoute
 import com.erolc.mrouter.model.IosRouteSource
 import com.erolc.mrouter.model.PlatformRoute
+import com.erolc.mrouter.route.RouteDelegate
+import com.erolc.mrouter.route.RouteUIViewControllerDelegate
 import com.erolc.mrouter.route.router.WindowRouter
-import com.erolc.mrouter.utils.loge
+import platform.UIKit.UIViewController
 
 internal actual fun WindowRouter.route(
     route: PlatformRoute,
@@ -15,10 +15,9 @@ internal actual fun WindowRouter.route(
     onResult: (Bundle) -> Unit
 ) {
     val rootVC = getRootViewController()
-    val iosRoute = route.routerDispatcher as IosRoute
+    val target = route.routerDispatcher as UIViewController
+    val delegate = platformRes["route_delegate"] as? RouteUIViewControllerDelegate ?: RouteDelegate
     rootVC?.let {
-        val result = bundleOf()
-        iosRoute.block(IosRouteSource(it, args, result), iosRoute.target)
-        onResult(result)
+        delegate.route(IosRouteSource(it, args, onResult), target)
     } ?: loge("MRouter", "缺少RootVC，请设置RootVC")
 }
