@@ -65,10 +65,10 @@ class WindowEntry(
                 Box(modifier.fillMaxSize().background(Color.Black)) {
                     val stack by pageRouter.getPlayStack()
                         .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
-                    if (stack.size == 1)
+                    if (stack.size == 1){
                         stack.first().transformState.value = ResumeState
-                    else
-                        stack.last().shareTransform(stack.first())
+                        stack.first().shareTransform(null)
+                    } else stack.last().shareTransform(stack.first())
 
                     stack.forEach { it.Content(Modifier) }
 

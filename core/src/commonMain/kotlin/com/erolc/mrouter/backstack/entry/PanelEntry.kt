@@ -28,13 +28,11 @@ class PanelEntry(override val address: Address) : StackEntry {
             val stack by pageRouter.getPlayStack()
                 .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
 
-            if (stack.size == 1)
+            if (stack.size == 1){
                 stack.first().transformState.value = ResumeState
-            else
-                stack.last().shareTransform(stack.first())
-
+                stack.first().shareTransform(null)
+            } else stack.last().shareTransform(stack.first())
             stack.forEach { it.Content(Modifier) }
-
             if (stack.size == 2)
                 ShareElementController.initShare(stack.first(), stack.last())
 
@@ -47,7 +45,7 @@ class PanelEntry(override val address: Address) : StackEntry {
     internal fun handleLifecycleEvent(event: Lifecycle.Event) {
         pageRouter.backStack.backStack.value.forEach {
             it as PageEntry
-            it.handleLifecycleEvent(event)
+            it.handleHostLifecycleEvent(event)
         }
     }
 
@@ -57,7 +55,7 @@ class PanelEntry(override val address: Address) : StackEntry {
     }
 
     override fun destroy() {
-        (pageRouter.backStack.findTopEntry() as PageEntry).handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        (pageRouter.backStack.findTopEntry() as PageEntry).handleHostLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         pageRouter.backStack.pop()
     }
 }

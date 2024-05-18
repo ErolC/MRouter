@@ -23,7 +23,6 @@ import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.PageRouter
-import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
@@ -83,7 +82,6 @@ open class PageEntry internal constructor(
                     if (isDestroy.value) {
                         MRouter.clear(id)
                         ShareElementController.afterShare(this@PageEntry)
-                        handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                     }
                 }
             }
@@ -110,8 +108,6 @@ open class PageEntry internal constructor(
                     pageRouter.parentRouter.backPressed()
 
             if (resume) onResume()
-
-            if (stop) updateMaxState(Lifecycle.State.CREATED)
         }
         if (scope.transformTransition == null) scope.transformTransition = transition
 
@@ -159,20 +155,38 @@ open class PageEntry internal constructor(
      * 和上一个页面共享同一个变换过程
      */
     @Composable
-    internal fun shareTransform(entry: PageEntry) {
-        val state by rememberPrivateInPage("page_share_transform_state", transformState) {
+    internal fun shareTransform(entry: PageEntry?) {
+        val state by remember(transformState) {
             transformState
         }
-        entry.transformState.value = when (state) {
-            EnterState -> ResumeState
-            ExitState -> {
-                transform.value.gesture.releasePauseModifier()
-                ResumeState
-            }
+        updateState(this, state)
+        entry?.also {
+            val transformState = when (state) {
+                EnterState -> ResumeState
+                ExitState -> {
+                    transform.value.gesture.releasePauseModifier()
+                    ResumeState
+                }
 
-            ResumeState -> updatePrevTransform(entry)
-            StopState -> StopState
-            else -> StoppingState(1 - state.progress)
+                ResumeState -> updatePrevTransform(entry)
+                StopState -> StopState
+                else -> StoppingState(1 - state.progress)
+            }
+            updateState(entry, transformState)
+            entry.transformState.value = transformState
+        }
+    }
+
+    @Composable
+    private fun updateState(entry: PageEntry, state: TransformState) {
+        DisposableEffect(state) {
+            when (state) {
+                EnterState -> entry.updateMaxState(Lifecycle.State.STARTED)
+                ResumeState -> entry.updateMaxState(Lifecycle.State.RESUMED)
+                StopState -> entry.updateMaxState(Lifecycle.State.CREATED)
+                else -> {}
+            }
+            onDispose { }
         }
     }
 
@@ -196,11 +210,11 @@ open class PageEntry internal constructor(
 
     override fun destroy() {
         isDestroy.value = true
+        updateMaxState(Lifecycle.State.DESTROYED)
     }
 
-    internal open fun handleLifecycleEvent(event: Lifecycle.Event) {
+    internal open fun handleHostLifecycleEvent(event: Lifecycle.Event) {
         lifecycleOwnerDelegate.handleLifecycleEvent(event)
-        (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
     }
 
 

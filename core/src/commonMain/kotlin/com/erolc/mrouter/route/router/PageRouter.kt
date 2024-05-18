@@ -61,7 +61,7 @@ open class PageRouter(
     private val lifecycleObserver: LifecycleObserver = LifecycleEventObserver { _, event ->
         hostLifecycleState = event.targetState
         for (entry in backStack.backStack.value) {
-            (entry as PageEntry).handleLifecycleEvent(event)
+            (entry as PageEntry).handleHostLifecycleEvent(event)
         }
     }
 
