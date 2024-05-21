@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.platform.loge
 import kotlin.math.abs
 
 /**
@@ -17,26 +18,17 @@ import kotlin.math.abs
  */
 class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     @Composable
-    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
+    override fun Wrap(modifier: Modifier) {
 
         val transform = rememberTransformTransition()
 
         val corner by transform.animateDp {
-            when (it) {
-                EnterState -> 0.dp
-                else -> it.between(10f, 0f).dp
-            }
+            it.between(10f, 0f).dp
         }
         val scope = LocalTransformWrapScope.current
-        val gestureModifier = rememberDraggableModifier(
-            Orientation.Vertical,
-            progress,
-            proportion
-        )
-        val padding by scope.gapSize
-        Box(modifier = modifier.padding(top = padding.dp)) {
+        val padding by scope.getGapSize(proportion)
+        Box(modifier = modifier.padding(top = padding.dp) then rememberDraggableModifier(Orientation.Vertical)) {
             PageContent(Modifier.clip(RoundedCornerShape(Dp(abs(corner.value)))))
-            Box(modifier = gestureModifier)
         }
     }
 
@@ -44,10 +36,7 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     override fun prevPauseModifier(): Modifier {
         val transform = rememberTransformTransition()
         val corner by transform.animateDp {
-            when (it) {
-                EnterState -> 0.dp
-                else -> it.between(0f, 10f).dp
-            }
+            it.between(0f, 10f).dp
         }
         return Modifier.clip(RoundedCornerShape(Dp(abs(corner.value))))
     }

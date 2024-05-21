@@ -1,20 +1,19 @@
 package com.erolc.mrouter.route.shareelement
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.model.ShareElement
 import com.erolc.mrouter.model.ShareElementGroup
 import com.erolc.mrouter.model.ShareEntry
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.transform.share.ShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlinx.coroutines.flow.*
@@ -101,7 +100,7 @@ internal object ShareElementController {
             val group = it.groups.first()
             val start = group.start.address
             val end = group.end.address
-            val newGroup = getElementGroups(keys,start, end)
+            val newGroup = getElementGroups(keys, start, end)
             val keyStr = keys.makeKeys()
             if (newGroup.size == keys.size) {
                 it.copy(groups = newGroup, keys = keyStr)
@@ -128,13 +127,13 @@ internal object ShareElementController {
      * 初始化共享
      */
     fun initShare(entry: PageEntry, endEntry: PageEntry) {
-        val gesture = endEntry.transform.value.gesture
+        val gesture = endEntry.transform.value.wrap
         if (gesture is ShareTransformWrap) {
             val keys = gesture.keys.makeKeys()
             val shareEntry = shareStack.value.lastOrNull()
             val startAddress = entry.address.path
             val endAddress = endEntry.address.path
-            val groups = getElementGroups(gesture.keys,startAddress, endAddress)
+            val groups = getElementGroups(gesture.keys, startAddress, endAddress)
             val findEntry = findEntry(keys, startAddress, endAddress)
             if (groups.isNotEmpty())
                 if (findEntry != null && !findEntry.equalEntry(shareEntry)) {
@@ -143,10 +142,21 @@ internal object ShareElementController {
                     shareStack.value = shareStack.value.subList(0, index) +
                             copy +
                             shareStack.value.subList(index + 1, shareStack.value.size)
-                } else if (shareEntry != null && shareEntry.equalTag(keys, startAddress, endAddress))
+                } else if (shareEntry != null && shareEntry.equalTag(
+                        keys,
+                        startAddress,
+                        endAddress
+                    )
+                )
                     shareStack.updateEntry(shareEntry.copy(groups = groups))
                 else {
-                    shareStack.value += ShareEntry(groups, gesture.transitionSpec, startAddress, endAddress, keys)
+                    shareStack.value += ShareEntry(
+                        groups,
+                        gesture.shareAnimationSpec,
+                        startAddress,
+                        endAddress,
+                        keys
+                    )
                     shareState.value = BeforeStart
                 }
         }
@@ -162,7 +172,7 @@ internal object ShareElementController {
         value += newEntry
     }
 
-    private fun getElementGroups(keys:Array<out String>,start: String, end: String) =
+    private fun getElementGroups(keys: Array<out String>, start: String, end: String) =
         keys.mapNotNull { getElementGroup(it, start, end) }
 
     private fun getElementGroup(key: String, start: String, end: String): ShareElementGroup? {
@@ -217,7 +227,7 @@ internal fun ShareElementController.Overlay() {
             groups.forEach {
                 it.start._state.value = state
                 it.end._state.value = state
-                transition.ShareElement(it, transitionSpec)
+                transition.ShareElement(it, shareAnimationSpec)
             }
         }
     }
@@ -253,12 +263,12 @@ internal fun ShareElementController.Overlay() {
 @Composable
 private fun Transition<ShareState>.ShareElement(
     group: ShareElementGroup,
-    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>
+    shareAnimationSpec: FiniteAnimationSpec<Rect>
 ) {
     val density = LocalDensity.current
     val startPosition by group.start.position.collectAsState()
     val endPosition by group.end.position.collectAsState()
-    val rect by animateRect(label = "", transitionSpec = transitionSpec) {
+    val rect by animateRect(label = "", transitionSpec = { shareAnimationSpec }) {
         when (it) {
             PreShare, BeforeStart -> startPosition
             is Sharing -> it.updateRect(startPosition, endPosition)

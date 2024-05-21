@@ -2,19 +2,20 @@
 annotation = "1.7.1"
 compose = "1.6.4"
 compose-plugin = "1.6.2"
-#compose-plugin = "1.6.10-rc01"
+#compose-plugin = "1.6.10"
 compose-compiler = "1.5.5"
 agp = "8.2.0"
 android-minSdk = "24"
 android-compileSdk = "34"
 android-targetSdk = "34"
 androidx-activityCompose = "1.9.0"
-coreBundleVersion = "1.0.0-rc01"
+coreBundleVersion = "1.0.0"
 kotlin = "1.9.23"
 junit = "4.13.2"
 android-window = "1.2.0"
 kotlinxCoroutinesSwing = "1.7.3"
-lifecycle-viewmodel = "2.8.0-rc01"
+#lifecycle-viewmodel = "2.8.0-rc01"
+lifecycle-viewmodel = "2.8.0"
 
 
 [libraries]

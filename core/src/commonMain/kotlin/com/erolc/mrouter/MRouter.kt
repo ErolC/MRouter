@@ -32,11 +32,6 @@ object MRouter {
     private var registerBlock: (RegisterBuilder.() -> Unit)? = null
     private var viewModel: MRouterControllerViewModel? = null
 
-    /**
-     * 主后退栈，也是window后退栈，window节点将会保存在这里。
-     * 主后退栈一般只有一个值
-     */
-
     internal fun build(
         startTarget: String,
         windowOptions: WindowOptions,

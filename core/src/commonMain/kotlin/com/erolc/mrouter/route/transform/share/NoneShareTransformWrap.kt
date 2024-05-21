@@ -12,12 +12,12 @@ import com.erolc.mrouter.utils.ShareState
  * 无手势的共享元素变换包装
  */
 class NoneShareTransformWrap(
-    transitionSpec: @Composable (Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>),
+    shareAnimationSpec: FiniteAnimationSpec<Rect>,
     vararg keys: String
-) : ShareTransformWrap(transitionSpec,*keys) {
+) : ShareTransformWrap(shareAnimationSpec,*keys) {
 
     @Composable
-    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
+    override fun Wrap(modifier: Modifier) {
         Box(modifier) {
             PageContent(Modifier)
         }

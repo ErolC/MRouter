@@ -11,4 +11,4 @@ import com.erolc.mrouter.utils.ShareState
  * 共享手势，目前共享过程中不支持手势
  * @param keys 在该次页面转换过程中共享的控件的key
  */
-abstract class ShareTransformWrap( val transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>,vararg val keys: String) : TransformWrap()
+abstract class ShareTransformWrap( val shareAnimationSpec: FiniteAnimationSpec<Rect>,vararg val keys: String) : TransformWrap()

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
  */
 class NoneTransformWrap : TransformWrap() {
     @Composable
-    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
+    override fun Wrap(modifier: Modifier) {
         Box(modifier) {
             PageContent(Modifier)
         }

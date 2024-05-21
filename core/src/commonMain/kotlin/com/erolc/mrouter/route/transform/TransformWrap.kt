@@ -50,10 +50,9 @@ abstract class TransformWrap {
 
     /**
      * 用于包裹[PageContent]和手势操作的
-     * @param progress 进度，当产生手势操作时务必改变进度，以便更新界面，该进度为关闭页面进度，范围是[0-1]。可参考[NormalTransformWrap]和[ModalTransformWrap]
      */
     @Composable
-    abstract fun Wrap(modifier: Modifier, progress: (Float) -> Unit)
+    abstract fun Wrap(modifier: Modifier)
 
     /**
      * 前一个页面在暂停时的modifier,用于控制在跳转过程中，上一个页面的页面变化
@@ -90,15 +89,13 @@ abstract class TransformWrap {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TransformWrap.rememberDraggableModifier(
+fun rememberDraggableModifier(
     orientation: Orientation = Orientation.Horizontal,
-    progress: (Float) -> Unit,
-    proportion: Float = 1f,
-    reverseDirection:Boolean = false
+    reverseDirection: Boolean = false
 ): Modifier {
     val scope = LocalTransformWrapScope.current
     val anchoredDraggableState = scope.run {
-        rememberDraggableState(proportion, progress, orientation)
+        rememberDraggableState(progress, orientation)
     }
     val modifier =
         if (orientation == Orientation.Horizontal)
@@ -123,7 +120,8 @@ fun TransformWrap.rememberDraggableModifier(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <T : Any> TransformWrap.rememberAnchoredDraggableState(
+fun <T : Any> rememberAnchoredDraggableState(
+    any: Any,
     initialValue: T,
     anchors: DraggableAnchors<T>,
     animationSpec: AnimationSpec<Float> = spring(),
@@ -132,7 +130,7 @@ fun <T : Any> TransformWrap.rememberAnchoredDraggableState(
     confirmValueChange: (T) -> Boolean = { true },
 ): AnchoredDraggableState<T> {
     return rememberSaveable(
-        this,anchors,
+        any, anchors,
         saver = AnchoredDraggableState.Saver(
             animationSpec,
             positionalThreshold,
@@ -150,5 +148,3 @@ fun <T : Any> TransformWrap.rememberAnchoredDraggableState(
         )
     }
 }
-
-

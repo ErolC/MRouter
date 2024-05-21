@@ -34,9 +34,6 @@ actual fun PlatformWindow(
     val size by remember(state.size) {
         mutableStateOf(WindowSize.calculateFromSize(state.size))
     }
-    val windowListenerRef = remember { windowListenerRef() }
-    val windowFocusListenerRef = remember { windowFocusListenerRef() }
-
     entry.scope.windowSize.value = size
     entry.options.value =
         options.copy(position = DpOffset(state.position.x, state.position.y), size = state.size)
@@ -59,14 +56,6 @@ actual fun PlatformWindow(
             if (maximumSize.isSpecified) window.maximumSize = maximumSize.toDimension()
             Menu(options.id)
             content()
-//            DisposableEffect(window) {
-//                windowListenerRef.registerWithAndSet(window, WindowLifecycleListener)
-//                windowFocusListenerRef.registerWithAndSet(window, WindowLifecycleListener)
-//                onDispose {
-//                    windowListenerRef.unregisterFromAndClear(window)
-//                    windowFocusListenerRef.unregisterFromAndClear(window)
-//                }
-//            }
         }
     else {
         LaunchedEffect(Unit) {

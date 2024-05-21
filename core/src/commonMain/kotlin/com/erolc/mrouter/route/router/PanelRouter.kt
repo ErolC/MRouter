@@ -98,13 +98,11 @@ class PanelRouter(
         if (!showPanels.contains(panelKey)) {
             showPanels.add(panelKey)
         }
-//        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.RESUMED)
     }
 
     internal fun hidePanel(panelKey: String) {
         showPanels.remove(panelKey)
-//        panelStacks[panelKey]?.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.STARTED)
     }
 

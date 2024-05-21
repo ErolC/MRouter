@@ -15,14 +15,15 @@ import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.LocalOwnersProvider
+import com.erolc.mrouter.lifecycle.addEventObserver
 import com.erolc.mrouter.platform.loge
-
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.PageRouter
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
@@ -32,7 +33,7 @@ import com.erolc.mrouter.utils.rememberPrivateInPage
 /**
  * 页面载体，承载着页面的生命周期，代表一个页面。
  */
-open class PageEntry internal constructor(
+class PageEntry internal constructor(
     val scope: PageScope,
     override val address: Address,
     internal val lifecycleOwnerDelegate: LifecycleOwnerDelegate
@@ -40,6 +41,11 @@ open class PageEntry internal constructor(
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
         scope.args.value = lifecycleOwnerDelegate.arguments ?: bundleOf()
+        lifecycleOwnerDelegate.lifecycle.addEventObserver { _, event ->
+            if (event < Lifecycle.Event.ON_START)
+                return@addEventObserver
+            (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
+        }
     }
 
     val id get() = lifecycleOwnerDelegate.id
@@ -86,7 +92,6 @@ open class PageEntry internal constructor(
                 }
             }
         }
-
     }
 
     private val wrapScope = TransformWrapScope()
@@ -99,27 +104,30 @@ open class PageEntry internal constructor(
         }
         var isExit by rememberPrivateInPage("page_exit") { isExit }
         val isIntercept by rememberPrivateInPage("page_intercept") { isIntercept }
-        val transition = rememberTransition(state).apply {
-            if (enterStart) transformState.value = ResumeState
-            if (exitFinished && !pageRouter.backStack.pop())
-                if (pageRouter.parentRouter is WindowRouter)
-                    isExit = true
-                else
-                    pageRouter.parentRouter.backPressed()
+        val transition = rememberTransition(state)
+        val newState by remember {
+            derivedStateOf {
+                transition.apply {
+                    if (enterStart) transformState.value = ResumeState
+                    if (exitFinished && !pageRouter.backStack.pop())
+                        if (pageRouter.parentRouter is WindowRouter)
+                            isExit = true
+                        else
+                            pageRouter.parentRouter.backPressed()
 
-            if (resume) onResume()
+                    if (resume) onResume()
+                }
+            }
         }
-        if (scope.transformTransition == null) scope.transformTransition = transition
+        if (scope.transformTransition == null) scope.transformTransition = newState
 
         val transform by rememberPrivateInPage("page_transform", transform) { transform }
-        Box(transition.createModifier(transform, modifier, "Built-in")) {
-            transform.gesture.run {
+        Box(newState.createModifier(transform, modifier, "Built-in")) {
+            transform.wrap.run {
                 setContent(address.content)
                 val pageModifier = gestureModifier.getModifier().fillMaxSize()
                 CompositionLocalProvider(LocalTransformWrapScope provides wrapScope) {
-                    Wrap(pageModifier.onGloballyPositioned {
-                        wrapScope.setSize(it.boundsInRoot())
-                    }) {
+                    wrapScope.progress = {
                         transformState.value = when (it) {
                             0f -> {
                                 ShareElementController.reset()
@@ -133,6 +141,8 @@ open class PageEntry internal constructor(
                             }
                         }
                     }
+                    wrapScope.wrap = this
+                    Wrap(pageModifier.onGloballyPositioned { wrapScope.setSize(it.boundsInRoot()) })
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
@@ -164,7 +174,7 @@ open class PageEntry internal constructor(
             val transformState = when (state) {
                 EnterState -> ResumeState
                 ExitState -> {
-                    transform.value.gesture.releasePauseModifier()
+                    transform.value.wrap.releasePauseModifier()
                     ResumeState
                 }
 
@@ -186,7 +196,7 @@ open class PageEntry internal constructor(
                 StopState -> entry.updateMaxState(Lifecycle.State.CREATED)
                 else -> {}
             }
-            onDispose { }
+            onDispose {}
         }
     }
 
@@ -196,7 +206,7 @@ open class PageEntry internal constructor(
     private fun updatePrevTransform(prev: PageEntry): TransformState {
         if (prev.isUpdateTransform) return StopState
         prev.transform.value = prev.transform.value.copy(prevPause = transform.value.prevPause)
-        prev.transform.value.gesture.updatePauseModifier(transform.value.gesture.pauseModifierPost)
+        prev.transform.value.wrap.updatePauseModifier(transform.value.wrap.pauseModifierPost)
         prev.isUpdateTransform = true
         return StopState
     }
@@ -216,7 +226,4 @@ open class PageEntry internal constructor(
     internal open fun handleHostLifecycleEvent(event: Lifecycle.Event) {
         lifecycleOwnerDelegate.handleLifecycleEvent(event)
     }
-
-
 }
-

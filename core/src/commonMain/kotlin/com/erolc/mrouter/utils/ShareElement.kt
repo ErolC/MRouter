@@ -37,14 +37,6 @@ fun onUpdateElement(block: (Array<out String>) -> Unit) {
  */
 sealed interface ShareState {
 
-    /**
-     * current between target
-     * 需要注意的是，target需要和目标页面对应的共享元素的current一致
-     */
-    infix fun <T> T.between(target: T): T {
-        return if (!preShare) this else target
-    }
-
     infix fun Float.with(target: Float): Float {
         return if (!preShare) {
             if (this@ShareState is Sharing) {

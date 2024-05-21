@@ -15,7 +15,6 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
-import com.erolc.mrouter.route.transform.share.NoneShareTransformWrap
 import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
@@ -28,7 +27,7 @@ import kotlin.math.roundToInt
 fun modal(scale: Float = 0.96f) = buildTransform {
     enter = slideInVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    wrap = ModalTransformWrap(scale + 0.005f)
+    wrap = ModalTransformWrap(scale + 0.02f)
 }
 
 fun normal() = buildTransform {
@@ -48,13 +47,13 @@ fun none() = buildTransform {
  * @param animationSpec 页面转换动画使用
  * @param transitionSpec 共享元素变换使用,控制共享元素尺寸的变化
  * @param wrap 变换包装类，可以在这里处理变换过程中两个页面的一些变化，可以通过该类给共享元素变换加上手势退出，可参考[NormalShareTransformWrap]
+ * 需要注意的是，如果给[shareAnimationSpec]或[animationSpec]设置[tween]那么请给另一个也加上，并且给予相同的时间，如此两者的进度才是一致的。
  */
 fun share(
     vararg keys: String,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
-    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect> =
-        { spring(visibilityThreshold = Rect.VisibilityThreshold) },
-    wrap: TransformWrap = NormalShareTransformWrap(transitionSpec, *keys)
+    shareAnimationSpec: FiniteAnimationSpec<Rect> = spring(visibilityThreshold = Rect.VisibilityThreshold),
+    wrap: TransformWrap = NormalShareTransformWrap(shareAnimationSpec, *keys)
 ) = buildTransform {
     enter = fadeIn(animationSpec)
     this.wrap = wrap
@@ -342,14 +341,14 @@ fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
  * @param enter 本页面进入的动画
  * @param _exit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
  * @param prevPause 上一个页面在本次变换中的动画
- * @param gesture 手势，可以自定义手势
+ * @param wrap 包装，页面切换包装，可以在其中实现一些功能，比如手势操作
  */
 @Immutable
 data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _exit: ExitTransition = ExitTransition.None,
     internal val prevPause: ExitTransition = slideOutHorizontally { 0 },
-    internal val gesture: TransformWrap = NoneTransformWrap()
+    internal val wrap: TransformWrap = NoneTransformWrap()
 ) {
 
     companion object {
@@ -658,14 +657,17 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
     var currentAlignment: Alignment? = null
     val alignment: Alignment? get() = transformData.getAlignment()
 
-    val sizeTransitionSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntSize> = {
-        transformData.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
-    }
+    val sizeTransitionSpec: Transition.Segment<TransformState>.() -> FiniteAnimationSpec<IntSize> =
+        {
+            transformData.changeSize?.animationSpec ?: DefaultSizeAnimationSpec
+        }
 
     fun sizeByState(targetState: TransformState, fullSize: IntSize): IntSize =
         when (targetState) {
             ResumeState -> fullSize
-            EnterState, ExitState, StopState -> transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
+            EnterState, ExitState, StopState -> transformData.changeSize?.size?.invoke(fullSize)
+                ?: fullSize
+
             is StoppingState -> {
                 val startValue = transformData.changeSize?.size?.invoke(fullSize) ?: fullSize
                 startValue.compute(targetState.progress, fullSize)
@@ -676,10 +678,12 @@ private class TransformModifierNode @OptIn(InternalAnimationApi::class) construc
                 var newWidth = startValue.width * 1.0f
                 var newHeight = startValue.height * 1.0f
                 if (startValue.height == fullSize.height) {
-                    newWidth = targetState.progress * (fullSize.width - startValue.width) + startValue.width
+                    newWidth =
+                        targetState.progress * (fullSize.width - startValue.width) + startValue.width
                 }
                 if (startValue.width == fullSize.width) {
-                    newHeight = targetState.progress * (fullSize.height - startValue.height) + startValue.height
+                    newHeight =
+                        targetState.progress * (fullSize.height - startValue.height) + startValue.height
 
                 }
                 IntSize(newWidth.roundToInt(), newHeight.roundToInt())

@@ -24,12 +24,12 @@ import com.erolc.mrouter.utils.Init
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * 共享元素
+ * 共享元素,需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置,
+ * 也就是共享元素的大小将由[Element]决定，而其内部的[content]只需要占满[Element]即可
  * @param key 共享元素的标识
  * @param modifier 共享元素的修饰符
  * @param content 共享元素的界面
- * 需要注意的是，共享元素是需要有大小变换的，那么就需要[content]中的界面调整为[fillMaxSize]，而该元素的具体大小请使用[modifier]进行设置,
- * 也就是共享元素的大小将由[Element]决定，而其内部的[content]只需要沾满[Element]即可
+ *
  */
 @Composable
 fun Element(key: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {

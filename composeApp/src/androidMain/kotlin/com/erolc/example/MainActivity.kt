@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.route.setting
 import com.erolc.mrouter.route.startActivity
+import page.Home
 
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +34,6 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    Home()
 }
 

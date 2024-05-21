@@ -15,16 +15,13 @@ import com.erolc.mrouter.utils.ShareState
  * 需要注意的是，共享元素的基础是两个确定位置大小的元素，所以不可以改变两个页面的位置
  */
 class NormalShareTransformWrap(
-    transitionSpec: @Composable (Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect>),
+    shareAnimationSpec: FiniteAnimationSpec<Rect>,
     vararg keys: String
-) : ShareTransformWrap(transitionSpec, *keys) {
+) : ShareTransformWrap(shareAnimationSpec, *keys) {
 
     @Composable
-    override fun Wrap(modifier: Modifier, progress: (Float) -> Unit) {
-        val gestureModifier = rememberDraggableModifier(
-            Orientation.Horizontal,
-            progress
-        )
+    override fun Wrap(modifier: Modifier) {
+        val gestureModifier = rememberDraggableModifier(Orientation.Horizontal)
         Box(modifier) {
             PageContent(Modifier)
             Box(modifier = gestureModifier) // 手势触发部分
