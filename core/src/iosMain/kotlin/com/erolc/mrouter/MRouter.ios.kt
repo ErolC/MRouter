@@ -9,7 +9,7 @@ import platform.UIKit.UIViewController
  * 设置ViewController，只有设置了根ViewController才能从compose跳转到对应的VC上。
  */
 fun MRouter.setRootViewController(rootViewController: UIViewController) {
-    rootRouter.setPlatformRes("root_vc", rootViewController)
+    setPlatformRes("root_vc", rootViewController)
 }
 
 internal fun WindowRouter.getRootViewController() = platformRes["root_vc"] as? UIViewController

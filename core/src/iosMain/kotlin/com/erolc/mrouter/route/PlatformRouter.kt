@@ -19,7 +19,7 @@ fun RegisterBuilder.platformRoute(address: String, target: UIViewController) =
  * 注册路由代理
  */
 fun MRouter.registerRouteDelegate(delegate: RouteUIViewControllerDelegate) {
-    rootRouter.setPlatformRes("route_delegate", delegate)
+    setPlatformRes("route_delegate", delegate)
 }
 
 interface RouteUIViewControllerDelegate {

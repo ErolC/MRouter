@@ -56,7 +56,7 @@ sealed interface RouteFlag {
 /**
  * 回退栈类型的flag
  */
-sealed class StackFlag : RouteFlag
+sealed interface StackFlag : RouteFlag
 
 /**
  * 正常
@@ -66,12 +66,12 @@ data object NormalFlag : RouteFlag
 /**
  * 清空当前栈
  */
-data object ClearTaskFlag : StackFlag()
+data object ClearTaskFlag : StackFlag
 
 /**
  * 更换当前回退栈中存在的页面。
  */
-internal data object ReplaceFlag : StackFlag()
+internal data object ReplaceFlag : StackFlag
 
 
 

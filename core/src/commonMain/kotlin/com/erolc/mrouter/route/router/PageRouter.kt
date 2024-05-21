@@ -10,6 +10,7 @@ import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
+import com.erolc.mrouter.model.SingleTop
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.platform.loge
 import kotlinx.coroutines.flow.map
@@ -29,8 +30,8 @@ open class PageRouter(
 
     internal fun route(stackEntry: StackEntry) {
         stackEntry as PageEntry
-        if (stackEntry.address.config.launchSingleTop)
-            backStack.findTopEntry()?.let {
+        when (stackEntry.address.config.launchMode) {
+            is SingleTop -> backStack.findTopEntry()?.let {
                 if (it.address.path == stackEntry.address.path) {
                     it as PageEntry
                     it.scope.run {
@@ -41,8 +42,8 @@ open class PageRouter(
                     }
                 } else null
             } ?: backStack.addEntry(stackEntry.apply { create() })
-        else
-            backStack.addEntry(stackEntry.apply { create() })
+            else -> backStack.addEntry(stackEntry.apply { create() })
+        }
     }
 
     internal var lifecycleOwner: LifecycleOwner? = null

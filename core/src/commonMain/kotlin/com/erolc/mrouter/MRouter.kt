@@ -25,9 +25,7 @@ import com.erolc.mrouter.route.router.createPageEntry
  */
 object MRouter {
 
-    var rootRouter: WindowRouter = WindowRouter()
-        private set
-
+    private var rootRouter: WindowRouter = WindowRouter()
     private var startRoute: Route? = null
     private var registerBlock: (RegisterBuilder.() -> Unit)? = null
     private var viewModel: MRouterControllerViewModel? = null
@@ -86,6 +84,10 @@ object MRouter {
 
     internal fun clear(entryId: String) {
         viewModel?.clear(entryId)
+    }
+
+    internal fun setPlatformRes(key: String, value: Any) {
+        rootRouter.setPlatformRes(key, value)
     }
 
     internal fun createEntry(
