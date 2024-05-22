@@ -72,7 +72,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
         updateState()
     }
 
-    override val defaultViewModelProviderFactory = DefaultViewModelProviderFactory()
+    override val defaultViewModelProviderFactory:ViewModelProvider.Factory = DefaultViewModelProviderFactory()
 
     override val defaultViewModelCreationExtras: CreationExtras
         get() {
