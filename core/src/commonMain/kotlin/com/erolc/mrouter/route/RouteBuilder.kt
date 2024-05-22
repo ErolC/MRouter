@@ -73,11 +73,17 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
     }
 
     internal fun build(route: String): Route {
-        val split = route.split("?")
-        val path = split[0]
+        val index = route.indexOfFirst { it == '?' }
+        var query:String? = null
+        val path = if (index == -1)
+            route
+        else {
+            query = route.substring(index+1)
+            route.substring(0,index)
+        }
         val (key, address) = getPaths(path)
-        if (split.size == 2) {
-            val pathArgs = split[1].split("&").map {
+        query?.let {
+            val pathArgs = it.split("&").map {
                 val (aKey, value) = it.split("=")
                 aKey to value
             }.filter {
