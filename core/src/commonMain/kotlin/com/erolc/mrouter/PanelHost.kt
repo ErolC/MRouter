@@ -56,10 +56,10 @@ fun PanelHost(
 }
 
 /**
- *
+ * 当其中一个不为空时，将以不为空的为主，当两个都不为空时，只需满足一个条件即可显示
  * @param windowWidthSize 当界面宽度大于这个尺寸级别时才显示，如果为空，则一直显示
  * @param windowHeightSize 当界面高度大于这个尺寸级别时才显示，如果为空，则一直显示
- * 当其中一个不为空时，将以不为空的为主，当两个都不为空时，只需满足一个条件即可显示
+ *
  */
 @Composable
 fun rememberPanelState(

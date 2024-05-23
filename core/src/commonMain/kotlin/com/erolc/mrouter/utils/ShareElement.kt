@@ -1,7 +1,25 @@
 package com.erolc.mrouter.utils
 
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateInt
+import androidx.compose.animation.core.animateIntOffset
+import androidx.compose.animation.core.animateIntSize
+import androidx.compose.animation.core.animateOffset
+import androidx.compose.animation.core.animateRect
+import androidx.compose.animation.core.animateSize
+import androidx.compose.animation.core.spring
 import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.LocalPageScope
 
@@ -40,10 +58,11 @@ sealed interface ShareState {
     infix fun Float.with(target: Float): Float {
         return if (!preShare) {
             if (this@ShareState is Sharing) {
-                target - (target - this) * progress
+                this between target
             } else this
         } else target
     }
+
 }
 
 /**
@@ -63,7 +82,19 @@ data object BeforeEnd : ShareState
  */
 data object PreShare : ShareState
 
-data class Sharing(val progress: Float) : ShareState
+/**
+ * sharing 手势触发时，将由手势控制共享的过程，[progress]则是手势的进度，
+ * 目前手势只能控制后退时的共享元素变化
+ */
+data class Sharing(val progress: Float) : ShareState {
+    /**
+     * 将是当前界面元素的值[between]到上一个页面元素的值
+     * @param pre 上一个页面元素的值
+     */
+    infix fun Float.between(pre: Float): Float {
+        return pre - (pre - this) * progress
+    }
+}
 
 /**
  * 共享结束
@@ -82,6 +113,200 @@ internal fun Sharing.updateRect(startRect: Rect, endRect: Rect): Rect {
     val eLeft = endRect.left
     val eRight = endRect.right
     val eBottom = endRect.bottom
-    return Rect(eLeft with sLeft, eTop with sTop, eRight with sRight, eBottom with sBottom)
+    return Rect(
+        eLeft between sLeft,
+        eTop between sTop,
+        eRight between sRight,
+        eBottom between sBottom
+    )
 }
 
+/**
+ *
+ * @param preValue 上一页面的值
+ * @param currentValue 当前页面的值
+ * @param nextValue 下一页面的值
+ * @param sharing 手势触发时,由该函数控制共享元素的变化过程
+ */
+@Composable
+fun <T> updateValue(
+    preValue: T,
+    currentValue: T,
+    nextValue: T,
+    sharing: Sharing.(preValue: T, currentValue: T) -> T = { _, current -> current },
+    anim: @Composable (function: (ShareState) -> T) -> State<T>
+): State<T> {
+    var pre by remember { mutableStateOf(preValue) }
+    var exit by remember { mutableStateOf(currentValue) }
+    return anim { it: ShareState ->
+        if (it is BeforeStart) {
+            pre = preValue
+            exit = nextValue
+        } else if (it is BeforeEnd) {
+            pre = preValue
+            exit = currentValue
+        }
+        when (it) {
+            PreShare -> pre
+            ExitShare -> exit
+            is Sharing -> it.sharing(preValue, currentValue)
+            else -> currentValue
+        }
+    }
+}
+@Composable
+fun Transition<ShareState>.updateFloat(
+    preValue: Float,
+    currentValue: Float,
+    nextValue: Float,
+    transitionSpec:
+    @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Float> = { spring() }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl -> animateFloat(transitionSpec) { impl(it) } }
+
+
+@Composable
+fun Transition<ShareState>.updateDP(
+    preValue: Dp,
+    currentValue: Dp,
+    nextValue: Dp,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Dp> = {
+        spring(visibilityThreshold = Dp.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateDp(transitionSpec) {
+        impl(it)
+    }
+}
+
+@Composable
+fun Transition<ShareState>.updateInt(
+    preValue: Int,
+    currentValue: Int,
+    nextValue: Int,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Int> = {
+        spring(visibilityThreshold = Int.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateInt(transitionSpec) {
+        impl(it)
+    }
+}
+
+@Composable
+fun Transition<ShareState>.updateRect(
+    preValue: Rect,
+    currentValue: Rect,
+    nextValue: Rect,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Rect> = {
+        spring(visibilityThreshold = Rect.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateRect(transitionSpec) {
+        impl(it)
+    }
+}
+
+
+@Composable
+fun Transition<ShareState>.updateOffset(
+    preValue: Offset,
+    currentValue: Offset,
+    nextValue: Offset,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Offset> = {
+        spring(visibilityThreshold = Offset.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateOffset(transitionSpec) {
+        impl(it)
+    }
+}
+
+@Composable
+fun Transition<ShareState>.updateIntOffset(
+    preValue: IntOffset,
+    currentValue: IntOffset,
+    nextValue: IntOffset,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<IntOffset> = {
+        spring(visibilityThreshold = IntOffset.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateIntOffset(transitionSpec) {
+        impl(it)
+    }
+}
+
+@Composable
+fun Transition<ShareState>.updateSize(
+    preValue: Size,
+    currentValue: Size,
+    nextValue: Size,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Size> = {
+        spring(visibilityThreshold = Size.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateSize(transitionSpec) {
+        impl(it)
+    }
+}
+
+@Composable
+fun Transition<ShareState>.updateIntSize(
+    preValue: IntSize,
+    currentValue: IntSize,
+    nextValue: IntSize,
+    transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<IntSize> = {
+        spring(visibilityThreshold = IntSize.VisibilityThreshold)
+    }
+) = updateValue(
+    preValue,
+    currentValue,
+    nextValue, ::sharing
+) { impl ->
+    animateIntSize(transitionSpec) {
+        impl(it)
+    }
+}
+
+
+
+internal fun Sharing.between(pre: Int, current: Int) = run { pre - (pre - current) * progress }.toInt()
+fun sharing(sharing: Sharing, pre: Float, current: Float) = sharing.run { current between pre }
+fun sharing(sharing: Sharing, pre: Int, current: Int):Int = sharing.between(pre, current)
+fun sharing(sharing: Sharing, pre: Dp, current: Dp) = sharing.run { (current.value between pre.value).dp }
+fun sharing(sharing: Sharing, pre: Rect, current: Rect) = sharing.updateRect(pre, current)
+fun sharing(sharing: Sharing, pre: Offset, current: Offset) = pre - (pre - current) * sharing.progress
+fun sharing(sharing: Sharing, pre: IntOffset, current: IntOffset) = pre - (pre - current) * sharing.progress
+fun sharing(sharing: Sharing, pre: Size, current: Size) = sharing.run {
+    Size(pre.width between current.width, pre.height between current.height)
+}
+fun sharing(sharing: Sharing, pre: IntSize, current: IntSize) = sharing.run {
+    IntSize(between(pre.width, current.width), between(pre.height, current.height))
+}

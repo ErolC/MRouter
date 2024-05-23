@@ -39,6 +39,7 @@ open class PageScope {
     internal val transformState = mutableStateOf<TransformState>(EnterState)
     internal var transformTransition: Transition<TransformState>? = null
     internal val isIntercept = mutableStateOf(false)
+    private val preArgs = bundleOf()
 
     internal fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
@@ -58,7 +59,12 @@ open class PageScope {
         val routeObj = RouteBuilder(windowId).apply(builder).build(route).let {
             it.copy(windowOptions = it.windowOptions.copy(currentWindowId = windowId))
         }
+        routeObj.args.putAll(preArgs)
         router.router(routeObj)
+    }
+
+    fun setArgs(body: Bundle.() -> Unit) {
+        preArgs.apply(body)
     }
 
     /**
@@ -109,7 +115,7 @@ fun rememberArgs(): Bundle {
 @Composable
 fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val owner = LocalLifecycleOwner.current
-    rememberPrivateInPage("lifecycle"){
-    owner.lifecycle.addEventObserver(body)
+    rememberPrivateInPage("lifecycle") {
+        owner.lifecycle.addEventObserver(body)
     }
 }

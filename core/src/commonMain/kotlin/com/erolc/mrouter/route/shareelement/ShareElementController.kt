@@ -276,7 +276,10 @@ private fun Transition<ShareState>.ShareElement(
         }
     }
     var target by remember { mutableStateOf<ShareElement?>(group.start) }
-    target = if (currentState is BeforeStart) group.start else group.end
+    if (currentState is BeforeStart)
+        target = group.start
+    else if (currentState is BeforeEnd || currentState is Sharing)
+        target = group.end
     Box(
         Modifier
             .size(with(density) { rect.size.toDpSize() })

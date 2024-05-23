@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  *
  */
 @Composable
-fun Element(key: String, modifier: Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
+fun Element(key: String, modifier: Modifier = Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
     val scope = LocalPageScope.current
     val position = remember { MutableStateFlow(Rect(Offset.Zero, Size.Zero)) }
     val element = remember(key, scope) {

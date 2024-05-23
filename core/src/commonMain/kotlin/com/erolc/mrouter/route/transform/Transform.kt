@@ -27,7 +27,7 @@ import kotlin.math.roundToInt
 fun modal(scale: Float = 0.96f) = buildTransform {
     enter = slideInVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    wrap = ModalTransformWrap(scale + 0.02f)
+    wrap = ModalTransformWrap(scale + 0.03f)
 }
 
 fun normal() = buildTransform {
