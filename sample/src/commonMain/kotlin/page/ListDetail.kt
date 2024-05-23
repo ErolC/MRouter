@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,8 @@ import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.rememberPanelState
+import com.erolc.mrouter.route.transform.modal
 import com.erolc.mrouter.utils.rememberInPage
 
 data class Content(val name: String, val id: Int)
@@ -43,10 +46,14 @@ fun ListDetail() = Page {
                 }
             }
         }
-
-        PanelHost(modifier = Modifier.weight(2f), onPanelChange = {
-            loge("tag", "isAttach:$it")
-        })
+        val panelState = rememberPanelState()
+        PanelHost(
+            startRoute = "list1",
+            modifier = Modifier.fillMaxSize(),
+            panelState = panelState,
+            onPanelChange = {
+                loge("tag", "isAttach:$it")
+            })
     }
 }
 

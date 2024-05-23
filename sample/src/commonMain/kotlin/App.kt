@@ -1,8 +1,6 @@
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import com.erolc.mrouter.Constants
 import com.erolc.mrouter.RouteHost
-import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.register.page
 import page.*
 import page.Target
@@ -10,7 +8,7 @@ import page.Target
 @Composable
 fun App(typography: Typography = MaterialTheme.typography) {
     MaterialTheme(typography = typography) {
-        RouteHost("home", startWindowOptions = WindowOptions(Constants.DEFAULT_WINDOW,"first")) {
+        RouteHost("home") {
             page("home") { Home() }
             page("first") { First() }
             page("second") { Second() }

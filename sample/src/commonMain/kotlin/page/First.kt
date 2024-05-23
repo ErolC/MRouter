@@ -8,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.erolc.mrouter.Constants
 import com.erolc.mrouter.route.pathArgs
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
@@ -19,7 +18,7 @@ import com.erolc.mrouter.utils.rememberInPage
 @Composable
 fun First() = Page {
     LifecycleObserver { _, event ->
-        loge("tag","first - $event")
+        loge("tag", "first - $event")
     }
     val args = rememberArgs()
     val bundle = args.pathArgs()
@@ -45,7 +44,7 @@ fun First() = Page {
                     if (key == "return") {
                         onResult {
                             result = it.getString("back_data", "")
-                            loge("tag","result:$result")
+                            loge("tag", "result:$result")
                         }
                     }
                 }
@@ -54,7 +53,7 @@ fun First() = Page {
             val key = bundle.getString("key")
             Text("前往下一个页面${if (key == "arg") "并携带数据" else ""}")
         }
-        val key =bundle.getString("key")
+        val key = bundle.getString("key")
         if (key == "return") {
             Text("这是由Second页面回传的数据：${result}")
         }

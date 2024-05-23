@@ -13,9 +13,6 @@ import androidx.compose.ui.zIndex
 import com.erolc.mrouter.route.shareelement.Element
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
-import mrouter.composeapp.generated.resources.Res
-import mrouter.composeapp.generated.resources.ic_back
-import mrouter.composeapp.generated.resources.ic_back_background
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 

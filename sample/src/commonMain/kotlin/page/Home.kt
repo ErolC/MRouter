@@ -20,6 +20,9 @@ import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.platform.isDesktop
 import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.route.transform.fadeIn
+import com.erolc.mrouter.route.transform.modal
+import com.erolc.mrouter.route.transform.share
 
 data class Future(val name: String, val value: String)
 
@@ -59,9 +62,7 @@ fun Home() = Page {
                 Column(Modifier.fillMaxWidth()) {
                     Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
                         when (it.value) {
-                            "normal" -> {
-                                route("first")
-                            }
+                            "normal" -> route("first")
                             "arg" -> route("first?key=arg")
                             "return" -> route("first?key=return")
                             "panel" -> route("panel")

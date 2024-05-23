@@ -29,17 +29,23 @@ fun Share() = Page {
         }
         Spacer(Modifier.weight(1f))
         Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp)) {
-            val corner by animateDp {
+            val corner by animateDp(transitionSpec = { tween(1000) }) {
 //                loge("tag", "Share__::$it")
 //                it.run { 100.dp between 10.dp }
-                it.run { 100f with 10f }.dp
-
+                when (it) {
+                    PreShare -> 10.dp
+                    ExitShare -> 100.dp
+                    else -> 10.dp
+                }
             }
-
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
                 Box(modifier = Modifier.fillMaxSize().clickable {
                     route("search") {
-                        transform = share("search")
+                        transform = share(
+                            "search",
+                            animationSpec = tween(1000),
+                            shareAnimationSpec = tween(1000)
+                        )
                     }
                 }) {
                     Text("search", Modifier.align(Alignment.CenterStart))
@@ -77,17 +83,16 @@ fun Search() = Page {
             })
         }
         Element("search", Modifier.padding(20.dp).weight(4f).height(50.dp)) {
-            val corner by animateDp {
-//                loge("tag", "Search+++::$it")
-//                it.run { 10.dp between 100.dp }
-                it.run { 10f with 100f }.dp
-            }
-
-            Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
+            val corner by updateDP(10.dp, 100.dp, 30.dp)
+            Surface(shape = RoundedCornerShape(corner), color = Color.Blue) {
                 Box(Modifier.fillMaxSize().clickable {
 //                    backPressed()
                     route("search1") {
-                        transform = share("search")
+                        transform = share(
+                            "search",
+                            animationSpec = tween(1000),
+                            shareAnimationSpec = tween(1000)
+                        )
                     }
                 }) {
                     Text("search", Modifier.align(Alignment.CenterStart))
@@ -114,9 +119,9 @@ fun Search1() = Page {
             })
         }
         Element("search", Modifier.padding(100.dp).weight(4f).height(50.dp)) {
-            val corner by animateDp {
+            val corner by animateDp(transitionSpec = { tween(1000) }) {
 //                it.run { 100.dp between 10.dp }
-                it.run { 100f with 10f }.dp
+                it.run { 30f with 100f }.dp
 
             }
 
