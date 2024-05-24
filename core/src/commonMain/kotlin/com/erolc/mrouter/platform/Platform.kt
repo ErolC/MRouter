@@ -26,6 +26,10 @@ data object UnKnow : Platform
 
 expect fun getPlatform(): Platform
 
+expect fun safeAreaInsetsTop():Float
+
+//判断ios是否有刘海
+val iosHasNotch get() = isIos && safeAreaInsetsTop() > 20
 
 val isMobile: Boolean
     get() {

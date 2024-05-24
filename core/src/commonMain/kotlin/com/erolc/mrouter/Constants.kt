@@ -6,4 +6,9 @@ object Constants {
     const val DEFAULT_PANEL = "local"
     const val PATH_ARGS = "path_args"
     internal const val CONTEXT = "context"
+
+    const val IOS_MODAL_SCALE =  0.92f
+    const val IOS_NOTCH_MODAL_SCALE =  0.88f
+    const val IOS_MODAL_PROPORTION = 0.94f
+    const val IOS_NOTCH_MODAL_PROPORTION = 0.93f
 }

@@ -23,3 +23,6 @@ actual fun PlatformWindow(
 }
 
 actual fun getPlatform(): Platform = Android
+
+
+actual fun safeAreaInsetsTop() = 0f

@@ -15,6 +15,9 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
+import com.erolc.mrouter.Constants
+import com.erolc.mrouter.platform.iosHasNotch
+import com.erolc.mrouter.platform.isIos
 import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
@@ -24,10 +27,15 @@ import kotlin.math.roundToInt
  * 并在此之上增加了[Transform]，该类描述了一次转换所需要的动画以及手势
  */
 
-fun modal(scale: Float = 0.96f) = buildTransform {
+private val modalScale: Float =
+    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_SCALE else if (isIos) Constants.IOS_MODAL_SCALE else 0.96f
+private val modalProportion: Float =
+    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos) Constants.IOS_MODAL_PROPORTION else (modalScale + 0.026f)
+
+fun modal(scale: Float = modalScale) = buildTransform {
     enter = slideInVertically { it }
     prevPause = scaleOut(targetScale = scale)
-    wrap = ModalTransformWrap(scale + 0.03f)
+    wrap = ModalTransformWrap(modalProportion)
 }
 
 fun normal() = buildTransform {

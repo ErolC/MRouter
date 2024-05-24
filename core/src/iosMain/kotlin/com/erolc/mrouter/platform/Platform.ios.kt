@@ -9,7 +9,9 @@ import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.window.WindowSize
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
+import platform.UIKit.UIApplication
 import platform.UIKit.UIScreen
+import platform.UIKit.UIWindow
 import kotlin.experimental.and
 import kotlin.experimental.or
 import kotlin.random.Random
@@ -29,6 +31,10 @@ actual fun PlatformWindow(
 }
 
 actual fun getPlatform(): Platform = Ios
+
+@OptIn(ExperimentalForeignApi::class)
+actual fun safeAreaInsetsTop() =
+    (UIApplication.sharedApplication.windows.first() as UIWindow).safeAreaInsets.useContents { top }.toFloat()
 
 
 @OptIn(ExperimentalStdlibApi::class)

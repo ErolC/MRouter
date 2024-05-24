@@ -30,6 +30,8 @@ actual fun PlatformWindow(
 
 actual fun getPlatform(): Platform = Web
 
+actual fun safeAreaInsetsTop() = 0f
+
 @OptIn(ExperimentalStdlibApi::class)
 fun randomUUID(): String {
     val bytes = Random.nextBytes(16).also {

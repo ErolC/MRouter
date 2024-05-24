@@ -76,6 +76,7 @@ actual fun getPlatform(): Platform {
     }
 }
 
+actual fun safeAreaInsetsTop() = 0f
 
 @OptIn(ExperimentalStdlibApi::class)
 fun randomUUID(): String {
