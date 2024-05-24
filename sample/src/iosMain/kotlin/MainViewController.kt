@@ -4,7 +4,7 @@ import com.erolc.mrouter.route.platformRoute
 
 fun MainViewController() = mRouterComposeUIViewController {
     MRouter.registerBuilder {
-        platformRoute("test", TestUIViewController())
+        platformRoute("platform", TestUIViewController())
     }
     App()
 }

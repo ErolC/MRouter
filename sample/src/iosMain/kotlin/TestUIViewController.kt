@@ -10,7 +10,7 @@ class TestUIViewController : UIViewController(nibName = null, bundle = null) {
     override fun viewDidLoad() {
         super.viewDidLoad()
         // 设置界面元素的属性
-        messageLabel.text = "点击按钮显示消息"
+        messageLabel.text = "iOS UIViewController界面"
         messageLabel.textAlignment = UITextAlignmentCenter
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(messageLabel)

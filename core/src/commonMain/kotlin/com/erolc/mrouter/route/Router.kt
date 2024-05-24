@@ -74,7 +74,6 @@ data object ClearTaskFlag : StackFlag
 internal data object ReplaceFlag : StackFlag
 
 
-
 /**
  * 是否是基础数据类型
  */
@@ -206,6 +205,17 @@ inline fun <reified T> getBasicData(value: Any): T? {
     else null
 }
 
-fun List<Pair<String,String>>.toBundle() = bundleOf(*toTypedArray())
+fun List<Pair<String, String>>.toBundle() = bundleOf().also { bundle ->
+    forEach { (key, value) ->
+        value.toIntOrNull()?.let { bundle.putInt(key, it) }
+            ?: value.toLongOrNull2()?.let { bundle.putLong(key, it) }
+            ?: value.toBooleanStrictOrNull()?.let { bundle.putBoolean(key, it) }
+            ?: value.toFloatOrNull()?.let { bundle.putFloat(key, it) }
+            ?: value.toDoubleOrNull()?.let { bundle.putDouble(key, it) }
+            ?: bundle.putString(key, value)
+    }
+}
 
-fun Bundle.pathArgs():Bundle = getBundle(Constants.PATH_ARGS)?: bundleOf()
+private fun String.toLongOrNull2(): Long? = if (endsWith("L")) {
+    substring(0, length - 1).toLongOrNull()
+} else toLongOrNull()

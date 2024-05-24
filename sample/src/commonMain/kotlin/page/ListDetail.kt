@@ -41,15 +41,16 @@ fun ListDetail() = Page {
             LazyColumn(modifier = Modifier.background(Color.Blue)) {
                 items(items) {
                     Text(it.name, Modifier.fillMaxWidth().clickable {
-                        route("local:detail?id=${it.id}")
+                        route("local:detail?id=${it.id}L")
                     })
                 }
             }
+
         }
         val panelState = rememberPanelState()
         PanelHost(
-            startRoute = "list1",
-            modifier = Modifier.fillMaxSize(),
+            startRoute = "detail",
+            modifier = Modifier.fillMaxSize().weight(2f),
             panelState = panelState,
             onPanelChange = {
                 loge("tag", "isAttach:$it")
@@ -60,7 +61,7 @@ fun ListDetail() = Page {
 @Composable
 fun Detail() = Page {
     val args = rememberArgs()
-    val id = args.getInt("id")
+    val id = args.getLong("id")
     Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
     LifecycleObserver { lifecycleOwner, event ->
         loge("tag", "id:$id owner:$lifecycleOwner event:$event")

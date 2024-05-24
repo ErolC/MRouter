@@ -25,7 +25,7 @@ suspend fun loadFont(): FontFamily {
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     MRouter.registerBuilder {
-        platformRoute("test","https://www.baidu.com")
+        platformRoute("platform","https://www.baidu.com")
     }
     CanvasBasedWindow(canvasElementId = "ComposeTarget") {
         var typography by remember { mutableStateOf<Typography?>(null) }

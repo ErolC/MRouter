@@ -26,6 +26,7 @@ class TestActivity : ComponentActivity() {
 @Composable
 fun Activity.Test() {
     Row {
+        Text("Android activity 页面")
         Button(onClick = {
             setResult(0, Intent().apply {
                 putExtra("back_data", "data:success")

@@ -41,6 +41,7 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
     }
 
     fun getArgs() = args
+
     fun onResult(body: (Bundle) -> Unit) {
         onResult = body
 
@@ -89,7 +90,7 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
             }.filter {
                 it.second.isNotEmpty()
             }.toBundle()
-            args.putBundle(PATH_ARGS, pathArgs)
+            args.putAll(pathArgs)
         }
         return Route(
             route,

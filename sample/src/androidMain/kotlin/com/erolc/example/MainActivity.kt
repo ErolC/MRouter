@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MRouter.registerBuilder {
-            startActivity("test_activity",TestActivity::class)
+            startActivity("platform",TestActivity::class)
             setting("app_home",Settings.ACTION_APPLICATION_DETAILS_SETTINGS){
                 data = Uri.parse("package:com.erolc.example")
             }

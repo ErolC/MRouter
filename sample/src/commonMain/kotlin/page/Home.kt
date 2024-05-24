@@ -36,11 +36,8 @@ fun Home() = Page {
     LifecycleObserver { _, event ->
         loge("tag","home $event")
     }
-//    testVM(::TestViewModel)
     val vm = viewModel(::TestViewModel)
-//    var state by  vm.state
-//    loge("tag","$state")
-    val list = remember() {
+    val list = remember {
         listOf(
             Future("普通的路由跳转", "normal"),
             Future("带参的路由跳转", "arg"),
@@ -50,7 +47,7 @@ fun Home() = Page {
             Future("共享元素", "share"),
             Future("动画", "anim"),
             Future("手势", "gesture"),
-            if(isDesktop) Future("多窗口","window") else null
+            if(isDesktop) Future("多窗口","window") else Future("平台界面","platform")
         ).filterNotNull()
     }
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -73,6 +70,7 @@ fun Home() = Page {
                             "window" ->route("first"){
                                 window("secondWindow","这是第二个窗口")
                             }
+                            "platform"->route("platform")
                         }
                     }) {
                         Text(it.name)
