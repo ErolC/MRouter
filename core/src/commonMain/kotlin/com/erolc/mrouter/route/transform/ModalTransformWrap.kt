@@ -11,10 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.erolc.mrouter.Constants
 import com.erolc.mrouter.platform.iosHasNotch
-import com.erolc.mrouter.platform.isIos
-import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.platform.safeAreaInsetsTop
 import kotlin.math.abs
 

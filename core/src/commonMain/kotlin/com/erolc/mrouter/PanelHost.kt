@@ -1,17 +1,27 @@
 package com.erolc.mrouter
 
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.PanelRouter
+import com.erolc.mrouter.route.transform.EnterState
+import com.erolc.mrouter.route.transform.ResumeState
+import com.erolc.mrouter.route.transform.TransformState
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.rememberPrivateInPage
 import com.erolc.mrouter.window.WindowHeightSize
 import com.erolc.mrouter.window.WindowWidthSize
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 
 /**
  * 在一个页面中可以有多个局部路由，如果需要路由到这些界面上则需要指明key。
@@ -44,12 +54,12 @@ fun PanelHost(
             router.run {
                 route(key, routeBuild(startRoute))
                 getPanel(key)
+            }.apply {
+                hostScope.panelState = panelState
             }
         }
-        Box(modifier) {
-            router.showPanel(key)
-            panel.Content(Modifier)
-        }
+        router.showPanel(key)
+        panel.Content(modifier)
     } else router.hidePanel(key)
 
 
@@ -73,9 +83,10 @@ fun rememberPanelState(
 
 data class PanelState(
     val windowWidthSize: WindowWidthSize? = null,
-    val windowHeightSize: WindowHeightSize? = null
+    val windowHeightSize: WindowHeightSize? = null,
 ) {
 
+    internal val pageState: MutableStateFlow<TransformState> = MutableStateFlow(ResumeState)
     val shouldAttach: Boolean
         @Composable get() {
             val windowScope = LocalWindowScope.current
@@ -84,4 +95,10 @@ data class PanelState(
                     (windowWidthSize != null && windowSize.width.value > windowWidthSize.value) ||
                     (windowHeightSize != null && windowSize.height.value > windowHeightSize.value)
         }
+
+    @Composable
+    private fun getPageStateTransition(): Transition<TransformState> {
+        val state by pageState.collectAsState()
+        return updateTransition(state)
+    }
 }

@@ -142,7 +142,7 @@ class PageEntry internal constructor(
                         }
                     }
                     wrapScope.wrap = this
-                    Wrap(pageModifier.onGloballyPositioned { wrapScope.setSize(it.boundsInRoot()) })
+                    Wrap(pageModifier)
                 }
                 check(isUseContent) { "必须在Wrap方法中使用PageContent,请检查 $this 的Wrap方法" }
             }
@@ -170,6 +170,7 @@ class PageEntry internal constructor(
             transformState
         }
         updateState(this, state)
+//        LocalHostScope.current.panelState?.pageState?.value = state
         entry?.also {
             val transformState = when (state) {
                 EnterState -> ResumeState

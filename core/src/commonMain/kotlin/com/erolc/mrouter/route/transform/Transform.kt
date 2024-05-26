@@ -16,6 +16,8 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.platform.Windows
+import com.erolc.mrouter.platform.getPlatform
 import com.erolc.mrouter.platform.iosHasNotch
 import com.erolc.mrouter.platform.isIos
 import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
@@ -30,11 +32,11 @@ import kotlin.math.roundToInt
 private val modalScale: Float =
     if (iosHasNotch) Constants.IOS_NOTCH_MODAL_SCALE else if (isIos) Constants.IOS_MODAL_SCALE else 0.96f
 private val modalProportion: Float =
-    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos) Constants.IOS_MODAL_PROPORTION else (modalScale + 0.026f)
+    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos) Constants.IOS_MODAL_PROPORTION else if (getPlatform() == Windows) 0.96f else 0.986f
 
-fun modal(scale: Float = modalScale) = buildTransform {
+fun modal() = buildTransform {
     enter = slideInVertically { it }
-    prevPause = scaleOut(targetScale = scale)
+    prevPause = scaleOut(targetScale = modalScale)
     wrap = ModalTransformWrap(modalProportion)
 }
 

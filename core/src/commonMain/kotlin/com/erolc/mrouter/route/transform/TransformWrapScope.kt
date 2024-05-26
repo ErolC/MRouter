@@ -7,6 +7,8 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import com.erolc.mrouter.backstack.entry.LocalHostScope
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.scope.LocalPageScope
 import kotlin.reflect.KClass
 
@@ -16,14 +18,9 @@ val LocalTransformWrapScope = compositionLocalOf { TransformWrapScope() }
  * 手势包裹层的作用域，该类主要是管理一些工作，比如：让页面内容也可以控制页面的手势
  */
 class TransformWrapScope {
-    private val _pageSize = mutableStateOf(Size.Zero)
     lateinit var wrap: TransformWrap
         internal set
 
-    /**
-     * 页面大小
-     */
-    val pageSize: State<Size> get() = _pageSize
     private val _gapSize = mutableStateOf(0f)
 
     /**
@@ -33,23 +30,23 @@ class TransformWrapScope {
     lateinit var progress: (Float) -> Unit
         internal set
 
-    internal fun setSize(rect: Rect) {
-        _pageSize.value = rect.size
-    }
 
     /**
      * 用于判断是否是属于你的包装
      */
-    inline fun <reified T:TransformWrap> wrapIsInstance(): Boolean {
+    inline fun <reified T : TransformWrap> wrapIsInstance(): Boolean {
         return wrap is T
     }
 
     @Composable
-    fun getGapSize(proportion: Float, orientation: Orientation = Orientation.Vertical): State<Float> {
-        val size by _pageSize
+    fun getGapSize(
+        proportion: Float,
+        orientation: Orientation = Orientation.Vertical
+    ): State<Float> {
+        val size by LocalHostScope.current.size.collectAsState()
         val squareSize = if (orientation == Orientation.Horizontal) size.width else size.height
         _gapSize.value = (1 - proportion) * squareSize
-        return gapSize
+        return _gapSize
     }
 
     /**
@@ -63,7 +60,7 @@ class TransformWrapScope {
         progress: (Float) -> Unit,
         orientation: Orientation = Orientation.Horizontal
     ): AnchoredDraggableState<Float> {
-        val size by pageSize
+        val size by LocalHostScope.current.size.collectAsState()
         val gapSize by gapSize
         val squareSize = if (orientation == Orientation.Horizontal) size.width else size.height
         val max = squareSize - gapSize

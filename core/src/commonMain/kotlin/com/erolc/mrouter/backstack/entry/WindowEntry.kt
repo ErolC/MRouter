@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.erolc.mrouter.Constants.DEFAULT_WINDOW
 import com.erolc.mrouter.model.WindowOptions
@@ -17,11 +19,14 @@ import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.platform.PlatformWindow
+import com.erolc.mrouter.scope.HostScope
 
 /**
  * window域
  */
 val LocalWindowScope = staticCompositionLocalOf { WindowScope() }
+
+internal val LocalHostScope = compositionLocalOf { HostScope() }
 
 /**
  * 代表一个窗口，对于ios和android来说，其只有一个window，而对于desktop来说是可以有多个window的。
@@ -37,6 +42,7 @@ class WindowEntry(
     internal lateinit var pageRouter: PageRouter
 
     val scope = WindowScope(address.path)
+    internal val hostScope = HostScope()
 
     fun shouldExit(): Boolean {
         return (pageRouter.parentRouter as WindowRouter)
@@ -53,7 +59,7 @@ class WindowEntry(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        CompositionLocalProvider(LocalWindowScope provides scope) {
+        CompositionLocalProvider(LocalWindowScope provides scope, LocalHostScope provides hostScope) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 val lifecycleOwner = LocalLifecycleOwner.current
@@ -62,10 +68,12 @@ class WindowEntry(
                     pageRouter.setLifecycleOwner(lifecycleOwner)
                     onDispose { }
                 }
-                Box(modifier.fillMaxSize().background(Color.Black)) {
+                Box(modifier.fillMaxSize().background(Color.Black).onGloballyPositioned {
+                    hostScope.size.value = it.boundsInRoot().size
+                }) {
                     val stack by pageRouter.getPlayStack()
                         .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
-                    if (stack.size == 1){
+                    if (stack.size == 1) {
                         stack.first().transformState.value = ResumeState
                         stack.first().shareTransform(null)
                     } else stack.last().shareTransform(stack.first())
