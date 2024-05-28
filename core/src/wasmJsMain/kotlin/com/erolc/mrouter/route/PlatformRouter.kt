@@ -2,7 +2,7 @@ package com.erolc.mrouter.route
 
 import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.model.WebRoute
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 
 /**
  * @param address 地址
@@ -10,8 +10,8 @@ import com.erolc.mrouter.register.RegisterBuilder
  * @param target window.open的target
  * @param features windown.open的features
  */
-fun RegisterBuilder.platformRoute(
+fun Register.platformRoute(
     address: String,
     url: String,
     target: String = "", features: String = "",
-) = registerPlatformResource(address, PlatformRoute(WebRoute(url, target, features)))
+) = addPlatformResource(address, PlatformRoute(WebRoute(url, target, features)))

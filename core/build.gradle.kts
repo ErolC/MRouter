@@ -66,7 +66,10 @@ kotlin {
             implementation(libs.lifecycle.runtime)
             implementation(libs.kotlin.reflect)
         }
-
+        commonTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.kotlin.test)
+        }
     }
 }
 

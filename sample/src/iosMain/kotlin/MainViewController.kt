@@ -3,7 +3,7 @@ import com.erolc.mrouter.mRouterComposeUIViewController
 import com.erolc.mrouter.route.platformRoute
 
 fun MainViewController() = mRouterComposeUIViewController {
-    MRouter.registerBuilder {
+    MRouter.register {
         platformRoute("platform", TestUIViewController())
     }
     App()

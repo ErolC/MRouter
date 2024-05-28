@@ -2,7 +2,7 @@ package com.erolc.mrouter.model
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.FrameWindowScope
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 import com.erolc.mrouter.window.windowMenu
 
 
@@ -10,7 +10,7 @@ import com.erolc.mrouter.window.windowMenu
  * @author erolc
  * @since 2024/4/15 10:27
  *
- * 窗口的菜单，需要在[RegisterBuilder]使用[windowMenu]进行注册才可使用
+ * 窗口的菜单，需要在[Register]使用[windowMenu]进行注册才可使用
  * ```
  * windowMenu(windowId = Constants.defaultWindow) {
  *     MenuBar {

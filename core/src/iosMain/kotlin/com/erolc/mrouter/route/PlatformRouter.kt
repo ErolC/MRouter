@@ -3,7 +3,7 @@ package com.erolc.mrouter.route
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.model.IosRouteSource
 import com.erolc.mrouter.model.PlatformRoute
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 import platform.UIKit.UINavigationController
 import platform.UIKit.UIViewController
 
@@ -12,8 +12,8 @@ import platform.UIKit.UIViewController
  * @param target 目标VC
  * @param block 跳转的具体实现
  */
-fun RegisterBuilder.platformRoute(address: String, target: UIViewController) =
-    registerPlatformResource(address, PlatformRoute(target))
+fun Register.platformRoute(address: String, target: UIViewController) =
+    addPlatformResource(address, PlatformRoute(target))
 
 /**
  * 注册路由代理

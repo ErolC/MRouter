@@ -42,7 +42,7 @@ fun PanelHost(
 ) {
     val scope = LocalPageScope.current
     val router = rememberPrivateInPage("panel_router_$key", key) {
-        scope.router as? PanelRouter ?: throw RuntimeException("面板内部页面不可使用面板（局部）路由")
+        scope.router as? PanelRouter ?: throw RuntimeException("非法路由器")
     }
     val isAttach = panelState.shouldAttach
     rememberPrivateInPage("panel_attach", isAttach) {

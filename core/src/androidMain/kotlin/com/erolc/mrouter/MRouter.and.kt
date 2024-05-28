@@ -1,9 +1,10 @@
 package com.erolc.mrouter
 
 import android.content.Context
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.router.WindowRouter
 
 /**
  * context
  */
-internal fun WindowRouter.getContext() = platformRes[Constants.CONTEXT] as Context
+internal fun WindowRouter.getContext() = ResourcePool.getPlatformRes()[Constants.CONTEXT] as Context

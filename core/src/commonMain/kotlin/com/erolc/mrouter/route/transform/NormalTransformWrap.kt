@@ -18,7 +18,7 @@ class NormalTransformWrap : TransformWrap() {
         val gestureModifier = rememberDraggableModifier(Orientation.Horizontal)
         Box(modifier = modifier) {
             PageContent(Modifier) // 页面内容
-            Box(modifier = gestureModifier.background(Color.Red)) // 手势触发部分
+            Box(modifier = gestureModifier) // 手势触发部分
         }
     }
 }

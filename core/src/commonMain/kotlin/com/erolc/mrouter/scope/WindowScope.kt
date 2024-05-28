@@ -1,6 +1,7 @@
 package com.erolc.mrouter.scope
 
 import androidx.compose.runtime.mutableStateOf
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.window.DefWindowSize
 
@@ -11,10 +12,9 @@ class WindowScope(val id: String = "") {
     val windowSize = mutableStateOf(DefWindowSize)
 
     internal val isCloseWindow = mutableStateOf(false)
-    internal lateinit var platformRes: Map<String, Any>
 
     internal val pageCache = PageCache()
-    fun getPlatformRes(key: String) = platformRes[key]
+    fun getPlatformRes(key: String) = ResourcePool.getPlatformRes()[key]
 
     /**
      * 关闭该window

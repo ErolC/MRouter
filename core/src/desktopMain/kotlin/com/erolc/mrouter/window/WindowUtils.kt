@@ -13,7 +13,7 @@ import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.model.WindowMenu
 import com.erolc.mrouter.model.WindowState
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 import java.awt.*
 import java.awt.event.ComponentListener
 import java.awt.event.WindowFocusListener
@@ -25,11 +25,11 @@ import kotlin.math.roundToInt
 /**
  * 注册[windowId]对应的窗口菜单
  */
-fun RegisterBuilder.windowMenu(
+fun Register.windowMenu(
     windowId: String = Constants.DEFAULT_WINDOW,
     menu: @Composable FrameWindowScope.() -> Unit
 ) {
-    registerPlatformResource(windowId, WindowMenu(windowId, menu))
+    addPlatformResource(windowId, WindowMenu(windowId, menu))
 }
 
 @Composable

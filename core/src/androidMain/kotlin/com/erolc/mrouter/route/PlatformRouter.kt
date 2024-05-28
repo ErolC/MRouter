@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.bundle.Bundle
 import com.erolc.mrouter.model.PlatformRoute
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 import kotlin.reflect.KClass
 
 
@@ -49,12 +49,12 @@ fun ActivityRouter<Intent, ActivityResult>.route(
  * @param contract ActivityResultContract
  * @param block 配置路由过程
  */
-fun <I, O> RegisterBuilder.platformRoute(
+fun <I, O> Register.platformRoute(
     address: String,
     contract: ActivityResultContract<I, O>,
     block: (ActivityRouter<I, O>) -> Unit
 ) {
-    registerPlatformResource(address, PlatformRoute(ActivityRouterDispatcher(contract, block)))
+    addPlatformResource(address, PlatformRoute(ActivityRouterDispatcher(contract, block)))
 }
 
 fun <I, O> ActivityRouter<I, O>.route(input: I, block: Bundle.(O) -> Unit = {}) {
@@ -66,7 +66,7 @@ fun <I, O> ActivityRouter<I, O>.route(input: I, block: Bundle.(O) -> Unit = {}) 
 /**
  * 设置跳转setting界面
  */
-fun RegisterBuilder.setting(
+fun Register.setting(
     address: String,
     setting: String,
     intentBody: Intent.(args: Bundle) -> Unit = {}
@@ -90,7 +90,7 @@ fun RegisterBuilder.setting(
  * }
  * ```
  */
-fun RegisterBuilder.startActivity(
+fun Register.startActivity(
     address: String,
     activityKClass: KClass<out Activity>,
     intentBody: Intent.(args: Bundle) -> Unit = {},

@@ -4,13 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
 
 /**
  * 路由起点
@@ -22,7 +21,7 @@ import com.erolc.mrouter.register.RegisterBuilder
 fun RouteHost(
     startRoute: String,
     startWindowOptions: WindowOptions = WindowOptions(Constants.DEFAULT_WINDOW, ""),
-    builder: RegisterBuilder.() -> Unit
+    builder: Register.() -> Unit
 ) {
     val viewModelStoreOwner = LocalViewModelStoreOwner.current ?: rememberViewModelStoreOwner()
     MRouter.setViewModelStore(viewModelStoreOwner.viewModelStore)

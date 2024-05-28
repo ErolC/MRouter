@@ -11,8 +11,8 @@ import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.SingleTop
-import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.route.ResourcePool.findAddress
 import kotlinx.coroutines.flow.map
 
 /**
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.map
  */
 open class PageRouter(
     name: String,
-    private val addresses: List<Address>,
     override val parentRouter: Router
 ) : Router {
     internal val backStack = BackStack(name)
@@ -42,6 +41,7 @@ open class PageRouter(
                     }
                 } else null
             } ?: backStack.addEntry(stackEntry.apply { create() })
+
             else -> backStack.addEntry(stackEntry.apply { create() })
         }
     }
@@ -96,20 +96,18 @@ open class PageRouter(
     }
 
     internal fun route(route: Route) {
-        val address = addresses.find { it.path == route.address }
-        if (address == null) {
-            if (!MRouter.routeToPlatform(route)) {
-                loge("MRouter", "not yet register the address：${route.address}")
-            }
-            return
-        }
-        val entry = MRouter.createEntry(
-            route,
-            address,
-            PanelRouter(addresses, this, hostLifecycleState = hostLifecycleState),
-            hostLifecycleState = hostLifecycleState
+        findAddress(route)?.let {(it,route)->
+            val entry = MRouter.createEntry(
+                route,
+                it,
+                PanelRouter(this, hostLifecycleState = hostLifecycleState),
+                hostLifecycleState = hostLifecycleState
+            )
+            route(entry)
+        } ?: MRouter.routeToPlatform(route) ?: loge(
+            "MRouter",
+            "not yet register the address：${route.address}"
         )
-        route(entry)
     }
 
     /**

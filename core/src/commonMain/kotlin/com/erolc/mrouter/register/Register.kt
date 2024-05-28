@@ -8,9 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.model.PageConfig
-import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.platform.logi
+import com.erolc.mrouter.route.ResourcePool
 
 /**
  * 空白的页面配置
@@ -23,7 +22,7 @@ val emptyConfig = PageConfig()
  * @param config 页面配置
  * @param content 页面
  */
-fun RegisterBuilder.page(
+fun Register.page(
     path: String,
     config: PageConfig = emptyConfig,
     content: @Composable () -> Unit
@@ -32,14 +31,14 @@ fun RegisterBuilder.page(
 /**
  * 构建一个模块
  */
-fun RegisterBuilder.module(
+fun Register.module(
     module: String,
     content: RegisterModuleBuilder.() -> Unit
 ) = RegisterModuleBuilder(this, module).apply(content)
 
 
 class RegisterModuleBuilder internal constructor(
-    private val builder: RegisterBuilder,
+    private val builder: Register,
     private val module: String
 ) {
 
@@ -59,7 +58,7 @@ class RegisterModuleBuilder internal constructor(
  * 注册范围构建，在注册范围中可以对页面进行注册
  */
 @SinceKotlin("1.0")
-class RegisterBuilder internal constructor() {
+class Register internal constructor() {
 
     private val addresses = mutableListOf<Address>()
 
@@ -75,7 +74,7 @@ class RegisterBuilder internal constructor() {
     /**
      * 注册平台资源
      */
-    fun registerPlatformResource(key: String, target: Any) {
+    fun addPlatformResource(key: String, target: Any) {
         platformRes[key] = target
     }
 
@@ -99,11 +98,9 @@ class RegisterBuilder internal constructor() {
         }
     }
 
-    /**
-     * 并分配第一个路由
-     */
-    internal fun build(windowRouter: WindowRouter, route: Route) {
-        windowRouter.setResource(addresses, platformRes, route)
+
+    internal fun register() {
+        ResourcePool.addAll(addresses, platformRes)
     }
 
 }

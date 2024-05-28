@@ -8,7 +8,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf
 
 fun main() = mRouterApplication {
     FlatIntelliJLaf.setup()
-    MRouter.registerBuilder {
+    MRouter.register {
         windowMenu {
             MenuBar {
                 Menu("Home") {

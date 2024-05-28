@@ -9,40 +9,33 @@ import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.register.Address
 import com.erolc.mrouter.platform.isDesktop
+import com.erolc.mrouter.route.ResourcePool
+import com.erolc.mrouter.route.ResourcePool.findAddress
 
 
 /**
  * window的路由器，生命周期比[PageRouter]更长。全局唯一
  * window的路由器管理的是window，对于移动端来说，只有一个window：[DEFAULT_WINDOW].
  * 而对于桌面端来说，可以有多个窗口。
- * @param addresses 所注册的所有地址
  */
 class WindowRouter : Router {
     internal val backStack = BackStack("root")
-    internal var addresses: List<Address> = listOf()
-        private set
-    internal var platformRes: Map<String, Any> = mapOf()
-        private set
 
     private fun createEntry(route: Route, address: Address): StackEntry {
         return WindowEntry(mutableStateOf(route.windowOptions)).also {
             it.newPageRouter(route, address)
-            it.scope.platformRes = platformRes
         }
     }
 
     internal fun setPlatformRes(key: String, value: Any) {
-        platformRes += key to value
+        ResourcePool.addPlatformRes(key to value)
         backStack.backStack.value.forEach {
             it as WindowEntry
-            it.scope.platformRes = platformRes
         }
     }
 
 
-    internal fun setResource(addresses: List<Address>, res: Map<String, Any>, route: Route) {
-        this.addresses = addresses
-        platformRes += res
+    internal fun start(route: Route) {
         if (backStack.isEmpty()) {
             dispatchRoute(route)
         } else {
@@ -63,12 +56,13 @@ class WindowRouter : Router {
 
     override fun dispatchRoute(route: Route) {
         shouldDispatchRoute(route) {
-            val address = addresses.find { it.path == route.address }
-            require(address != null) {
+            val pair = findAddress(route)
+            require(pair != null) {
                 "can't find the address with ‘${route.path}’"
             }
-            it?.also { updateEntry(it as WindowEntry, route, address) } ?: createEntry(
-                route,
+            val (address, realRoute) = pair
+            it?.also { updateEntry(it as WindowEntry, realRoute, address) } ?: createEntry(
+                realRoute,
                 address
             )
         }
@@ -91,13 +85,12 @@ class WindowRouter : Router {
 
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
         pageRouter =
-            PageRouter("windowBackStack", addresses, this@WindowRouter).also { pageRouter ->
+            PageRouter("windowBackStack", this@WindowRouter).also { pageRouter ->
                 pageRouter.route(
                     MRouter.createEntry(
                         route,
                         address,
                         PanelRouter(
-                            addresses,
                             pageRouter,
                             hostLifecycleState = pageRouter.hostLifecycleState
                         ),

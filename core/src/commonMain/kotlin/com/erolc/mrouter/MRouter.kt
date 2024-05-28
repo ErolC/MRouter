@@ -13,7 +13,8 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.platform.route
 import com.erolc.mrouter.register.Address
-import com.erolc.mrouter.register.RegisterBuilder
+import com.erolc.mrouter.register.Register
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.RouteBuilder
 import com.erolc.mrouter.route.routeBuild
 import com.erolc.mrouter.route.router.Router
@@ -27,19 +28,20 @@ object MRouter {
 
     private var rootRouter: WindowRouter = WindowRouter()
     private var startRoute: Route? = null
-    private var registerBlock: (RegisterBuilder.() -> Unit)? = null
+    private var registerBlock: (Register.() -> Unit)? = null
     private var viewModel: MRouterControllerViewModel? = null
 
     internal fun build(
         startTarget: String,
         windowOptions: WindowOptions,
-        builder: RegisterBuilder.() -> Unit
+        builder: Register.() -> Unit
     ) {
         val route = routeBuild(startTarget).copy(windowOptions = windowOptions)
-        RegisterBuilder().apply {
+        Register().apply {
             registerBlock?.invoke(this)
             builder()
-        }.build(rootRouter, route)
+        }.register()
+        rootRouter.start(route)
         startRoute?.let {
             route(it)
             startRoute = null
@@ -63,7 +65,7 @@ object MRouter {
      */
     fun route(route: String, block: RouteBuilder.() -> Unit = {}) {
         val routeObj = routeBuild(route, block)
-        if (rootRouter.addresses.isEmpty())
+        if (ResourcePool.isEmpty())
             startRoute = routeObj
         else
             route(routeObj)
@@ -77,8 +79,10 @@ object MRouter {
         viewModel = MRouterControllerViewModel.getInstance(viewModelStore)
     }
 
-
-    fun registerBuilder(block: RegisterBuilder.() -> Unit) {
+    /**
+     * 注册
+     */
+    fun register(block: Register.() -> Unit) {
         registerBlock = block
     }
 
@@ -98,11 +102,10 @@ object MRouter {
         hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
     ) = createPageEntry(route, address, router, isReplace, hostLifecycleState, viewModel)
 
-    internal fun routeToPlatform(route: Route): Boolean {
-        val platformRoute = rootRouter.platformRes[route.address] as? PlatformRoute
+    internal fun routeToPlatform(route: Route): Unit? {
+        val platformRoute = ResourcePool.getPlatformRes()[route.address] as? PlatformRoute
         return platformRoute?.let {
             rootRouter.route(it, route.args, route.onResult)
-            true
-        } ?: false
+        }
     }
 }

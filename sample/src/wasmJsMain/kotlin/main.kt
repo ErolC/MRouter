@@ -24,7 +24,7 @@ suspend fun loadFont(): FontFamily {
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    MRouter.registerBuilder {
+    MRouter.register {
         platformRoute("platform","https://www.baidu.com")
     }
     CanvasBasedWindow(canvasElementId = "ComposeTarget") {
