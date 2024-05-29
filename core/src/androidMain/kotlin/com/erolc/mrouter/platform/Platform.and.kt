@@ -6,7 +6,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.erolc.mrouter.Constants
 import com.erolc.mrouter.backstack.entry.WindowEntry
 import com.erolc.mrouter.model.WindowOptions
-import com.erolc.mrouter.route.router.WindowRouter
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.window.calculateWindowSizeClass
 
 @Composable
@@ -15,7 +15,7 @@ actual fun PlatformWindow(
 ) {
     val context = LocalContext.current
     DisposableEffect(context) {
-        (entry.pageRouter.parentRouter as WindowRouter).setPlatformRes(Constants.CONTEXT, context)
+        ResourcePool.addPlatformRes(Constants.CONTEXT to context)
         onDispose { }
     }
     entry.scope.windowSize.value = calculateWindowSizeClass(context = context)

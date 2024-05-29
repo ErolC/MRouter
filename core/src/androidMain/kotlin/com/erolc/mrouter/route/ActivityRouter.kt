@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 
 /**
- * Activity的路由器，和[ActivityRouterDispatcher]配合可实现从compose跳转到Activity并获取activity的返回值
+ * Activity的路由器，和[ActivityRouterLauncher]配合可实现从compose跳转到Activity并获取activity的返回值
  */
 class ActivityRouter<I, O> {
     internal var input: I? = null

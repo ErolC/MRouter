@@ -27,14 +27,6 @@ class WindowRouter : Router {
         }
     }
 
-    internal fun setPlatformRes(key: String, value: Any) {
-        ResourcePool.addPlatformRes(key to value)
-        backStack.backStack.value.forEach {
-            it as WindowEntry
-        }
-    }
-
-
     internal fun start(route: Route) {
         if (backStack.isEmpty()) {
             dispatchRoute(route)
@@ -86,17 +78,7 @@ class WindowRouter : Router {
     private fun WindowEntry.newPageRouter(route: Route, address: Address) {
         pageRouter =
             PageRouter("windowBackStack", this@WindowRouter).also { pageRouter ->
-                pageRouter.route(
-                    MRouter.createEntry(
-                        route,
-                        address,
-                        PanelRouter(
-                            pageRouter,
-                            hostLifecycleState = pageRouter.hostLifecycleState
-                        ),
-                        hostLifecycleState = pageRouter.hostLifecycleState
-                    )
-                )
+                pageRouter.route(route)
             }
     }
 

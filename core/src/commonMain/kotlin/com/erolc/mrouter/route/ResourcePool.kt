@@ -34,8 +34,8 @@ internal object ResourcePool {
     fun getPlatformRes(): Map<String, Any> = platformRes
 
     fun findAddress(route: Route): Pair<Address, Route>? {
-        val nAddress = normal.find { route.address == it.path }
-        return nAddress?.let { it to route } ?: findDynamicAddress(route)
+        return normal.find { it.match(route.address) }?.let { it to route }
+            ?: findDynamicAddress(route)
     }
 
     private fun findDynamicAddress(route: Route): Pair<Address, Route>? {
@@ -44,7 +44,8 @@ internal object ResourcePool {
         }
     }
 
-    private data class DynamicWrap(val address: Address) {
+
+    private data class DynamicWrap(var address: Address) {
         private var matches = address.path
         private var keyPath = address.path
 
@@ -57,6 +58,7 @@ internal object ResourcePool {
                 val key = KEY_PATTERN.find(it.value)?.value ?: it.value
                 keyPath = keyPath.replace(it.value, key)
             }
+            address = address.copy(matchKey = matches)
         }
 
         fun match(source: String) = matches.toRegex().matches(source)

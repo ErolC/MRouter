@@ -91,7 +91,7 @@ object MRouter {
     }
 
     internal fun setPlatformRes(key: String, value: Any) {
-        rootRouter.setPlatformRes(key, value)
+        ResourcePool.addPlatformRes(key to value)
     }
 
     internal fun createEntry(

@@ -54,7 +54,7 @@ fun <I, O> Register.platformRoute(
     contract: ActivityResultContract<I, O>,
     block: (ActivityRouter<I, O>) -> Unit
 ) {
-    addPlatformResource(address, PlatformRoute(ActivityRouterDispatcher(contract, block)))
+    addPlatformResource(address, PlatformRoute(ActivityRouterLauncher(contract, block)))
 }
 
 fun <I, O> ActivityRouter<I, O>.route(input: I, block: Bundle.(O) -> Unit = {}) {

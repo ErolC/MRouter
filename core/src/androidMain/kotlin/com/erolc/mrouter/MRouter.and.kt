@@ -7,4 +7,4 @@ import com.erolc.mrouter.route.router.WindowRouter
 /**
  * context
  */
-internal fun WindowRouter.getContext() = ResourcePool.getPlatformRes()[Constants.CONTEXT] as Context
+internal fun getContext() = ResourcePool.getPlatformRes()[Constants.CONTEXT] as Context

@@ -15,16 +15,12 @@ fun Lifecycle.addEventObserver(body: (source: LifecycleOwner, event: Lifecycle.E
 expect class LifecycleOwnerDelegate :
     LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
     HasDefaultViewModelProviderFactory {
-    constructor(
-        viewModelStoreProvider: MRouterViewModelStoreProvider? = null,
-        hostLifecycleState: Lifecycle.State,
-        args: Bundle? = null
-    )
+    constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?)
 
     override val lifecycle: Lifecycle
 
     val id: String
-    val arguments:Bundle?
+    val arguments: Bundle?
 
     val savedStateHandle: SavedStateHandle
 
@@ -42,3 +38,9 @@ expect class LifecycleOwnerDelegate :
 
     fun handleLifecycleEvent(event: Lifecycle.Event)
 }
+
+expect fun createLifecycleOwnerDelegate(
+    viewModelStoreProvider: MRouterViewModelStoreProvider?,
+    hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+    immutableArgs: Bundle?
+):LifecycleOwnerDelegate

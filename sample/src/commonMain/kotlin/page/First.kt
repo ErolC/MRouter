@@ -25,11 +25,11 @@ fun First() = Page {
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             backPressed()
         }) {
-            Text("回退:${this@Page.name}")
+            Text("回退:${args.getString("key","default")}")
         }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             val key = args.getString("key")
-            var route = "second"
+            var route = "first?key=success"
             if (key == "arg") route += "?value=routeData"
             route(route) {
                 argBuild {

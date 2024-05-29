@@ -73,10 +73,14 @@ class WindowEntry(
                 }) {
                     val stack by pageRouter.getPlayStack()
                         .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
+
                     if (stack.size == 1) {
-                        stack.first().transformState.value = ResumeState
-                        stack.first().shareTransform(null)
-                    } else stack.last().shareTransform(stack.first())
+                        stack.first().run {
+                            transformState.value = ResumeState
+                            shareTransform(null)
+                        }
+                    } else
+                        stack.last().shareTransform(stack.first())
 
                     stack.forEach { it.Content(Modifier) }
 

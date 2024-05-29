@@ -3,7 +3,6 @@ package com.erolc.mrouter.route
 import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.Constants.PATH_ARGS
 import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.platform.isMobile

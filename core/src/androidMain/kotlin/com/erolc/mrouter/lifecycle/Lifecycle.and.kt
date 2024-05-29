@@ -9,20 +9,21 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.erolc.mrouter.platform.loge
 import java.util.UUID.randomUUID
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
 
-actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
+actual class LifecycleOwnerDelegate private constructor(
+    private val viewModelStoreProvider: MRouterViewModelStoreProvider?,
+    private var hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+    private val immutableArgs: Bundle?,
+    actual val id: String = randomUUID().toString()
+) : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
     HasDefaultViewModelProviderFactory {
     private val _lifecycle = LifecycleRegistry(this)
 
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
-    actual val id: String = randomUUID().toString()
-    private var hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
-    private var immutableArgs: Bundle? = null
 
     actual val arguments: Bundle?
         get() = if (immutableArgs == null) {
@@ -33,22 +34,30 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
 
     private var savedStateRegistryAttached = false
 
-    private var viewModelStoreProvider: MRouterViewModelStoreProvider? = null
-
     private val savedState: Bundle? = null
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    actual constructor(
-        viewModelStoreProvider: MRouterViewModelStoreProvider?,
-        hostLifecycleState: Lifecycle.State,
-        args: Bundle?
-    ) : super() {
-        this.viewModelStoreProvider = viewModelStoreProvider
-        this.hostLifecycleState = hostLifecycleState
-        this.immutableArgs = args
+    actual constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?) : this(
+        delegate.viewModelStoreProvider,
+        delegate.hostLifecycleState,
+        arguments,
+        delegate.id
+    )
+
+    companion object {
+        fun create(
+            viewModelStoreProvider: MRouterViewModelStoreProvider?,
+            hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+            immutableArgs: Bundle?,
+            id: String = randomUUID().toString()
+        ) = LifecycleOwnerDelegate(
+            viewModelStoreProvider,
+            hostLifecycleState,
+            immutableArgs,
+            id
+        )
     }
 
-    actual fun resetLifecycle(){
+    actual fun resetLifecycle() {
         hostLifecycleState = Lifecycle.State.INITIALIZED
         maxLifecycle = Lifecycle.State.INITIALIZED
     }
@@ -165,3 +174,10 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
 
     private class SavedStateViewModel(val handle: SavedStateHandle) : ViewModel()
 }
+
+actual fun createLifecycleOwnerDelegate(
+    viewModelStoreProvider: MRouterViewModelStoreProvider?,
+    hostLifecycleState: Lifecycle.State,
+    immutableArgs: Bundle?
+): LifecycleOwnerDelegate =
+    LifecycleOwnerDelegate.create(viewModelStoreProvider,hostLifecycleState,immutableArgs)

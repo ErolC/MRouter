@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.MRouter
@@ -47,6 +48,12 @@ class PageEntry internal constructor(
             (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
         }
     }
+
+    internal constructor(entry: PageEntry, argument: Bundle) : this(
+        entry.scope,
+        entry.address,
+        LifecycleOwnerDelegate(entry.lifecycleOwnerDelegate, argument)
+    )
 
     val id get() = lifecycleOwnerDelegate.id
 
@@ -224,7 +231,7 @@ class PageEntry internal constructor(
         updateMaxState(Lifecycle.State.DESTROYED)
     }
 
-    internal open fun handleHostLifecycleEvent(event: Lifecycle.Event) {
+    internal fun handleHostLifecycleEvent(event: Lifecycle.Event) {
         lifecycleOwnerDelegate.handleLifecycleEvent(event)
     }
 }

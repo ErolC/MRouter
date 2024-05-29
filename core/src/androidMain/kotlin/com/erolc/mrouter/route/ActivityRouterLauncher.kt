@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Activity路由器的分配器
  */
-class ActivityRouterDispatcher<I, O>(
+class ActivityRouterLauncher<I, O>(
     private val contract: ActivityResultContract<I, O>,
     private val block: (ActivityRouter<I, O>) -> Unit
 ) {

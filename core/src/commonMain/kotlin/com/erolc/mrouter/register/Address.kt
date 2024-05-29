@@ -13,5 +13,8 @@ import com.erolc.mrouter.model.PageConfig
 data class Address(
     val path: String,
     val config: PageConfig = emptyConfig,
-    val content: @Composable () -> Unit = {}
-)
+    val content: @Composable () -> Unit = {},
+    val matchKey:String = path
+){
+    fun match(address:String) = matchKey.toRegex().matches(address)
+}

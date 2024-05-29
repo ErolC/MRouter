@@ -2,8 +2,12 @@ package com.erolc.mrouter.backstack
 
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
+import com.erolc.mrouter.model.LaunchMode
+import com.erolc.mrouter.model.Route
+import com.erolc.mrouter.model.SingleTop
 import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.router.Router
@@ -106,9 +110,22 @@ open class BackStack(val name: String) {
     }
 
     /**
-     * 找对应的条目
+     * 找对应的条目，并不严谨，该方法不可用于寻找pageEntry
      */
-    fun findEntry(address: String) = _backstack.value.find { it.address.path == address }
+    fun findEntry(address: String): StackEntry? =
+        _backstack.value.find { it.address.match(address) }
+
+    fun updateEntry(route: Route, launchMode: LaunchMode): Unit? {
+        return if (launchMode == SingleTop) {
+            findTopEntry()?.let {
+                if (it.address.match(route.address)) {
+                    _backstack.value -= it
+                    val newEntry = PageEntry(it as PageEntry, route.args)
+                    _backstack.value += newEntry
+                } else null
+            }
+        } else null
+    }
 
     /**
      * 找顶部的条目

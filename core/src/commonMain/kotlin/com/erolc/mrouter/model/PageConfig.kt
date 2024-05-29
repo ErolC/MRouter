@@ -12,4 +12,4 @@ sealed interface LaunchMode
 data object Standard:LaunchMode
 data object SingleTop:LaunchMode
 
-data object SingleTask:LaunchMode
+//data object SingleTask:LaunchMode

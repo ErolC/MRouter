@@ -41,7 +41,7 @@ fun ListDetail() = Page {
             LazyColumn(modifier = Modifier.background(Color.Blue)) {
                 items(items) {
                     Text(it.name, Modifier.fillMaxWidth().clickable {
-                        route("local:detail?id=${it.id}L")
+                        route("local:detail/${it.id}L")
                     })
                 }
             }
@@ -49,7 +49,7 @@ fun ListDetail() = Page {
         }
         val panelState = rememberPanelState()
         PanelHost(
-            startRoute = "detail",
+            startRoute = "detail/0",
             modifier = Modifier.fillMaxSize().weight(2f),
             panelState = panelState,
             onPanelChange = {

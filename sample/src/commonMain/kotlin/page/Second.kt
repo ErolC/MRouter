@@ -24,12 +24,13 @@ fun Second() = Page {
 
         Column(modifier = Modifier.fillMaxHeight().align(Alignment.Center)) {
             Button(onClick = {
-                if (args.getBoolean("return")) {
-                    setResult {
-                        putString("back_data", "secondBackData")
-                    }
-                }
-                backPressed()
+//                if (args.getBoolean("return")) {
+//                    setResult {
+//                        putString("back_data", "secondBackData")
+//                    }
+//                }
+//                backPressed()
+                route("first")
             }) {
                 Text("回退${if (args.getBoolean("return")) "并回传数据" else ""}")
             }

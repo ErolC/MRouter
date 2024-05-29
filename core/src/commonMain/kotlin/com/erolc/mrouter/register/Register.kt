@@ -66,9 +66,9 @@ class Register internal constructor() {
     private val platformRes = mutableMapOf<String, Any>()
 
     init {
-        addAddress(Address(path = Constants.DEFAULT_PAGE, config = emptyConfig) {
+        addAddress(Address(path = Constants.DEFAULT_PAGE, config = emptyConfig, {
             Box(Modifier.background(Color.White).fillMaxSize())
-        })
+        }))
     }
 
     /**

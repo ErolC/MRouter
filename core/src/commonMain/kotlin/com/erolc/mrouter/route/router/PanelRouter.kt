@@ -18,7 +18,6 @@ import com.erolc.mrouter.route.ResourcePool.findAddress
 class PanelRouter(
     override val parentRouter: PageRouter,
     panelEntry: PanelEntry? = null,
-    private val hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
 ) : Router {
     //这里是当前界面中各个面板的回退栈
     private val panelStacks = mutableMapOf<String, PanelEntry>()
@@ -30,24 +29,17 @@ class PanelRouter(
 
     }
 
-    private fun createEntry(route: Route, address: Address): PanelEntry {
+    private fun createEntry(route: Route): PanelEntry {
         return PanelEntry(Address(route.panelOptions?.key!!)).also {
-            it.newPageRouter(route, address)
+            it.newPageRouter(route)
         }
     }
 
-    private fun PanelEntry.newPageRouter(route: Route, address: Address) {
+    private fun PanelEntry.newPageRouter(route: Route) {
         pageRouter = PageRouter("panelBackStack", this@PanelRouter).also { pageRouter ->
             pageRouter.setLifecycleOwner(this@PanelRouter.parentRouter.lifecycleOwner!!)
-            pageRouter.hostLifecycleState = hostLifecycleState
-            pageRouter.route(
-                MRouter.createEntry(
-                    route,
-                    address,
-                    PanelRouter(pageRouter, hostLifecycleState = hostLifecycleState),
-                    hostLifecycleState = hostLifecycleState
-                )
-            )
+            pageRouter.route(route)
+
         }
     }
 
@@ -56,8 +48,8 @@ class PanelRouter(
     }
 
     private fun initPanel(route: Route) {
-        findAddress(route)?.let { (it, route) ->
-            panelStacks[route.panelOptions?.key!!] = createEntry(route, it)
+        findAddress(route)?.let { (_, route) ->
+            panelStacks[route.panelOptions?.key!!] = createEntry(route)
         } ?: loge("MRouter", "not yet register the address：${route.address}")
     }
 
@@ -69,21 +61,7 @@ class PanelRouter(
         val panel = panelStacks[route.panelOptions?.key]
         if (panel == null || !showPanels.contains(route.panelOptions?.key))
             parentRouter.dispatchRoute(route)
-        else panel.pageRouter.let {
-            findAddress(route)?.let { (address, route) ->
-                it.route(
-                    MRouter.createEntry(
-                        route,
-                        address,
-                        PanelRouter(it),
-                        route.panelOptions?.clearTask == true, hostLifecycleState
-                    )
-                )
-            }
-                ?: MRouter.routeToPlatform(route)
-                ?: loge("MRouter", "not yet register the address：${route.address}")
-        }
-
+        else panel.pageRouter.route(route)
     }
 
 

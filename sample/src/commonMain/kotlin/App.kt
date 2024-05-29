@@ -17,7 +17,7 @@ fun App(typography: Typography = MaterialTheme.typography) {
             page("search") { Search() }
             page("anim") { Anim() }
             page("list") { ListDetail() }
-            page("detail") { Detail() }
+            page("detail/{id}") { Detail() }
             page("gesture") { Gesture() }
             page("target") { Target() }
             page("search1") { Search1() }

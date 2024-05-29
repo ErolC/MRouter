@@ -3,55 +3,59 @@ package com.erolc.mrouter.lifecycle
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.core.bundle.Bundle
-import androidx.core.bundle.bundleOf
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.platform.randomUUID
 import kotlin.reflect.KClass
 
 
-actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
+actual class LifecycleOwnerDelegate private constructor(
+    private val viewModelStoreProvider: MRouterViewModelStoreProvider?,
+    private var hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+    private val immutableArgs: Bundle?,
+    actual val id: String = randomUUID()
+) : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
     HasDefaultViewModelProviderFactory {
     private val _lifecycle = LifecycleRegistry(this)
 
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
-    actual val id: String = randomUUID()
-    private var hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
 
     private var savedStateRegistryAttached = false
-
-    private var viewModelStoreProvider: MRouterViewModelStoreProvider? = null
 
 
     private val savedState: Bundle? = null
 
-    private var immutableArgs: Bundle? = null
 
     actual val arguments: Bundle?
         get() = if (immutableArgs == null) {
             null
         } else {
-            Bundle(immutableArgs?: bundleOf())
+            Bundle(immutableArgs)
         }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    actual constructor(
-        viewModelStoreProvider: MRouterViewModelStoreProvider?,
-        hostLifecycleState: Lifecycle.State,args:Bundle?
-    ) : super() {
-        this.viewModelStoreProvider = viewModelStoreProvider
-        this.hostLifecycleState = hostLifecycleState
-        immutableArgs = args
-    }
+    actual constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?) : this(
+        delegate.viewModelStoreProvider,
+        delegate.hostLifecycleState,
+        arguments,
+        delegate.id
+    )
 
-    actual fun resetLifecycle(){
-        hostLifecycleState = Lifecycle.State.INITIALIZED
-        maxLifecycle = Lifecycle.State.INITIALIZED
+    companion object {
+        fun create(
+            viewModelStoreProvider: MRouterViewModelStoreProvider?,
+            hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
+            immutableArgs: Bundle?,
+            id: String = randomUUID()
+        ) = LifecycleOwnerDelegate(
+            viewModelStoreProvider,
+            hostLifecycleState,
+            immutableArgs,
+            id
+        )
     }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -67,12 +71,20 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
+
+    actual fun resetLifecycle() {
+        hostLifecycleState = Lifecycle.State.INITIALIZED
+        maxLifecycle = Lifecycle.State.INITIALIZED
+    }
+
     actual fun handleLifecycleEvent(event: Lifecycle.Event) {
         hostLifecycleState = event.targetState
         updateState()
     }
 
-    override val defaultViewModelProviderFactory:ViewModelProvider.Factory = DefaultViewModelProviderFactory()
+    override val defaultViewModelProviderFactory = object : ViewModelProvider.Factory {
+
+    }
 
     override val defaultViewModelCreationExtras: CreationExtras
         get() {
@@ -85,6 +97,7 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
             return extras
         }
     override val viewModelStore: ViewModelStore
+
         get() {
             check(savedStateRegistryAttached) {
                 "You cannot access the PageEntry's ViewModels until it is added to " +
@@ -153,3 +166,10 @@ actual class LifecycleOwnerDelegate : LifecycleOwner, ViewModelStoreOwner, Saved
 
     private class SavedStateViewModel(val handle: SavedStateHandle) : ViewModel()
 }
+
+actual fun createLifecycleOwnerDelegate(
+    viewModelStoreProvider: MRouterViewModelStoreProvider?,
+    hostLifecycleState: Lifecycle.State,
+    immutableArgs: Bundle?
+): LifecycleOwnerDelegate =
+    LifecycleOwnerDelegate.create(viewModelStoreProvider,hostLifecycleState,immutableArgs)

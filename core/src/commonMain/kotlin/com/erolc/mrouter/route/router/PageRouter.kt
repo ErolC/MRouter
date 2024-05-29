@@ -9,15 +9,16 @@ import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
+import com.erolc.mrouter.model.LaunchMode
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.SingleTop
+import com.erolc.mrouter.model.Standard
 import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.ResourcePool.findAddress
 import kotlinx.coroutines.flow.map
 
 /**
  * 页面路由器的实现，将管理一个载体（window/panel）内所有的页面
- * @param addresses 存放着该库所注册的所有地址。
  * @param parentRouter 父路由，对于window内的页面路由来说，[WindowRouter]将是其父路由，同理，对于panel内的页面路由来说[PanelRouter]将是其父路由。
  * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [PanelRouter]
  */
@@ -27,24 +28,23 @@ open class PageRouter(
 ) : Router {
     internal val backStack = BackStack(name)
 
-    internal fun route(stackEntry: StackEntry) {
-        stackEntry as PageEntry
-        when (stackEntry.address.config.launchMode) {
-            is SingleTop -> backStack.findTopEntry()?.let {
-                if (it.address.path == stackEntry.address.path) {
-                    it as PageEntry
-                    it.scope.run {
-                        args.value = stackEntry.scope.args.value
-                        router = stackEntry.scope.router
-                        onResult = stackEntry.scope.onResult
-                        name = stackEntry.scope.name
-                    }
-                } else null
-            } ?: backStack.addEntry(stackEntry.apply { create() })
-
-            else -> backStack.addEntry(stackEntry.apply { create() })
-        }
+    private fun StackEntry.updateEntry(
+        stackEntry: PageEntry,
+        launchMode: LaunchMode = SingleTop
+    ): Unit? {
+        val oldEntry = this as PageEntry
+        return if (oldEntry.address.path == stackEntry.address.path) {
+            oldEntry.scope.run {
+                args.value = stackEntry.scope.args.value
+                if (launchMode == SingleTop)
+                    onResult = stackEntry.scope.onResult
+                router = stackEntry.scope.router
+                name = stackEntry.scope.name
+            }
+        } else null
     }
+
+    private fun addEntry(stackEntry: PageEntry) = backStack.addEntry(stackEntry.apply { create() })
 
     internal var lifecycleOwner: LifecycleOwner? = null
 
@@ -96,14 +96,17 @@ open class PageRouter(
     }
 
     internal fun route(route: Route) {
-        findAddress(route)?.let {(it,route)->
+        findAddress(route)?.let { (it, route) ->
             val entry = MRouter.createEntry(
                 route,
                 it,
-                PanelRouter(this, hostLifecycleState = hostLifecycleState),
+                PanelRouter(this),
                 hostLifecycleState = hostLifecycleState
             )
-            route(entry)
+            when (val launchMode = it.config.launchMode) {
+                Standard -> addEntry(entry)
+                else -> backStack.updateEntry(route, launchMode) ?: addEntry(entry)
+            }
         } ?: MRouter.routeToPlatform(route) ?: loge(
             "MRouter",
             "not yet register the address：${route.address}"
