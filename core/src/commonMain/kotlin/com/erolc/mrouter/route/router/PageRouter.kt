@@ -8,8 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.backstack.entry.PageEntry
-import com.erolc.mrouter.backstack.entry.StackEntry
-import com.erolc.mrouter.model.LaunchMode
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.SingleTop
 import com.erolc.mrouter.model.Standard
@@ -22,28 +20,11 @@ import kotlinx.coroutines.flow.map
  * @param parentRouter 父路由，对于window内的页面路由来说，[WindowRouter]将是其父路由，同理，对于panel内的页面路由来说[PanelRouter]将是其父路由。
  * 路由器的关系将是[WindowRouter] -> [PageRouter] -> [PanelRouter] -> [PageRouter] -> [PanelRouter]
  */
-open class PageRouter(
+class PageRouter(
     name: String,
     override val parentRouter: Router
 ) : Router {
     internal val backStack = BackStack(name)
-
-    private fun StackEntry.updateEntry(
-        stackEntry: PageEntry,
-        launchMode: LaunchMode = SingleTop
-    ): Unit? {
-        val oldEntry = this as PageEntry
-        return if (oldEntry.address.path == stackEntry.address.path) {
-            oldEntry.scope.run {
-                args.value = stackEntry.scope.args.value
-                if (launchMode == SingleTop)
-                    onResult = stackEntry.scope.onResult
-                router = stackEntry.scope.router
-                name = stackEntry.scope.name
-            }
-        } else null
-    }
-
     private fun addEntry(stackEntry: PageEntry) = backStack.addEntry(stackEntry.apply { create() })
 
     internal var lifecycleOwner: LifecycleOwner? = null

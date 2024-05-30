@@ -40,7 +40,7 @@ fun ActivityRouter<Intent, ActivityResult>.route(
  * 注册路由到activity的部分
  * ```
  * MRouter.registerBuilder {
- *             routeActivity("test_activity", ActivityResultContracts.StartActivityForResult()) {
+ *             platformRoute("test_activity", ActivityResultContracts.StartActivityForResult()) {
  *                 it.route(TestActivity::class)
  *             }
  *         }

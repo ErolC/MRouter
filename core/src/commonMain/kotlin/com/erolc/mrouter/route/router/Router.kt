@@ -2,11 +2,10 @@ package com.erolc.mrouter.route.router
 
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.backstack.entry.PageEntry
-import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.MRouterViewModelStoreProvider
 import com.erolc.mrouter.lifecycle.createLifecycleOwnerDelegate
 import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.route.ReplaceFlag
 import com.erolc.mrouter.scope.getScope
 
@@ -15,11 +14,6 @@ import com.erolc.mrouter.scope.getScope
  */
 interface Router {
     val parentRouter: Router?
-
-    /**
-     * 路由的起点
-     */
-    fun router(route: Route) {}
 
     /**
      * 分配路由
@@ -39,7 +33,7 @@ interface Router {
 internal fun createPageEntry(
     route: Route,
     address: Address,
-    router: Router,
+    router: PanelRouter,
     isReplace: Boolean = false,
     hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
     viewModelStoreProvider: MRouterViewModelStoreProvider?

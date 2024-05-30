@@ -2,6 +2,7 @@ package com.erolc.mrouter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.ComposeUIViewController
+import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.router.WindowRouter
 import platform.UIKit.UIViewController
 
@@ -12,7 +13,7 @@ fun MRouter.setRootViewController(rootViewController: UIViewController) {
     setPlatformRes("root_vc", rootViewController)
 }
 
-internal fun WindowRouter.getRootViewController() = platformRes["root_vc"] as? UIViewController
+internal fun getRootViewController() = ResourcePool.getPlatformRes()["root_vc"] as? UIViewController
 
 
 fun mRouterComposeUIViewController(content: @Composable () -> Unit) =

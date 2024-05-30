@@ -2,7 +2,7 @@ package com.erolc.mrouter.backstack.entry
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 
 
 /**

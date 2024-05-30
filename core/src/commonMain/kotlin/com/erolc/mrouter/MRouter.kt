@@ -12,11 +12,12 @@ import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.platform.route
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.register.Register
 import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.RouteBuilder
 import com.erolc.mrouter.route.routeBuild
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.router.createPageEntry
@@ -97,7 +98,7 @@ object MRouter {
     internal fun createEntry(
         route: Route,
         address: Address,
-        router: Router,
+        router: PanelRouter,
         isReplace: Boolean = false,
         hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED
     ) = createPageEntry(route, address, router, isReplace, hostLifecycleState, viewModel)

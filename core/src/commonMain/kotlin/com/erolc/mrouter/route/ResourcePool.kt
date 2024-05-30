@@ -2,7 +2,7 @@ package com.erolc.mrouter.route
 
 import androidx.core.bundle.Bundle
 import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 
 /**
  * 资源池，用于存放地址资源以及平台资源

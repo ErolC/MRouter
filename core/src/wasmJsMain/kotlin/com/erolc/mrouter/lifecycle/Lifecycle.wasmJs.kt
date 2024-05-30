@@ -112,14 +112,14 @@ actual class LifecycleOwnerDelegate private constructor(
                 "You must call setViewModelStore() on your MRouter before " +
                         "accessing the ViewModelStore of a route register."
             }
-            return viewModelStoreProvider!!.getViewModelStore(id)
+            return viewModelStoreProvider.getViewModelStore(id)
         }
 
     @get:MainThread
     actual val savedStateHandle: SavedStateHandle by lazy {
         check(savedStateRegistryAttached) {
             "You cannot access the PageEntry's SavedStateHandle until it is added to " +
-                    "the Routehost's back stack (i.e., the Lifecycle of the PageEntry " +
+                    "the RouteHost's back stack (i.e., the Lifecycle of the PageEntry " +
                     "reaches the CREATED state)."
         }
         check(lifecycle.currentState != Lifecycle.State.DESTROYED) {

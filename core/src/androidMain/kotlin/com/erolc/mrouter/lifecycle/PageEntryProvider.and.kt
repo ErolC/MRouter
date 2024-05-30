@@ -61,7 +61,7 @@ internal class PageEntryIdViewModel(handle: SavedStateHandle) : ViewModel() {
     // we create our own id for each back stack entry to support multiple entries of the same
     // destination. this id will be restored by SavedStateHandle
     val id: String = handle.get<String>(IdKey) ?: randomUUID().toString().also {
-        handle.set(IdKey, it)
+        handle[IdKey] = it
     }
 
     lateinit var saveableStateHolderRef: WeakReference<SaveableStateHolder>

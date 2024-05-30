@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.erolc.mrouter.lifecycle.addEventObserver
 import com.erolc.mrouter.route.*
+import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.EnterState
@@ -23,15 +24,14 @@ val LocalPageScope = compositionLocalOf { default }
 /**
  * 页面范围（域），代表页面作用的区域，可以获取该页面相关的一些数据以及操作，比如获取页面的变换状态，监听页面生命周期等。
  */
-open class PageScope {
+class PageScope {
     internal val args = mutableStateOf(bundleOf())
     var name: String = ""
         internal set
     private val result = bundleOf()
     internal var windowId = ""
 
-    //这个router存在两种可能，一种是panelRouter，一种是EmptyRouter
-    internal lateinit var router: Router
+    internal lateinit var router: PanelRouter
     var pageCache = PageCache()
         private set
     internal var onResult: RouteResult = {}
@@ -55,12 +55,12 @@ open class PageScope {
      * @param route 路由，其标准格式是: `[key/]`address`[?argKey=arg&argKey1=arg1]`
      * 其中只有address是必须的，?后面接的是参数；而key是[GroupScope]的某个layout
      */
-    open fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
+    fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
         val routeObj = RouteBuilder(windowId).apply(builder).build(route).let {
             it.copy(windowOptions = it.windowOptions.copy(currentWindowId = windowId))
         }
         routeObj.args.putAll(preArgs)
-        router.router(routeObj)
+        router.dispatchRoute(routeObj)
     }
 
     fun setArgs(body: Bundle.() -> Unit) {

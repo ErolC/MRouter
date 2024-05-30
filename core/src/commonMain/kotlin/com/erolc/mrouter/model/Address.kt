@@ -1,8 +1,7 @@
-package com.erolc.mrouter.register
+package com.erolc.mrouter.model
 
 import androidx.compose.runtime.Composable
-import com.erolc.mrouter.Constants
-import com.erolc.mrouter.model.PageConfig
+import com.erolc.mrouter.register.emptyConfig
 
 /**
  * 地址，用于定义一个页面地址

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
@@ -17,8 +15,7 @@ import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.LocalOwnersProvider
 import com.erolc.mrouter.lifecycle.addEventObserver
-import com.erolc.mrouter.platform.loge
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
 import com.erolc.mrouter.route.RouteFlag
@@ -45,7 +42,7 @@ class PageEntry internal constructor(
         lifecycleOwnerDelegate.lifecycle.addEventObserver { _, event ->
             if (event < Lifecycle.Event.ON_START)
                 return@addEventObserver
-            (scope.router as? PanelRouter)?.handleLifecycleEvent(event)
+            scope.router.handleLifecycleEvent(event)
         }
     }
 
@@ -79,7 +76,7 @@ class PageEntry internal constructor(
     private val isIntercept get() = scope.isIntercept
 
     // 管理当前页面的路由器
-    private val pageRouter: PageRouter get() = scope.router.parentRouter as PageRouter
+    private val pageRouter: PageRouter get() = scope.router.parentRouter
 
     @Composable
     override fun Content(modifier: Modifier) {

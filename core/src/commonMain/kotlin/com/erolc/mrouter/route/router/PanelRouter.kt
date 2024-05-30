@@ -2,10 +2,9 @@ package com.erolc.mrouter.route.router
 
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
-import com.erolc.mrouter.register.Address
+import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.backstack.BackStack
 import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.platform.loge
@@ -52,11 +51,6 @@ class PanelRouter(
             panelStacks[route.panelOptions?.key!!] = createEntry(route)
         } ?: loge("MRouter", "not yet register the address：${route.address}")
     }
-
-    override fun router(route: Route) {
-        dispatchRoute(route)
-    }
-
     override fun dispatchRoute(route: Route) {
         val panel = panelStacks[route.panelOptions?.key]
         if (panel == null || !showPanels.contains(route.panelOptions?.key))

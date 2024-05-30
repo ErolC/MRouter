@@ -18,7 +18,7 @@ internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModel
 
     private val viewModelStores = mutableMapOf<String, ViewModelStore>()
     actual fun clear(entryId: String) {
-        // Clear and remove the NavGraph's ViewModelStore
+        // Clear and remove the entry's ViewModelStore
         val viewModelStore = viewModelStores.remove(entryId)
         viewModelStore?.clear()
     }
