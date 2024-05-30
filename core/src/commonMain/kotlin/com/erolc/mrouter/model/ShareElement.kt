@@ -1,11 +1,11 @@
 package com.erolc.mrouter.model
 
-import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Rect
+import com.erolc.mrouter.route.shareelement.ShareTransition
 import com.erolc.mrouter.utils.Init
 import com.erolc.mrouter.utils.ShareState
 import kotlinx.coroutines.flow.StateFlow
@@ -16,14 +16,15 @@ import kotlinx.coroutines.flow.StateFlow
  * @param content 元素的compose
  * @param address 元素所在地址
  * @param position element的位置和尺寸
+ * @param styles 样式列表，给共享元素内的元素使用
  */
 @Immutable
 data class ShareElement internal constructor(
     val key: String,
-    val content: @Composable Transition<ShareState>.() -> Unit,
+    val content: @Composable ShareTransition.() -> Unit,
     val address: String,
     val position: StateFlow<Rect>,
-
+    val styles:List<Any>,
     ) {
     val tag get() = "${address}_$key"
 

@@ -1,6 +1,5 @@
 package page
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.shareelement.Element
@@ -28,23 +28,13 @@ fun Share() = Page {
             Text("back")
         }
         Spacer(Modifier.weight(1f))
-        Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp)) {
-            val corner by animateDp(transitionSpec = { tween(1000) }) {
-//                loge("tag", "Share__::$it")
-//                it.run { 100.dp between 10.dp }
-                when (it) {
-                    PreShare -> 10.dp
-                    ExitShare -> 100.dp
-                    else -> 10.dp
-                }
-            }
+        Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp), listOf(10.dp)) {
+            val corner by getStyle(0, animate = animateDp())
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
                 Box(modifier = Modifier.fillMaxSize().clickable {
                     route("search") {
                         transform = share(
-                            "search",
-                            animationSpec = tween(1000),
-                            shareAnimationSpec = tween(1000)
+                            "search"
                         )
                     }
                 }) {
@@ -68,7 +58,6 @@ fun Share() = Page {
     }
 }
 
-
 @Composable
 fun Search() = Page {
     loge("tag", "Search")
@@ -82,16 +71,14 @@ fun Search() = Page {
                 backPressed()
             })
         }
-        Element("search", Modifier.padding(20.dp).weight(4f).height(50.dp)) {
-            val corner by updateDP(10.dp, 100.dp, 30.dp)
+        Element("search", Modifier.padding(20.dp).weight(4f).height(50.dp), listOf(100.dp)) {
+            val corner by getStyle<Dp>(0) with animateDp()
             Surface(shape = RoundedCornerShape(corner), color = Color.Blue) {
                 Box(Modifier.fillMaxSize().clickable {
 //                    backPressed()
                     route("search1") {
                         transform = share(
-                            "search",
-                            animationSpec = tween(1000),
-                            shareAnimationSpec = tween(1000)
+                            "search"
                         )
                     }
                 }) {
@@ -118,12 +105,8 @@ fun Search1() = Page {
                 backPressed()
             })
         }
-        Element("search", Modifier.padding(100.dp).weight(4f).height(50.dp)) {
-            val corner by animateDp(transitionSpec = { tween(1000) }) {
-//                it.run { 100.dp between 10.dp }
-                it.run { 30f with 100f }.dp
-
-            }
+        Element("search", Modifier.padding(100.dp).weight(4f).height(50.dp), listOf(30.dp)) {
+            val corner by getStyle<Dp>(0) with animateDp()
 
             Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
                 Box(Modifier.fillMaxSize().clickable {

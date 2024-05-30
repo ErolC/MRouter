@@ -1,7 +1,10 @@
 package com.erolc.mrouter.route.shareelement
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
@@ -227,7 +230,10 @@ internal fun ShareElementController.Overlay() {
             groups.forEach {
                 it.start._state.value = state
                 it.end._state.value = state
-                transition.ShareElement(it, shareAnimationSpec)
+                val shareTransition = remember(it) {
+                    ShareTransition(it.start, it.end, it.start, transition)
+                }
+                transition.ShareElement(it, shareTransition, shareAnimationSpec)
             }
         }
     }
@@ -263,6 +269,7 @@ internal fun ShareElementController.Overlay() {
 @Composable
 private fun Transition<ShareState>.ShareElement(
     group: ShareElementGroup,
+    shareTransition: ShareTransition,
     shareAnimationSpec: FiniteAnimationSpec<Rect>
 ) {
     val density = LocalDensity.current
@@ -275,11 +282,12 @@ private fun Transition<ShareState>.ShareElement(
             else -> endPosition
         }
     }
-    var target by remember { mutableStateOf<ShareElement?>(group.start) }
+    var target by remember { mutableStateOf(group.start) }
     if (currentState is BeforeStart)
         target = group.start
     else if (currentState is BeforeEnd || currentState is Sharing)
         target = group.end
+    shareTransition.targetElement = target
     Box(
         Modifier
             .size(with(density) { rect.size.toDpSize() })
@@ -287,6 +295,8 @@ private fun Transition<ShareState>.ShareElement(
                 IntOffset(rect.topLeft.x.roundToInt(), rect.topLeft.y.roundToInt())
             }
     ) {
-        target?.content?.invoke(this@ShareElement)
+        target.content.invoke(shareTransition)
+        //共享过程中，禁止点击
+        Box(modifier = Modifier.fillMaxSize().clickable(MutableInteractionSource(), null) {})
     }
 }

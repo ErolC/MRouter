@@ -1,6 +1,5 @@
 package com.erolc.mrouter.route.shareelement
 
-import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,18 +25,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * 共享元素
  * @param key 共享元素的标识
  * @param modifier 共享元素的修饰符
+ * @param styles 样式列表，给共享元素内的元素使用
  * @param content 共享元素的界面
- *
  */
 @Composable
-fun Element(key: String, modifier: Modifier = Modifier, content: @Composable Transition<ShareState>.() -> Unit) {
+fun Element(
+    key: String,
+    modifier: Modifier = Modifier,
+    styles: List<Any> = listOf(),
+    content: @Composable ShareTransition.() -> Unit
+) {
     val scope = LocalPageScope.current
     val position = remember { MutableStateFlow(Rect(Offset.Zero, Size.Zero)) }
     val element = remember(key, scope) {
-        val element = ShareElement(key, content, scope.name, position)
+        val element = ShareElement(key, content, scope.name, position, styles)
         ShareElementController.addElement(element)
         element
     }
+
     LifecycleObserver { _, event ->
         if (event == Lifecycle.Event.ON_DESTROY) {
             ShareElementController.removeElement(element.tag)
@@ -48,6 +53,10 @@ fun Element(key: String, modifier: Modifier = Modifier, content: @Composable Tra
         val bound = it.boundsInRoot()
         if (!bound.isEmpty) position.value = bound
     }) {
-        if (state == Init || state == BeforeStart || state == BeforeEnd) content(updateTransition(state))
+        val transition = updateTransition(state)
+        val shareTransition = remember(element) {
+            ShareTransition(element, element, element, transition)
+        }
+        if (state == Init || state == BeforeStart || state == BeforeEnd) content(shareTransition)
     }
 }
