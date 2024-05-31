@@ -1,9 +1,11 @@
 package com.erolc.mrouter.route.shareelement
 
+import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.AnimationVector
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -21,11 +23,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.colorspace.ColorSpace
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.erolc.mrouter.model.ShareElement
-import com.erolc.mrouter.utils.ShareAnim
 import com.erolc.mrouter.utils.ShareAnimBody
 import com.erolc.mrouter.utils.ShareState
 import com.erolc.mrouter.utils.Sharing
@@ -39,8 +43,8 @@ import com.erolc.mrouter.utils.updateValue
  * @param transition 共享元素过渡状态
  */
 class ShareTransition(
-    internal val startElement: ShareElement,
-    internal val endElement: ShareElement,
+    private val startElement: ShareElement,
+    private val endElement: ShareElement,
     internal var targetElement: ShareElement,
     internal val transition: Transition<ShareState>
 ) {
@@ -88,9 +92,7 @@ class ShareTransition(
         }
     }
 
-    /**
-     * dp的动画过程，用于[getStyle]方法
-     */
+
     @Composable
     fun animateDp(
         transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Dp> = {
@@ -101,6 +103,25 @@ class ShareTransition(
             transition.animateDp(transitionSpec) { this(it) }
         }
     }
+
+    /**
+     * @param targetColorSpace 目标颜色的色域
+     */
+    @Composable
+    fun animateColor(
+        targetColorSpace: ColorSpace = Color.White.colorSpace,
+        transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<Color> = {
+            spring()
+        }
+    ) = animateValue(Color.VectorConverter(targetColorSpace), transitionSpec)
+
+    @Composable
+    fun animateDpOffset(
+        transitionSpec: @Composable Transition.Segment<ShareState>.() -> FiniteAnimationSpec<DpOffset> = {
+            spring()
+        }
+    ) = animateValue(DpOffset.VectorConverter, transitionSpec)
+
 
     @Composable
     fun animateFloat(

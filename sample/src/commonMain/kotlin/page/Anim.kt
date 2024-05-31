@@ -1,6 +1,8 @@
 package page
 
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateInt
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -15,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.rememberArgs
@@ -91,10 +94,10 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
     val args = rememberArgs()
     //页面元素如果希望在页面过程中也有动画的表现，可以使用该方法获得转换过程，
     val transition = rememberTransformTransition()
-    val padding by transition.animateDp {
+    val padding by transition.animateInt {
         when (it) {
-            EnterState -> 200.dp// 页面进入
-            else -> it.between(30f, 300f).dp
+            EnterState -> 200// 页面进入
+            else -> it.between(30f, 300f).toInt()
         }
     }
     Column {
@@ -102,14 +105,16 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
         when (gesture) {
             "normal" -> Text(
                 "可将手指或鼠标通过拖拽页面的最左侧实现右滑动后退",
-                modifier = Modifier.padding(top = padding)
+                modifier = Modifier
             )
 
             "modal" -> Text("可将手指或鼠标通过拖拽页面的最上方实现向下滑动后退",
-                modifier = Modifier.padding(top = padding))
+                modifier = Modifier)
             else -> Button(onClick = {
                 backPressed()
-            }, modifier = Modifier.padding(top = padding)) {
+            }, modifier = Modifier.offset {
+                IntOffset(0,padding)
+            }) {
                 Text("back")
             }
         }

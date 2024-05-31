@@ -24,19 +24,18 @@ fun Second() = Page {
 
         Column(modifier = Modifier.fillMaxHeight().align(Alignment.Center)) {
             Button(onClick = {
-//                if (args.getBoolean("return")) {
-//                    setResult {
-//                        putString("back_data", "secondBackData")
-//                    }
-//                }
-//                backPressed()
-                route("first")
+                if (args.getBoolean("return")) {
+                    setResult {
+                        putString("back_data", "secondBackData")
+                    }
+                }
+                backPressed()
             }) {
                 Text("回退${if (args.getBoolean("return")) "并回传数据" else ""}")
             }
 
-            val value = args.getString("value","")
-            val value1 = args.getString("value1","")
+            val value = args.getString("value", "")
+            val value1 = args.getString("value1", "")
             if (value.isNotEmpty() && value1.isNotEmpty())
                 Text("这是由First页面传递而来的值：$value $value1")
 

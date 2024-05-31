@@ -1,5 +1,6 @@
 package page
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,14 +29,17 @@ fun Share() = Page {
             Text("back")
         }
         Spacer(Modifier.weight(1f))
-        Element("search", Modifier.padding(10.dp).weight(3f).height(50.dp), listOf(10.dp)) {
+        Element(
+            "search",
+            Modifier.padding(10.dp).weight(3f).height(50.dp),
+            listOf(10.dp, Color.Blue)
+        ) {
             val corner by getStyle(0, animate = animateDp())
-            Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
+            val color by getStyle(1, animate = animateColor())
+            Surface(shape = RoundedCornerShape(corner), color = color) {
                 Box(modifier = Modifier.fillMaxSize().clickable {
                     route("search") {
-                        transform = share(
-                            "search"
-                        )
+                        transform = share("search")
                     }
                 }) {
                     Text("search", Modifier.align(Alignment.CenterStart))
@@ -71,9 +75,14 @@ fun Search() = Page {
                 backPressed()
             })
         }
-        Element("search", Modifier.padding(20.dp).weight(4f).height(50.dp), listOf(100.dp)) {
+        Element(
+            "search",
+            Modifier.padding(20.dp).weight(4f).height(50.dp),
+            listOf(100.dp, Color.Red)
+        ) {
             val corner by getStyle<Dp>(0) with animateDp()
-            Surface(shape = RoundedCornerShape(corner), color = Color.Blue) {
+            val color by getStyle(1, animate = animateColor())
+            Surface(shape = RoundedCornerShape(corner), color = color) {
                 Box(Modifier.fillMaxSize().clickable {
 //                    backPressed()
                     route("search1") {

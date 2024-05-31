@@ -73,6 +73,6 @@ internal object ResourcePool {
 
     private const val PATTERN_CHAR = ".+*?^$()\\[]"
 
-    private val FILL_IN_PATTERN = Regex("\\{[^/]+}")
-    private val KEY_PATTERN = Regex("\\w+")
+    private val FILL_IN_PATTERN get() = Regex("\\{[^/]+\\}")
+    private val KEY_PATTERN get() =  Regex("\\w+")
 }
