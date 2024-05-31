@@ -9,11 +9,18 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import com.erolc.mrouter.lifecycle.viewModel
 import com.erolc.mrouter.platform.log
 import com.erolc.mrouter.scope.LifecycleObserver
 import com.erolc.mrouter.scope.rememberArgs
 import com.erolc.mrouter.utils.Page
 import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.utils.rememberInPage
+
+class FirstViewModel : ViewModel() {
+    val result = mutableStateOf("")
+}
 
 @Composable
 fun First() = Page {
@@ -21,12 +28,11 @@ fun First() = Page {
         loge("tag", "first - $event")
     }
     val args = rememberArgs()
+    val viewModel = viewModel(::FirstViewModel)
+
+    var result by remember { viewModel.result }
+
     Column(modifier = Modifier.fillMaxWidth().safeContentPadding()) {
-        val result = rememberSaveable {
-            val data = mutableStateOf("")
-            log("tag", "init_________:$data")
-            data
-        }
         Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             backPressed()
         }) {
@@ -50,8 +56,7 @@ fun First() = Page {
 
                 if (key == "return") {
                     onResult {
-                        result.value = it.getString("back_data", "")
-                        loge("tag", "result:${result.value} ::${result}")
+                        result = it.getString("back_data", "")
                     }
                 }
             }
@@ -62,7 +67,8 @@ fun First() = Page {
         loge("tag", "first__:$result")
         val key = args.getString("key")
         if (key == "return") {
-            Text("这是由Second页面回传的数据：${result.value}")
+            Text("这是由Second页面回传的数据：${result}")
         }
+
     }
 }

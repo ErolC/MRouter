@@ -7,12 +7,12 @@ import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 class ResultCallBack(private val lifecycleOwnerDelegate: LifecycleOwnerDelegate) {
     var onResult: RouteResult? = null
 
-    fun onCallResult() {
+    internal fun onCallResult() {
         val result = lifecycleOwnerDelegate.savedStateHandle.get<Bundle>("result")
         onResult?.invoke(result ?: bundleOf())
     }
 
-    fun setResult(bundle: Bundle) {
-        lifecycleOwnerDelegate.savedStateHandle.set("result", bundle)
+    internal fun setResult(bundle: Bundle) {
+        lifecycleOwnerDelegate.savedStateHandle["result"] = bundle
     }
 }

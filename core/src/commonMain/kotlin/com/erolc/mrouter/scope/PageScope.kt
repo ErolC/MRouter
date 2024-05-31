@@ -82,6 +82,13 @@ class PageScope {
     }
 
     /**
+     * 设置[backPressed]时返回给上一个页面的数据
+     */
+    fun setResult(bundle: Bundle) {
+        result.putAll(bundle)
+    }
+
+    /**
      * 后退
      */
     fun backPressed() {
