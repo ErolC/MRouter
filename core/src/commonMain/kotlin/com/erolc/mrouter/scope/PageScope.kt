@@ -7,7 +7,9 @@ import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.addEventObserver
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.router.PanelRouter
 import com.erolc.mrouter.route.router.Router
@@ -28,13 +30,13 @@ class PageScope {
     internal val args = mutableStateOf(bundleOf())
     var name: String = ""
         internal set
-    private val result = bundleOf()
+    internal val result = bundleOf()
     internal var windowId = ""
 
     internal lateinit var router: PanelRouter
-    var pageCache = PageCache()
-        private set
-    internal var onResult: RouteResult = {}
+    internal var callBack: ResultCallBack? = null
+    lateinit var pageCache: PageCache
+        internal set
     private val interceptors = mutableListOf<BackInterceptor>()
     internal val transformState = mutableStateOf<TransformState>(EnterState)
     internal var transformTransition: Transition<TransformState>? = null
@@ -43,23 +45,28 @@ class PageScope {
 
     internal fun initLifeCycle(lifecycle: Lifecycle) {
         lifecycle.addEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY) {
-                onResult(result)
-                interceptors.clear()
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> interceptors.clear()
+                Lifecycle.Event.ON_RESUME -> {
+                    callBack?.onCallResult()
+                }
+
+                else -> {}
             }
         }
     }
 
     /**
      * 路由到下一个页面
-     * @param route 路由，其标准格式是: `[key/]`address`[?argKey=arg&argKey1=arg1]`
-     * 其中只有address是必须的，?后面接的是参数；而key是[GroupScope]的某个layout
+     * @param route 路由，其标准格式是: `[key|]`address`[?argKey=arg&argKey1=arg1]`
+     * 其中只有address是必须的，?后面接的是参数；而key是[PanelEntry]的某个layout
      */
     fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
-        val routeObj = RouteBuilder(windowId).apply(builder).build(route).let {
+        val routeObj = RouteBuilder(windowId).apply(builder).build(callBack, route).let {
             it.copy(windowOptions = it.windowOptions.copy(currentWindowId = windowId))
         }
         routeObj.args.putAll(preArgs)
+
         router.dispatchRoute(routeObj)
     }
 
@@ -113,9 +120,9 @@ fun rememberArgs(): Bundle {
  * 添加生命周期事件监听
  */
 @Composable
-fun LifecycleObserver(body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
+fun LifecycleObserver(key: String = "lifecycle", body: (LifecycleOwner, Lifecycle.Event) -> Unit) {
     val owner = LocalLifecycleOwner.current
-    rememberPrivateInPage("lifecycle") {
+    rememberPrivateInPage(key) {
         owner.lifecycle.addEventObserver(body)
     }
 }

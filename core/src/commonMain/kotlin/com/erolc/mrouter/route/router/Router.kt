@@ -45,8 +45,8 @@ internal fun createPageEntry(
     ).apply {
         flag = if (isReplace) route.flag + ReplaceFlag else route.flag
         transform.value = route.transform
+        callBack = route.callback
         scope.run {
-            onResult = route.onResult
             this.router = router
             name = route.address
         }

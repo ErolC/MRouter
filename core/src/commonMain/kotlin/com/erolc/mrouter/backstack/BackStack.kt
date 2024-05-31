@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 open class BackStack(val name: String) {
 
-    private val _backstack: MutableStateFlow<List<StackEntry>> = MutableStateFlow(listOf())
+    internal val _backstack: MutableStateFlow<List<StackEntry>> = MutableStateFlow(listOf())
 
     val backStack: StateFlow<List<StackEntry>> = _backstack.asStateFlow()
 

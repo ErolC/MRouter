@@ -13,6 +13,7 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.WindowOptions
 import com.erolc.mrouter.platform.route
 import com.erolc.mrouter.model.Address
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.register.Register
 import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.RouteBuilder
@@ -106,7 +107,7 @@ object MRouter {
     internal fun routeToPlatform(route: Route): Unit? {
         val platformRoute = ResourcePool.getPlatformRes()[route.address] as? PlatformRoute
         return platformRoute?.let {
-            rootRouter.route(it, route.args, route.onResult)
+            rootRouter.route(it, route.args, route.callback)
         }
     }
 }

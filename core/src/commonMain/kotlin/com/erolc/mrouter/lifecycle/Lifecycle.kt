@@ -28,8 +28,6 @@ expect class LifecycleOwnerDelegate :
     @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     var maxLifecycle: Lifecycle.State
 
-    fun resetLifecycle()
-
     /**
      * Update the state to be the lower of the two constraints:
      */

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import com.erolc.mrouter.platform.loge
 import java.util.UUID.randomUUID
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -21,7 +22,7 @@ actual class LifecycleOwnerDelegate private constructor(
     actual val id: String = randomUUID().toString()
 ) : LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
     HasDefaultViewModelProviderFactory {
-    private val _lifecycle = LifecycleRegistry(this)
+    private var _lifecycle = LifecycleRegistry(this)
 
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
@@ -41,7 +42,14 @@ actual class LifecycleOwnerDelegate private constructor(
         delegate.hostLifecycleState,
         arguments,
         delegate.id
-    )
+    ) {
+        hostLifecycleState =
+            if (delegate.hostLifecycleState == Lifecycle.State.DESTROYED)
+                Lifecycle.State.INITIALIZED
+            else
+                delegate.hostLifecycleState
+        maxLifecycle = delegate.maxLifecycle
+    }
 
     companion object {
         fun create(
@@ -55,11 +63,6 @@ actual class LifecycleOwnerDelegate private constructor(
             immutableArgs,
             id
         )
-    }
-
-    actual fun resetLifecycle() {
-        hostLifecycleState = Lifecycle.State.INITIALIZED
-        maxLifecycle = Lifecycle.State.INITIALIZED
     }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -120,7 +123,7 @@ actual class LifecycleOwnerDelegate private constructor(
                 "You must call setViewModelStore() on your MRouter before " +
                         "accessing the ViewModelStore of a route register."
             }
-            return viewModelStoreProvider!!.getViewModelStore(id)
+            return viewModelStoreProvider.getViewModelStore(id)
         }
 
     @get:MainThread
@@ -180,4 +183,4 @@ actual fun createLifecycleOwnerDelegate(
     hostLifecycleState: Lifecycle.State,
     immutableArgs: Bundle?
 ): LifecycleOwnerDelegate =
-    LifecycleOwnerDelegate.create(viewModelStoreProvider,hostLifecycleState,immutableArgs)
+    LifecycleOwnerDelegate.create(viewModelStoreProvider, hostLifecycleState, immutableArgs)

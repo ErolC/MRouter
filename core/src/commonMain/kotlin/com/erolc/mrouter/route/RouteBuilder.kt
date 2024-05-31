@@ -14,13 +14,13 @@ import com.erolc.mrouter.window.WindowOptionsBuilder
  * 构建路由的方法
  */
 fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Route =
-    RouteBuilder().apply(optionsBuilder).build(route)
+    RouteBuilder().apply(optionsBuilder).build(route = route)
 
 /**
  * 路由构建类，用于构建路由到下一个页面所需的一些数据：参数，回调等。
  */
 class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
-    private var onResult: (Bundle) -> Unit = {}
+    internal var onResult: (Bundle) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(currentWindowId, "")
 
     private val args = bundleOf()
@@ -72,7 +72,7 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
         panelOptions = PanelOptions(key, clearTask)
     }
 
-    internal fun build(route: String): Route {
+    internal fun build(callBack: ResultCallBack? = null,route: String): Route {
         val index = route.indexOfFirst { it == '?' }
         var query:String? = null
         val path = if (index == -1)
@@ -91,13 +91,14 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
             }.toBundle()
             args.putAll(pathArgs)
         }
+        callBack?.onResult = onResult
         return Route(
             route,
             address,
             flag,
             windowOptions,
             args,
-            onResult,
+            callBack,
             panelOptions ?: key?.let { PanelOptions(it, false) },
 
             transform

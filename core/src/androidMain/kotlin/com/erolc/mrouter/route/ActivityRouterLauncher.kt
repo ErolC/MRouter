@@ -15,7 +15,7 @@ class ActivityRouterLauncher<I, O>(
     private val router = ActivityRouter<I, O>()
     private val nextLocalRequestCode = AtomicInteger()
 
-    fun launch(activity: ComponentActivity, args: Bundle, onResult: (Bundle) -> Unit) {
+    fun launch(activity: ComponentActivity, args: Bundle, callBack: ResultCallBack?) {
         router.context = activity
         router.args = args
         block(router)
@@ -24,7 +24,7 @@ class ActivityRouterLauncher<I, O>(
             contract
         ) {
             router.onResult?.invoke(it)
-            onResult(router.result)
+            callBack?.setResult(router.result)
         }
         router.input?.let { launcher.launch(it) }
     }

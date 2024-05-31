@@ -42,7 +42,10 @@ actual class LifecycleOwnerDelegate private constructor(
         delegate.hostLifecycleState,
         arguments,
         delegate.id
-    )
+    ){
+        hostLifecycleState = delegate.hostLifecycleState
+        maxLifecycle = delegate.maxLifecycle
+    }
 
     companion object {
         fun create(
@@ -71,11 +74,6 @@ actual class LifecycleOwnerDelegate private constructor(
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
-
-    actual fun resetLifecycle() {
-        hostLifecycleState = Lifecycle.State.INITIALIZED
-        maxLifecycle = Lifecycle.State.INITIALIZED
-    }
 
     actual fun handleLifecycleEvent(event: Lifecycle.Event) {
         hostLifecycleState = event.targetState

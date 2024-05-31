@@ -1,6 +1,7 @@
 package com.erolc.mrouter.route.router
 
 import androidx.annotation.RestrictTo
+import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleObserver
@@ -106,10 +107,10 @@ class PageRouter(
     internal fun getBackStack() = backStack.backStack
 
     fun dispatchOnAddressChange() {
-        backStack.backStack.value.forEach {
-            (it as PageEntry).lifecycleOwnerDelegate.resetLifecycle()
+        backStack._backstack.value = backStack.backStack.value.map {
+            it as PageEntry
+            PageEntry(it,it.lifecycleOwnerDelegate.arguments?: bundleOf())
         }
-
     }
 
 

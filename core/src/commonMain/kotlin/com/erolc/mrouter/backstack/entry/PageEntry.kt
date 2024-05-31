@@ -16,9 +16,12 @@ import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.LocalOwnersProvider
 import com.erolc.mrouter.lifecycle.addEventObserver
 import com.erolc.mrouter.model.Address
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.ExitImpl
 import com.erolc.mrouter.route.NormalFlag
+import com.erolc.mrouter.route.ResultCallBack
 import com.erolc.mrouter.route.RouteFlag
+import com.erolc.mrouter.route.RouteResult
 import com.erolc.mrouter.route.SysBackPressed
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.router.PanelRouter
@@ -26,6 +29,7 @@ import com.erolc.mrouter.route.router.WindowRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
@@ -36,9 +40,15 @@ class PageEntry internal constructor(
     override val address: Address,
     internal val lifecycleOwnerDelegate: LifecycleOwnerDelegate
 ) : StackEntry {
+
+    private val pageCache = PageCache()
+    internal var callBack: ResultCallBack? = null
+
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
+        scope.pageCache = pageCache
         scope.args.value = lifecycleOwnerDelegate.arguments ?: bundleOf()
+        scope.callBack = ResultCallBack(lifecycleOwnerDelegate)
         lifecycleOwnerDelegate.lifecycle.addEventObserver { _, event ->
             if (event < Lifecycle.Event.ON_START)
                 return@addEventObserver
@@ -50,7 +60,9 @@ class PageEntry internal constructor(
         entry.scope,
         entry.address,
         LifecycleOwnerDelegate(entry.lifecycleOwnerDelegate, argument)
-    )
+    ) {
+        callBack = entry.callBack
+    }
 
     val id get() = lifecycleOwnerDelegate.id
 
@@ -162,7 +174,6 @@ class PageEntry internal constructor(
         pageRouter.backStack.execute(flag)
         flag = NormalFlag
         isUpdateTransform = false
-        updateMaxState(Lifecycle.State.RESUMED)
     }
 
     /**
@@ -174,6 +185,7 @@ class PageEntry internal constructor(
             transformState
         }
         updateState(this, state)
+
 //        LocalHostScope.current.panelState?.pageState?.value = state
         entry?.also {
             val transformState = when (state) {
@@ -187,7 +199,8 @@ class PageEntry internal constructor(
                 StopState -> StopState
                 else -> StoppingState(1 - state.progress)
             }
-            updateState(entry, transformState)
+            if (transformState == StopState)
+                updateState(entry, transformState)
             entry.transformState.value = transformState
         }
     }
@@ -225,6 +238,7 @@ class PageEntry internal constructor(
 
     override fun destroy() {
         isDestroy.value = true
+        callBack?.setResult(scope.result)
         updateMaxState(Lifecycle.State.DESTROYED)
     }
 

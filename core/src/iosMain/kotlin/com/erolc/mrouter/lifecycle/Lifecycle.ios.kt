@@ -39,7 +39,10 @@ actual class LifecycleOwnerDelegate private constructor(
         delegate.hostLifecycleState,
         arguments,
         delegate.id
-    )
+    ){
+        hostLifecycleState = delegate.hostLifecycleState
+        maxLifecycle = delegate.maxLifecycle
+    }
 
     companion object {
         fun create(
