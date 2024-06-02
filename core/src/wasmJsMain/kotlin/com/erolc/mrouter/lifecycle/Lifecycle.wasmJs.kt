@@ -43,7 +43,11 @@ actual class LifecycleOwnerDelegate private constructor(
         arguments,
         delegate.id
     ){
-        hostLifecycleState = delegate.hostLifecycleState
+        hostLifecycleState =
+            if (delegate.hostLifecycleState == Lifecycle.State.DESTROYED)
+                Lifecycle.State.INITIALIZED
+            else
+                delegate.hostLifecycleState
         maxLifecycle = delegate.maxLifecycle
     }
 
