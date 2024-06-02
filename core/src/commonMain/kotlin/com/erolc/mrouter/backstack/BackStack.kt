@@ -1,5 +1,6 @@
 package com.erolc.mrouter.backstack
 
+import androidx.compose.ui.util.fastLastOrNull
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.LaunchMode
@@ -24,7 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 open class BackStack(val name: String) {
 
-    internal val _backstack: MutableStateFlow<List<StackEntry>> = MutableStateFlow(listOf())
+    private val _backstack: MutableStateFlow<List<StackEntry>> = MutableStateFlow(listOf())
 
     val backStack: StateFlow<List<StackEntry>> = _backstack.asStateFlow()
 
@@ -40,6 +41,13 @@ open class BackStack(val name: String) {
      * 给回退栈增加一个元素
      */
     fun addEntry(entry: StackEntry) {
+        if (entry is PageEntry)
+            _backstack.value.takeLast(2).also {
+                if (it.size == 2) {
+                    (it.first() as PageEntry).isFrozen = true
+                }
+            }
+
         _backstack.value += entry
     }
 
@@ -78,6 +86,10 @@ open class BackStack(val name: String) {
 
                 if (isDestroy) destroy()
             }
+            _backstack.value.takeLast(2).also {
+                it.map { (it as? PageEntry)?.isFrozen = false }
+            }
+
             true
         } else false
     }
@@ -131,4 +143,9 @@ open class BackStack(val name: String) {
      * 找顶部的条目
      */
     fun findTopEntry() = _backstack.value.lastOrNull()
+
+    fun updateEntries(oldEntries: List<StackEntry>, newEntries: List<StackEntry>) {
+        _backstack.value -= oldEntries
+        _backstack.value += newEntries
+    }
 }

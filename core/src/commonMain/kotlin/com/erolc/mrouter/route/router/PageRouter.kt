@@ -107,11 +107,12 @@ class PageRouter(
     internal fun getBackStack() = backStack.backStack
 
     fun dispatchOnAddressChange() {
-        backStack._backstack.value = backStack.backStack.value.map {
+        val oldEntries = backStack.backStack.value.takeLast(2)
+        val newEntries = oldEntries.map {
             it as PageEntry
-            PageEntry(it,it.lifecycleOwnerDelegate.arguments?: bundleOf())
+            it.scope.router.dispatchOnAddressChange()
+            PageEntry(it, it.lifecycleOwnerDelegate.arguments ?: bundleOf())
         }
+        backStack.updateEntries(oldEntries,newEntries)
     }
-
-
 }

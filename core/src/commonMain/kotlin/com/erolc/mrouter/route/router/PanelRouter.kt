@@ -36,9 +36,7 @@ class PanelRouter(
 
     private fun PanelEntry.newPageRouter(route: Route) {
         pageRouter = PageRouter("panelBackStack", this@PanelRouter).also { pageRouter ->
-            pageRouter.setLifecycleOwner(this@PanelRouter.parentRouter.lifecycleOwner!!)
             pageRouter.route(route)
-
         }
     }
 
@@ -51,6 +49,7 @@ class PanelRouter(
             panelStacks[route.panelOptions?.key!!] = createEntry(route)
         } ?: loge("MRouter", "not yet register the address：${route.address}")
     }
+
     override fun dispatchRoute(route: Route) {
         val panel = panelStacks[route.panelOptions?.key]
         if (panel == null || !showPanels.contains(route.panelOptions?.key))
@@ -71,10 +70,10 @@ class PanelRouter(
         panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.STARTED)
     }
 
-    internal fun handleLifecycleEvent(event: Lifecycle.Event) {
+    fun dispatchOnAddressChange() {
         panelStacks.forEach { (key, panelEntry) ->
             if (showPanels.contains(key))
-                panelEntry.handleLifecycleEvent(event)
+                panelEntry.dispatchOnAddressChange()
         }
     }
 

@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.route.router.PageRouter
@@ -30,6 +32,12 @@ class PanelEntry(override val address: Address) : StackEntry {
     @Composable
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalHostScope provides hostScope) {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                // Setup the pageRouter with proper owners
+                pageRouter.setLifecycleOwner(lifecycleOwner)
+                onDispose { }
+            }
             Box(modifier.fillMaxSize().onGloballyPositioned {
                 hostScope.size.value = it.boundsInRoot().size
             }) {
@@ -54,16 +62,6 @@ class PanelEntry(override val address: Address) : StackEntry {
         }
     }
 
-    /**
-     * 处理生命周期事件
-     */
-    internal fun handleLifecycleEvent(event: Lifecycle.Event) {
-        pageRouter.backStack.backStack.value.forEach {
-            it as PageEntry
-            it.handleHostLifecycleEvent(event)
-        }
-    }
-
     internal fun maxLifecycle(state: Lifecycle.State) {
         (pageRouter.backStack.backStack.value.lastOrNull() as? PageEntry)?.lifecycleOwnerDelegate?.maxLifecycle =
             state
@@ -72,5 +70,9 @@ class PanelEntry(override val address: Address) : StackEntry {
     override fun destroy() {
         (pageRouter.backStack.findTopEntry() as PageEntry).handleHostLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         pageRouter.backStack.pop()
+    }
+
+    fun dispatchOnAddressChange() {
+        pageRouter.dispatchOnAddressChange()
     }
 }

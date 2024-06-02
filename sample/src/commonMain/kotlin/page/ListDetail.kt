@@ -49,7 +49,7 @@ fun ListDetail() = Page {
         }
         val panelState = rememberPanelState()
         PanelHost(
-            startRoute = "detail/0",
+            startRoute = "detail/0L",
             modifier = Modifier.fillMaxSize().weight(2f),
             panelState = panelState,
             onPanelChange = {
@@ -63,8 +63,5 @@ fun Detail() = Page {
     val args = rememberArgs()
     val id = args.getLong("id")
     Text("detail:${id}", modifier = Modifier.clickable { backPressed() })
-    LifecycleObserver { lifecycleOwner, event ->
-        loge("tag", "id:$id owner:$lifecycleOwner event:$event")
-    }
 }
 

@@ -44,16 +44,12 @@ class PageEntry internal constructor(
     private val pageCache = PageCache()
     internal var callBack: ResultCallBack? = null
 
+
     init {
         scope.initLifeCycle(lifecycleOwnerDelegate.lifecycle)
         scope.pageCache = pageCache
         scope.args.value = lifecycleOwnerDelegate.arguments ?: bundleOf()
         scope.callBack = ResultCallBack(lifecycleOwnerDelegate)
-        lifecycleOwnerDelegate.lifecycle.addEventObserver { _, event ->
-            if (event < Lifecycle.Event.ON_START)
-                return@addEventObserver
-            scope.router.handleLifecycleEvent(event)
-        }
     }
 
     internal constructor(entry: PageEntry, argument: Bundle) : this(
@@ -62,9 +58,15 @@ class PageEntry internal constructor(
         LifecycleOwnerDelegate(entry.lifecycleOwnerDelegate, argument)
     ) {
         callBack = entry.callBack
+        isUpdateTransform = entry.isUpdateTransform
+        transform.value = entry.transform.value
+        flag = entry.flag
     }
 
     val id get() = lifecycleOwnerDelegate.id
+
+    //是否已冻结,冻结的entry的lifecycle是不会发生变化的
+    internal var isFrozen = false
 
     //transform中的prev在下一个页面打开的时候才会被赋值
     internal val transform = mutableStateOf(Transform.None)
@@ -230,7 +232,8 @@ class PageEntry internal constructor(
     }
 
     private fun updateMaxState(state: Lifecycle.State) {
-        lifecycleOwnerDelegate.maxLifecycle = state
+        if (!isFrozen)
+            lifecycleOwnerDelegate.maxLifecycle = state
     }
 
     internal fun create() = updateMaxState(Lifecycle.State.CREATED)
@@ -243,6 +246,7 @@ class PageEntry internal constructor(
     }
 
     internal fun handleHostLifecycleEvent(event: Lifecycle.Event) {
-        lifecycleOwnerDelegate.handleLifecycleEvent(event)
+        if (!isFrozen)
+            lifecycleOwnerDelegate.handleLifecycleEvent(event)
     }
 }
