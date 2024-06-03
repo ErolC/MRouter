@@ -16,10 +16,14 @@ import androidx.compose.animation.core.animateOffset
 import androidx.compose.animation.core.animateRect
 import androidx.compose.animation.core.animateSize
 import androidx.compose.animation.core.animateValue
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -30,6 +34,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.erolc.mrouter.model.ShareElement
+import com.erolc.mrouter.utils.BeforeEnd
+import com.erolc.mrouter.utils.BeforeStart
+import com.erolc.mrouter.utils.ExitShare
+import com.erolc.mrouter.utils.PreShare
 import com.erolc.mrouter.utils.ShareAnimBody
 import com.erolc.mrouter.utils.ShareState
 import com.erolc.mrouter.utils.Sharing
@@ -68,6 +76,56 @@ class ShareTransition(
         animate: ShareAnimBody<T>,
     ) = styleCore(index, sharing, animate)
 
+    fun <T> getValue(index: Int): T = targetElement.styles[index] as T
+
+    @Composable
+    fun getTextStyle(
+        index: Int,
+        onChangeText: (String) -> Unit
+    ): State<Float> {
+        val current = targetElement.styles.getOrNull(index) as? String
+        require(current != null) {
+            "请检查${targetElement.tag}的样式列表，无法在位置${index}找到值"
+        }
+        val result = remember { mutableStateOf(1f) }
+        if (startElement == targetElement && endElement == targetElement) {
+            return result
+        }
+        val isStart = startElement == targetElement
+        var isSharing by remember { mutableStateOf(false) }
+        val (pre, next) = if (isStart)
+            current to endElement.styles.getOrNull(index) as? String
+        else
+            startElement.styles.getOrNull(index) as? String to current
+        val alpha by updateValue(1f, 1f, 1f, sharing = { _, _ ->
+            isSharing = true
+            if (progress < 0.5f) {
+                onChangeText(if (isStart) next ?: current else pre ?: current)
+                1 - progress * 2
+            } else {
+                onChangeText(current)
+                progress * 2 - 1
+            }
+        }, anim = { func ->
+            transition.animateFloat({
+                keyframes {
+                    0f.atFraction(0.5f)
+                    1f.atFraction(1f)
+                }
+            }) {
+                func(it)
+            }
+        })
+        if (!isSharing) {
+            onChangeText(
+                if (result.value < alpha) if (isStart) next ?: current else pre
+                    ?: current else current
+            )
+        }
+        result.value = alpha
+        return result
+    }
+
 
     @Composable
     internal fun <T> styleCore(
@@ -82,16 +140,26 @@ class ShareTransition(
         if (startElement == targetElement && endElement == targetElement) {
             return mutableStateOf(current)
         }
-        val isStart = startElement == targetElement
-        val (pre, next) = if (isStart)
-            current to endElement.styles.getOrNull(index) as? T
-        else
-            startElement.styles.getOrNull(index) as? T to current
-        return updateValue(pre ?: current, current, next ?: current, sharing) {
-            anim(it)
+        val preValue = (startElement.styles.getOrNull(index) as? T) ?: current
+        val nextValue = (endElement.styles.getOrNull(index) as? T) ?: current
+        var pre by remember { mutableStateOf(preValue) }
+        var exit by remember { mutableStateOf(current) }
+        return anim { it: ShareState ->
+            if (it is BeforeStart) {
+                pre = preValue
+                exit = nextValue
+            } else if (it is BeforeEnd) {
+                pre = preValue
+                exit = current
+            }
+            when (it) {
+                PreShare -> pre
+                ExitShare -> exit
+                is Sharing -> it.sharing(preValue, current)
+                else -> current
+            }
         }
     }
-
 
     @Composable
     fun animateDp(

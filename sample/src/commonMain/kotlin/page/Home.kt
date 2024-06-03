@@ -26,29 +26,21 @@ import com.erolc.mrouter.route.transform.share
 
 data class Future(val name: String, val value: String)
 
-class TestViewModel():ViewModel(){
-
-    val state = mutableStateOf(true)
-}
-
 @Composable
 fun Home() = Page {
     LifecycleObserver { _, event ->
-        loge("tag","home $event")
+        loge("tag", "home $event")
     }
-    val vm = viewModel(::TestViewModel)
     val list = remember {
         listOf(
-            Future("普通的路由跳转", "normal"),
-            Future("带参的路由跳转", "arg"),
-            Future("带返回值的路由跳转", "return"),
+            Future("路由跳转", "normal"),
             Future("局部路由", "panel"),
             Future("列表详情", "list"),
             Future("共享元素", "share"),
             Future("动画", "anim"),
             Future("手势", "gesture"),
-            if(isDesktop) Future("多窗口","window") else Future("平台界面","platform")
-        ).filterNotNull()
+            if (isDesktop) Future("多窗口", "window") else Future("平台界面", "platform")
+        )
     }
     Row(modifier = Modifier.fillMaxWidth()) {
         LazyColumn(
@@ -57,22 +49,23 @@ fun Home() = Page {
         ) {
             items(list) {
                 Column(Modifier.fillMaxWidth()) {
-                    Button(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp), onClick = {
-                        when (it.value) {
-                            "normal" -> route("first")
-                            "arg" -> route("first?key=arg")
-                            "return" -> route("first?key=return")
-                            "panel" -> route("panel")
-                            "share" -> route("share")
-                            "anim" -> route("anim")
-                            "list" -> route("list")
-                            "gesture" -> route("gesture")
-                            "window" ->route("first"){
-                                window("secondWindow","这是第二个窗口")
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                            .padding(top = 10.dp), onClick = {
+                            when (it.value) {
+                                "normal" -> route("sample/first")
+                                "panel" -> route("panel")
+                                "share" -> route("share")
+                                "anim" -> route("anim")
+                                "list" -> route("list")
+                                "gesture" -> route("gesture")
+                                "window" -> route("sample/first") {
+                                    window("secondWindow", "这是第二个窗口")
+                                }
+
+                                "platform" -> route("platform")
                             }
-                            "platform"->route("platform")
-                        }
-                    }) {
+                        }) {
                         Text(it.name)
                     }
 

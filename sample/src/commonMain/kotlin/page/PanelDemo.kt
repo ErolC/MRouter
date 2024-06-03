@@ -23,19 +23,24 @@ fun PanelDemo() = Page {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(onClick = {
-                route("local:first") {
+                route("local:sample/first") {
 //                    panel("local", false)
                 }
             }) {
                 Text("first")
             }
             Button(onClick = {
-                route("local:second") {
+                route("local:sample/second") {
                     panel("local", true)
                 }
             }) {
                 Text("second")
 
+            }
+            Button(onClick = {
+               backPressed()
+            }) {
+                Text("back")
             }
         }
         PanelHost(modifier = Modifier.weight(2f), onPanelChange = {

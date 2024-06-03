@@ -259,7 +259,7 @@ internal fun ShareElementController.Overlay() {
         if (transition.currentState == resetState && transition.targetState == resetState) {
             shareState.value = Init
             groups.forEach {
-                it.start._state.value = if (resetState == ExitShare) resetState else Init
+                it.start._state.value = Init
                 it.end._state.value = Init
             }
         }

@@ -29,4 +29,5 @@ dependencyResolutionManagement {
 }
 
 include(":sample")
+include(":sample-module")
 include(":core")

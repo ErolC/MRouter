@@ -56,7 +56,7 @@ fun none() = buildTransform {
  * 共享元素，当需要使用共享元素动画时，需要使用该transform
  * @param keys 指定参与该次页面切换的共享控件
  * @param animationSpec 页面转换动画使用
- * @param transitionSpec 共享元素变换使用,控制共享元素尺寸的变化
+ * @param shareAnimationSpec 共享元素变换使用,控制共享元素尺寸的变化
  * @param wrap 变换包装类，可以在这里处理变换过程中两个页面的一些变化，可以通过该类给共享元素变换加上手势退出，可参考[NormalShareTransformWrap]
  * 需要注意的是，如果给[shareAnimationSpec]或[animationSpec]设置[tween]那么请给另一个也加上，并且给予相同的时间，如此两者的进度才是一致的。
  */

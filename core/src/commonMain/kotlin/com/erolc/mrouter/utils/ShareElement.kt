@@ -1,27 +1,18 @@
 package com.erolc.mrouter.utils
 
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateInt
-import androidx.compose.animation.core.animateIntOffset
-import androidx.compose.animation.core.animateIntSize
-import androidx.compose.animation.core.animateOffset
-import androidx.compose.animation.core.animateRect
-import androidx.compose.animation.core.animateSize
-import androidx.compose.animation.core.spring
+
+import androidx.compose.animation.VectorConverter
+import androidx.compose.animation.core.AnimationVector4D
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.shareelement.ShareElementController
-import com.erolc.mrouter.route.shareelement.ShareTransition
 import com.erolc.mrouter.scope.LocalPageScope
 
 typealias UpdateElementListener = (Array<out String>) -> Unit
@@ -161,8 +152,6 @@ fun <T> updateValue(
 }
 
 
-
-
 internal fun Sharing.between(pre: Int, current: Int) =
     run { pre - (pre - current) * progress }.toInt()
 
@@ -184,4 +173,18 @@ fun sharing(sharing: Sharing, pre: Size, current: Size) = sharing.run {
 
 fun sharing(sharing: Sharing, pre: IntSize, current: IntSize) = sharing.run {
     IntSize(between(pre.width, current.width), between(pre.height, current.height))
+}
+
+fun sharing(sharing: Sharing, pre: Color, current: Color) = sharing.run {
+    val converter = Color.VectorConverter(pre.colorSpace)
+    val vector = converter.convertToVector
+    val pre4D = vector.invoke(pre)
+    val current4D = vector.invoke(current)
+    val target = AnimationVector4D(
+        current4D.v1 between pre4D.v1,
+        current4D.v2 between pre4D.v2,
+        current4D.v3 between pre4D.v3,
+        current4D.v4 between pre4D.v4
+    )
+    converter.convertFromVector.invoke(target)
 }

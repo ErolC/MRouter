@@ -1,6 +1,5 @@
 package page
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,10 +9,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.shareelement.Element
 import com.erolc.mrouter.route.transform.share
 import com.erolc.mrouter.utils.*
@@ -21,7 +20,6 @@ import com.erolc.mrouter.utils.*
 
 @Composable
 fun Share() = Page {
-    loge("tag", "Share")
     Row(Modifier.fillMaxSize()) {
         Button(onClick = {
             backPressed()
@@ -42,21 +40,10 @@ fun Share() = Page {
                         transform = share("search")
                     }
                 }) {
-                    Text("search", Modifier.align(Alignment.CenterStart))
+                    Text("共享控件", Modifier.align(Alignment.CenterStart))
                 }
             }
         }
-        var showLabel by rememberInPage("showLabel") {
-            mutableStateOf(false)
-        }
-        onUpdateElement {
-            loge("tag", "ddddd")
-            showLabel = true
-        }
-        if (showLabel)
-            Element("label", modifier = Modifier.weight(1f).height(20.dp)) {
-                Text("text")
-            }
         Spacer(Modifier.weight(1f))
 
     }
@@ -64,36 +51,45 @@ fun Share() = Page {
 
 @Composable
 fun Search() = Page {
-    loge("tag", "Search")
-//    EventObserver { lifecycleOwner, event ->
-//        logi("tag","$lifecycleOwner $event")
-//    }
     Row(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
-        Element("label", modifier = Modifier.weight(1f).height(20.dp)) {
-            Text("text", Modifier.clickable {
-                backPressed()
-            })
+        Button(onClick = {
+            backPressed()
+        }) {
+            Text("back")
         }
         Element(
             "search",
             Modifier.padding(20.dp).weight(4f).height(50.dp),
-            listOf(100.dp, Color.Red)
+            listOf(100.dp, Color.Red, "共享控件")
         ) {
+            var text by remember { mutableStateOf(getValue<String>(2)) }
             val corner by getStyle<Dp>(0) with animateDp()
-            val color by getStyle(1, animate = animateColor())
+            val color by getStyle(1, sharing = ::sharing, animate = animateColor())
+            val alpha by getTextStyle(2) {
+                text = it
+            }
             Surface(shape = RoundedCornerShape(corner), color = color) {
                 Box(Modifier.fillMaxSize().clickable {
-//                    backPressed()
                     route("search1") {
                         transform = share(
                             "search"
                         )
                     }
                 }) {
-                    Text("search", Modifier.align(Alignment.CenterStart))
+                    Text(text, Modifier.align(Alignment.CenterStart).alpha(alpha))
                 }
             }
+        }
+
+        Element("label", modifier = Modifier.weight(1f).height(20.dp)) {
+            Text("second", Modifier.clickable {
+                route("search1") {
+                    transform = share(
+                        "search", "label"
+                    )
+                }
+            })
         }
         Spacer(Modifier.weight(1f))
     }
@@ -102,26 +98,30 @@ fun Search() = Page {
 
 @Composable
 fun Search1() = Page {
-    loge("tag", "Search1")
-//    EventObserver { lifecycleOwner, event ->
-//        logi("tag","$lifecycleOwner $event")
-//    }
     Row(Modifier.fillMaxSize()) {
         Spacer(Modifier.weight(1f))
         Element("label", modifier = Modifier.weight(1f).height(20.dp)) {
-            Text("text", Modifier.clickable {
+            Text("second", Modifier.clickable {
                 updateElement("label")
-                backPressed()
             })
         }
-        Element("search", Modifier.padding(100.dp).weight(4f).height(50.dp), listOf(30.dp)) {
+        Element(
+            "search",
+            Modifier.padding(100.dp).weight(4f).height(50.dp),
+            listOf(30.dp, Color.Gray, "测试文本")
+        ) {
+            var text by remember { mutableStateOf(getValue<String>(2)) }
             val corner by getStyle<Dp>(0) with animateDp()
+            val color by getStyle(1, sharing = ::sharing, animate = animateColor())
 
-            Surface(shape = RoundedCornerShape(corner), color = Color.Gray) {
+            val alpha by getTextStyle(2) {
+                text = it
+            }
+            Surface(shape = RoundedCornerShape(corner), color = color) {
                 Box(Modifier.fillMaxSize().clickable {
                     backPressed()
                 }) {
-                    Text("search", Modifier.align(Alignment.CenterStart))
+                    Text(text, Modifier.align(Alignment.CenterStart).alpha(alpha))
                 }
             }
         }
