@@ -1,14 +1,36 @@
+
 # MRouter
 
-这是一个可用于compose-multiplatform的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
+[MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
+
+
+## 安装
+在项目的`build.gradle.kts`中添加以下依赖，同步后即可开始使用
+```kotlin
+    commonMain.dependencies {
+            implementation("cn.erolc.mrouter:core:1.0.0-beta")
+    }
+```
 
 ## 使用
 
 我们首先需要在common中创建Compose页面的根部，然后实现各个平台的入口即可。代码如下
 
-### common
+## 准备两个页面
+```kotlin
+@Composable
+fun Home(){
+//code...
+}
 
-在common中创建RouteHost
+@Composable
+fun Second(){
+//code...
+}
+```
+
+## common
+在`common`中使用`RouteHost`
 
 ```kotlin
 @Composable
@@ -26,9 +48,10 @@ fun App() {
 }
 ```
 
-`RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将展现`home()`页面。
+`RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面。有关注册的更多操作，可前往[注册](https://erolc.github.io/MRouter/route/register.html)部分。
+## 实现各平台入口
 
-### android
+=== "android"
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -41,27 +64,21 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-### desktop
+=== "desktop"
 
 ```kotlin
 fun main() = mRouterApplication {
     App()
 }
 ```
-
-由于需要管理window，所以从application开始定义。没错，desktop在使用该库是可以多窗口运行的。
-
-### ios
+=== "ios"
 
 ```kotlin
-fun MainViewController() = LifecycleUIViewController {
+fun MainViewController() = mRouterUIViewController {
     App()
 }
 ```
-
-由于需要管理页面的生命周期，于是ios需要如上述处理。
-
-### web
+=== "wasmJs"
 
 ```kotlin
 @OptIn(ExperimentalComposeUiApi::class)
@@ -71,5 +88,3 @@ fun main() {
     }
 }
 ```
-
-需要注意compose-wasm正处于实验性。
