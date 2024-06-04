@@ -44,7 +44,6 @@ fun App() {
 ## 实现各平台入口
 
 === "android"
-
     ```kotlin
     class MainActivity : ComponentActivity() {
         override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +54,8 @@ fun App() {
         }
     }
     ```
-=== "ios"
 
+=== "ios"
     ```kotlin
     fun MainViewController() = mRouterUIViewController {
         App()
@@ -64,7 +63,6 @@ fun App() {
     ```
 
 === "desktop"
-
     ```kotlin
     fun main() = mRouterApplication {
         App()
@@ -72,7 +70,6 @@ fun App() {
     ```
 
 === "wasmJs"
-
     ```kotlin
     @OptIn(ExperimentalComposeUiApi::class)
     fun main() {
