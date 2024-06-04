@@ -44,38 +44,39 @@ fun App() {
 
 === "android"
 
-```kotlin
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            App() // 使用common的App()
+    ```kotlin
+    class MainActivity : ComponentActivity() {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContent {
+                App() // 使用common的App()
+            }
         }
     }
-}
-```
+    ```
+=== "ios"
+
+    ```kotlin
+    fun MainViewController() = mRouterUIViewController {
+        App()
+    }
+    ```
 
 === "desktop"
 
-```kotlin
-fun main() = mRouterApplication {
-    App()
-}
-```
-=== "ios"
-
-```kotlin
-fun MainViewController() = mRouterUIViewController {
-    App()
-}
-```
-=== "wasmJs"
-
-```kotlin
-@OptIn(ExperimentalComposeUiApi::class)
-fun main() {
-    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+    ```kotlin
+    fun main() = mRouterApplication {
         App()
     }
-}
-```
+    ```
+
+=== "wasmJs"
+
+    ```kotlin
+    @OptIn(ExperimentalComposeUiApi::class)
+    fun main() {
+        CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+            App()
+        }
+    }
+    ```
