@@ -15,11 +15,13 @@ theme:
   palette:
     primary: 'purple'
     accent: 'deep purple'
+
   name: material
   language: 'zh'
 
-feature:
-  tabs: true
+  feature:
+    - navigation.tabs
+    - navigation.expand
 
 extra:
   social:
