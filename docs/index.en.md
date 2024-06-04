@@ -6,6 +6,19 @@ At present, the library supports `Android`, `iOS`, `JVM`, and `web`
 ## usage
 We first need to create the root of the `Compose` page in `common`, and then implement the entry points for each platform. 
 
+## Prepare two pages
+```kotlin
+@Composable
+fun Home(){
+//code...
+}
+
+@Composable
+fun Second(){
+//code...
+}
+```
+
 ### common
 Create `RouteHost` in `common`
 
@@ -26,40 +39,37 @@ fun App() {
 ```
 
 `RouteHost` is the starting point of routing, and `compose` is registered as a page using the `page` method. The above example will first display the `home()` page when opening the app.
-### android
+
+## Implement each platform entry
+
+=== "android"
 
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            App() // Using the common App()
+            App() // 使用common的App()
         }
     }
 }
 ```
 
-### desktop
+=== "desktop"
 
 ```kotlin
 fun main() = mRouterApplication {
     App()
 }
 ```
-
-Due to the need to manage `window`, define from `application` onwards. That's right, `desktop` can run in multiple windows when using this library.
-
-### ios
+=== "ios"
 
 ```kotlin
-fun MainViewController() = LifecycleUIViewController {
+fun MainViewController() = mRouterUIViewController {
     App()
 }
 ```
-
-Due to the need to manage the lifecycle of pages, `iOS` also needs to do the same.
-
-### web
+=== "wasmJs"
 
 ```kotlin
 @OptIn(ExperimentalComposeUiApi::class)
@@ -69,5 +79,3 @@ fun main() {
     }
 }
 ```
-
-Please note that `compose-wasm` is currently experimental stage and may have more bugs than other platforms. Please use it with caution.

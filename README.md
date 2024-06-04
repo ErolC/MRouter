@@ -20,12 +20,22 @@
 ```kotlin
 @Composable
 fun Home(){
-//code...
+    val pageScope = LocalPageScope.current
+    Button(onClick={
+        pageScope.route("second") // route to second page
+    }){
+        //code...
+    }
 }
 
 @Composable
 fun Second(){
-//code...
+    val pageScope = LocalPageScope.current
+    Button(onClick={
+        pageScope.backPressed() // back to home page
+    }){
+        //code...
+    }
 }
 ```
 
@@ -49,9 +59,9 @@ fun App() {
 ```
 
 `RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面。有关注册的更多操作，可前往[注册](https://erolc.github.io/MRouter/route/register.html)部分。
-## 实现各平台入口
 
-=== "android"
+
+## android
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -64,21 +74,21 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
-=== "desktop"
+## desktop
 
 ```kotlin
 fun main() = mRouterApplication {
     App()
 }
 ```
-=== "ios"
+## ios
 
 ```kotlin
 fun MainViewController() = mRouterUIViewController {
     App()
 }
 ```
-=== "wasmJs"
+## wasmJs
 
 ```kotlin
 @OptIn(ExperimentalComposeUiApi::class)
