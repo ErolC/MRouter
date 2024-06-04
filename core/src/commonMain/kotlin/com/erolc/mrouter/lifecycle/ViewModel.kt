@@ -28,6 +28,8 @@ internal expect class MRouterControllerViewModel : ViewModel, MRouterViewModelSt
     companion object {
         fun getInstance(viewModelStore: ViewModelStore): MRouterControllerViewModel
     }
+
+    override fun getViewModelStore(entryId: String): ViewModelStore
 }
 
 

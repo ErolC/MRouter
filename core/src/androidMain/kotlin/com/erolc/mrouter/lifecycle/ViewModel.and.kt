@@ -30,7 +30,7 @@ internal actual class MRouterControllerViewModel : ViewModel(), MRouterViewModel
         viewModelStores.clear()
     }
 
-    override fun getViewModelStore(entryId: String): ViewModelStore {
+    actual override fun getViewModelStore(entryId: String): ViewModelStore {
         var viewModelStore = viewModelStores[entryId]
         if (viewModelStore == null) {
             viewModelStore = ViewModelStore()

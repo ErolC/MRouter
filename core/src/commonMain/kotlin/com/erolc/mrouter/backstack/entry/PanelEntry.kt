@@ -17,6 +17,7 @@ import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.scope.HostScope
+import com.erolc.mrouter.utils.HostContent
 
 /**
  * 局部界面的元素
@@ -33,32 +34,7 @@ class PanelEntry(override val address: Address) : StackEntry {
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(LocalHostScope provides hostScope) {
             val lifecycleOwner = LocalLifecycleOwner.current
-            DisposableEffect(lifecycleOwner) {
-                // Setup the pageRouter with proper owners
-                pageRouter.setLifecycleOwner(lifecycleOwner)
-                onDispose { }
-            }
-            Box(modifier.fillMaxSize().onGloballyPositioned {
-                hostScope.size.value = it.boundsInRoot().size
-            }) {
-                val stack by pageRouter.getPlayStack()
-                    .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
-
-                if (stack.size == 1)
-                    stack.first().run {
-                        transformState.value = ResumeState
-                        shareTransform(null)
-                    }
-                else
-                    stack.last().shareTransform(stack.first())
-
-                stack.forEach { it.Content(Modifier) }
-
-                if (stack.size == 2)
-                    ShareElementController.initShare(stack.first(), stack.last())
-
-            }
-
+            pageRouter.HostContent(modifier, hostScope, lifecycleOwner)
         }
     }
 

@@ -16,7 +16,8 @@ android-window = "1.2.0"
 kotlinxCoroutinesSwing = "1.7.3"
 #lifecycle-viewmodel = "2.8.0-rc01"
 lifecycle-viewmodel = "2.8.0"
-
+dokka = "1.9.20"
+vanniktechMavenPublish = "0.28.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
@@ -42,3 +43,5 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+vanniktechMavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }

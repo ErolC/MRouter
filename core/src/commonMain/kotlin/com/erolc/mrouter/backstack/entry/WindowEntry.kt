@@ -20,6 +20,7 @@ import com.erolc.mrouter.scope.WindowScope
 import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.platform.PlatformWindow
 import com.erolc.mrouter.scope.HostScope
+import com.erolc.mrouter.utils.HostContent
 
 /**
  * window域
@@ -59,34 +60,14 @@ class WindowEntry(
 
     @Composable
     override fun Content(modifier: Modifier) {
-        CompositionLocalProvider(LocalWindowScope provides scope, LocalHostScope provides hostScope) {
+        CompositionLocalProvider(
+            LocalWindowScope provides scope,
+            LocalHostScope provides hostScope
+        ) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 val lifecycleOwner = LocalLifecycleOwner.current
-                DisposableEffect(lifecycleOwner) {
-                    // Setup the pageRouter with proper owners
-                    pageRouter.setLifecycleOwner(lifecycleOwner)
-                    onDispose { }
-                }
-                Box(modifier.fillMaxSize().background(Color.Black).onGloballyPositioned {
-                    hostScope.size.value = it.boundsInRoot().size
-                }) {
-                    val stack by pageRouter.getPlayStack()
-                        .collectAsState(pageRouter.getBackStack().value.map { it as PageEntry })
-
-                    if (stack.size == 1) {
-                        stack.first().run {
-                            transformState.value = ResumeState
-                            shareTransform(null)
-                        }
-                    } else
-                        stack.last().shareTransform(stack.first())
-
-                    stack.forEach { it.Content(Modifier) }
-
-                    if (stack.size == 2)
-                        ShareElementController.initShare(stack.first(), stack.last())
-
+                pageRouter.HostContent(modifier, hostScope, lifecycleOwner) {
                     ShareElementController.Overlay()
                 }
             }

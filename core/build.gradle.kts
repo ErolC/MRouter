@@ -1,3 +1,6 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
@@ -5,6 +8,10 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+
+    signing
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktechMavenPublish)
 }
 
 
@@ -109,5 +116,45 @@ android {
     }
     dependencies {
         debugImplementation(libs.compose.ui.tooling)
+    }
+}
+
+mavenPublishing {
+    configure(
+        KotlinMultiplatform(
+            javadocJar = JavadocJar.Dokka("dokkaHtml"),
+            sourcesJar = true,
+            androidVariantsToPublish = listOf("debug", "release"),
+        )
+    )
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+
+    coordinates("cn.erolc.mrouter", "core", "1.0.0-beta")
+
+    pom {
+        name.set("MRouter")
+        description.set("A router for compose-multiplatform")
+        inceptionYear.set("2020")
+        url.set("https://github.com/erolc/MRouter")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("erolc")
+                name.set("ErolC")
+                url.set("https://github.com/erolc")
+            }
+        }
+        scm {
+            url.set("https://github.com/erolc/MRouter")
+            connection.set("scm:git:git://github.com/ErolC/MRouter.git")
+            developerConnection.set("scm:git:ssh://git@github.com/ErolC/MRouter.git")
+        }
     }
 }

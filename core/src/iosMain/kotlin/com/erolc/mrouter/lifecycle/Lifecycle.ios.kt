@@ -72,7 +72,7 @@ actual class LifecycleOwnerDelegate private constructor(
 
     actual override val lifecycle: Lifecycle
         get() = _lifecycle
-    override val savedStateRegistry: SavedStateRegistry
+    actual override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
     actual fun handleLifecycleEvent(event: Lifecycle.Event) {
@@ -80,10 +80,10 @@ actual class LifecycleOwnerDelegate private constructor(
         updateState()
     }
 
-    override val defaultViewModelProviderFactory: ViewModelProvider.Factory =
+    actual override val defaultViewModelProviderFactory: ViewModelProvider.Factory =
         DefaultViewModelProviderFactory()
 
-    override val defaultViewModelCreationExtras: CreationExtras
+    actual override val defaultViewModelCreationExtras: CreationExtras
         get() {
             val extras = MutableCreationExtras()
             extras[SAVED_STATE_REGISTRY_OWNER_KEY] = this
@@ -93,7 +93,7 @@ actual class LifecycleOwnerDelegate private constructor(
             }
             return extras
         }
-    override val viewModelStore: ViewModelStore
+    actual override val viewModelStore: ViewModelStore
         get() {
             check(savedStateRegistryAttached) {
                 "You cannot access the PageEntry's ViewModels until it is added to " +

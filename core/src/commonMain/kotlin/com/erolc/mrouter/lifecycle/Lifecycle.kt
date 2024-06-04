@@ -3,6 +3,8 @@ package com.erolc.mrouter.lifecycle
 import androidx.annotation.RestrictTo
 import androidx.core.bundle.Bundle
 import androidx.lifecycle.*
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 
 
@@ -27,6 +29,14 @@ expect class LifecycleOwnerDelegate :
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     var maxLifecycle: Lifecycle.State
+
+    override val viewModelStore: ViewModelStore
+
+    override val savedStateRegistry: SavedStateRegistry
+
+    override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+
+    override val defaultViewModelCreationExtras: CreationExtras
 
     /**
      * Update the state to be the lower of the two constraints:
