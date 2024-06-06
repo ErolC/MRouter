@@ -1,6 +1,7 @@
+[![Maven Central Version](https://img.shields.io/maven-central/v/cn.erolc.mrouter/core)](https://central.sonatype.com/artifact/cn.erolc.mrouter/core)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # MRouter
-
 [MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
 
 
@@ -8,11 +9,11 @@
 在项目的`build.gradle.kts`中添加以下依赖，同步后即可开始使用
 ```kotlin
     commonMain.dependencies {
-            implementation("cn.erolc.mrouter:core:1.0.0-beta")
+            implementation("cn.erolc.mrouter:core:<version>")
     }
 ```
 
-## 使用
+## 简单使用
 
 我们首先需要在common中创建Compose页面的根部，然后实现各个平台的入口即可。代码如下
 
@@ -60,9 +61,7 @@ fun App() {
 
 `RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面。有关注册的更多操作，可前往[注册](https://erolc.github.io/MRouter/route/register.html)部分。
 
-
 ## android
-
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,7 +83,7 @@ fun main() = mRouterApplication {
 ## ios
 
 ```kotlin
-fun MainViewController() = mRouterUIViewController {
+fun MainViewController() = ComposeUIViewController {
     App()
 }
 ```

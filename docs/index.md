@@ -57,7 +57,7 @@ fun App() {
 
 === "ios"
     ```kotlin
-    fun MainViewController() = mRouterUIViewController {
+    fun MainViewController() = ComposeUIViewController {
         App()
     }
     ```
