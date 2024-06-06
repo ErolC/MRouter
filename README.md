@@ -1,7 +1,11 @@
-[![Maven Central Version](https://img.shields.io/maven-central/v/cn.erolc.mrouter/core)](https://central.sonatype.com/artifact/cn.erolc.mrouter/core)
-
 # MRouter
-[MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
+[![Maven Central](https://img.shields.io/maven-central/v/cn.erolc.mrouter/core?label=MavenCentral&logo=apache-maven)](https://search.maven.org/artifact/cn.erolc.mrouter/core)
+[![License](https://img.shields.io/github/license/Kotlin/dokka.svg)](LICENSE.txt)
+[![Latest build](https://img.shields.io/github/v/release/ErolC/MRouter?color=orange&include_prereleases&label=latest%20build)](https://github.com/ErolC/MRouter/releases)
+
+[MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库
+
+其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
 
 
 ## 安装
@@ -18,23 +22,29 @@
 
 ## 准备两个页面
 ```kotlin
+class HomeViewModel : ViewModel() {
+    val result = mutableStateOf("")
+}
+
 @Composable
 fun Home(){
     val pageScope = LocalPageScope.current
-    val data by remember{
-        mutableStateOf("default")
-    }
+    
+    val viewModel = viewModel(::HomeViewModel) //use viewModel
+    
+    var result by remember { viewModel.result }
+
     Button(onClick={
         pageScope.route("second") { // route to second page
             argBuild{ // build the args
                 putString("key","value")
             }
             onResult{
-                data = it.getString("result","") //get return data 
+                result = it.getString("result","") //get return data 
             }
         }
     }){
-        Text(data) //data
+        Text(result) //data
     }
     
 }
