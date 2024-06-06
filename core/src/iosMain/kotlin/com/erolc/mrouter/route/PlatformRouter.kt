@@ -6,6 +6,7 @@ import com.erolc.mrouter.model.PlatformRoute
 import com.erolc.mrouter.register.Register
 import platform.UIKit.UINavigationController
 import platform.UIKit.UIViewController
+import platform.UIKit.navigationController
 
 /**
  * @param address 地址
@@ -36,7 +37,8 @@ internal object RouteDelegate : RouteUIViewControllerDelegate {
     override fun route(source: IosRouteSource, target: UIViewController) {
         when (val rootVC = source.rootVC) {
             is UINavigationController -> rootVC.pushViewController(target, true)
-            else -> rootVC.presentViewController(target, true, null)
+            else -> source.rootVC.navigationController?.pushViewController(target, true)
+                ?: source.rootVC.presentViewController(target, true, null)
         }
     }
 

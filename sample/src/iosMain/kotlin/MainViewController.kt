@@ -1,10 +1,11 @@
+import androidx.compose.ui.window.ComposeUIViewController
 import com.erolc.mrouter.MRouter
-import com.erolc.mrouter.mRouterComposeUIViewController
 import com.erolc.mrouter.route.platformRoute
 
-fun MainViewController() = mRouterComposeUIViewController {
+fun MainViewController() = ComposeUIViewController {
     MRouter.register {
         platformRoute("platform", TestUIViewController())
     }
     App()
 }
+

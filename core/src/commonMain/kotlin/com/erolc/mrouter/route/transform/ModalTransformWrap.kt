@@ -24,18 +24,18 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     @Composable
     override fun Wrap(modifier: Modifier) {
 
-        val transform = rememberTransformTransition()
+//        val transform = rememberTransformTransition()
 
-        val corner by transform.animateDp {
-            it.between(10f, 0f).dp
-        }
+//        val corner by transform.animateDp {
+//            it.between(10f, 0f).dp
+//        }
         val scope = LocalTransformWrapScope.current
         val padding by scope.getGapSize(proportion)
 
         Box(modifier = modifier.padding(top = with(LocalDensity.current) {
             padding.toDp()
         }) then rememberDraggableModifier(Orientation.Vertical)) {
-            PageContent(Modifier.clip(RoundedCornerShape(Dp(abs(corner.value)))))
+            PageContent(Modifier.clip(RoundedCornerShape(10.dp)))
         }
     }
 

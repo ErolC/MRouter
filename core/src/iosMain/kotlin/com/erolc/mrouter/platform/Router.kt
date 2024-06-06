@@ -9,6 +9,7 @@ import com.erolc.mrouter.route.ResultCallBack
 import com.erolc.mrouter.route.RouteDelegate
 import com.erolc.mrouter.route.RouteUIViewControllerDelegate
 import com.erolc.mrouter.route.router.WindowRouter
+import com.erolc.mrouter.topViewController
 import platform.UIKit.UIViewController
 
 internal actual fun WindowRouter.route(
@@ -16,10 +17,9 @@ internal actual fun WindowRouter.route(
     args: Bundle,
     callBack: ResultCallBack?
 ) {
-    val rootVC = getRootViewController()
+    val rootVC = getRootViewController() ?: topViewController
     val target = route.routerDispatcher as UIViewController
-    val delegate = ResourcePool.getPlatformRes()["route_delegate"] as? RouteUIViewControllerDelegate ?: RouteDelegate
-    rootVC?.let {
-        delegate.route(IosRouteSource(it, args, callBack), target)
-    } ?: loge("MRouter", "缺少RootVC，请设置RootVC")
+    val delegate = ResourcePool.getPlatformRes()["route_delegate"] as? RouteUIViewControllerDelegate
+        ?: RouteDelegate
+    delegate.route(IosRouteSource(rootVC, args, callBack), target)
 }

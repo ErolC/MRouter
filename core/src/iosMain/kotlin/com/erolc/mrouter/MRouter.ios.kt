@@ -1,9 +1,8 @@
 package com.erolc.mrouter
-
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.ComposeUIViewController
 import com.erolc.mrouter.route.ResourcePool
-import com.erolc.mrouter.route.router.WindowRouter
+import platform.UIKit.UIApplication
+import platform.UIKit.UINavigationController
+import platform.UIKit.UITabBarController
 import platform.UIKit.UIViewController
 
 /**
@@ -15,6 +14,14 @@ fun MRouter.setRootViewController(rootViewController: UIViewController) {
 
 internal fun getRootViewController() = ResourcePool.getPlatformRes()["root_vc"] as? UIViewController
 
+val topViewController: UIViewController get() = topViewController()!!
 
-fun mRouterComposeUIViewController(content: @Composable () -> Unit) =
-    ComposeUIViewController { content() }.also { MRouter.setRootViewController(it) }
+private fun topViewController(currentVC: UIViewController? = UIApplication.sharedApplication.keyWindow()?.rootViewController): UIViewController? {
+    return (currentVC as? UINavigationController)?.let {
+        topViewController(it.visibleViewController)
+    } ?: (currentVC as? UITabBarController)?.let {
+        it.selectedViewController?.let(::topViewController) ?: currentVC
+    } ?: currentVC?.presentedViewController?.let { topViewController(it) } ?: currentVC
+}
+
+
