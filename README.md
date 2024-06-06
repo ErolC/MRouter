@@ -1,5 +1,4 @@
 [![Maven Central Version](https://img.shields.io/maven-central/v/cn.erolc.mrouter/core)](https://central.sonatype.com/artifact/cn.erolc.mrouter/core)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 # MRouter
 [MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库，其实现了基础的路由，参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。
@@ -22,20 +21,33 @@
 @Composable
 fun Home(){
     val pageScope = LocalPageScope.current
-    Button(onClick={
-        pageScope.route("second") // route to second page
-    }){
-        //code...
+    val data by remember{
+        mutableStateOf("default")
     }
+    Button(onClick={
+        pageScope.route("second") { // route to second page
+            argBuild{ // build the args
+                putString("key","value")
+            }
+            onResult{
+                data = it.getString("result","") //get return data 
+            }
+        }
+    }){
+        Text(data) //data
+    }
+    
 }
 
 @Composable
 fun Second(){
     val pageScope = LocalPageScope.current
+    val args = rememberArgs()
     Button(onClick={
+        pageScope.setResult(bundleOf("result" to "success")) // set return data
         pageScope.backPressed() // back to home page
     }){
-        //code...
+        Text(args.getString("key")) //value
     }
 }
 ```
@@ -59,7 +71,7 @@ fun App() {
 }
 ```
 
-`RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面。有关注册的更多操作，可前往[注册](https://erolc.github.io/MRouter/route/register.html)部分。
+`RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面.
 
 ## android
 ```kotlin
