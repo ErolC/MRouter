@@ -1,7 +1,7 @@
 # MRouter
 [![Maven Central](https://img.shields.io/maven-central/v/cn.erolc.mrouter/core?label=MavenCentral&logo=apache-maven)](https://search.maven.org/artifact/cn.erolc.mrouter/core)
 [![License](https://img.shields.io/github/license/Kotlin/dokka.svg)](LICENSE.txt)
-[![Latest build](https://img.shields.io/github/v/release/ErolC/MRouter?color=orange&include_prereleases&label=latest%20build)](https://github.com/ErolC/MRouter/releases)
+[![Latest build](https://img.shields.io/github/v/release/ErolC/MRouter?color=orange&include_prereleases&label=latestBuild)](https://github.com/ErolC/MRouter/releases)
 
 [MRouter](https://erolc.github.io/MRouter)是一个适用于[compose-multiplatform](https://github.com/JetBrains/compose-multiplatform)的路由库
 
