@@ -80,7 +80,6 @@ fun App() {
     }
 }
 ```
-
 `RouteHost`是路由的起点，通过`page`方法将`composable`注册成页面，以上示例在打开app时将首先展现`Home()`页面.
 
 ## android
