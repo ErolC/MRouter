@@ -81,7 +81,22 @@ plugins:
           default: true
           site_name: "MRouter"
           nav_translations:
-            Home: 首页
+            Getting started: 开始
+            Overview: 概述
+            Install: 安装
+            Introduction: 入门
 
 nav:
-  - Home: index.md
+  - Getting started:
+    - Overview: index.md
+    - Install: started/install.md
+    - Introduction: started/introduction.md
+  - Route:
+    - Register: route/register.md
+    - Route: route/route.md
+  - Feature:
+    - Gesture: feature/gesture.md
+    - Lifecycle&VM: feature/lifecycle_vm.md
+    - Panel: feature/panel.md
+    - ShareElement: feature/share_element.md
+    - Transform: feature/transform.md
