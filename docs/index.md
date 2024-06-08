@@ -1,3 +1,14 @@
-# MRouter
+# 概述
+`MRouter`是一个适用于`compose-multiplatform`的路由库，实现了参数传递，动画，手势，生命周期，共享元素以及局部路由等一系列功能。<br>
+目前该库支持`android`，`ios`，`JVM`和`web`。
 
-正在努力编写文档中...
+## 功能
+[路由跳转](https://erolc.github.io/MRouter/route/route.html)：管理app的页面，可以很方便地从一个页面路由到另外一个页面。<br>
+[页面变换](https://erolc.github.io/MRouter/feature/transform.html)：在路由的过程中可以很方便的使用动画，让路由的过程更加丝滑<br>
+[共享元素](https://erolc.github.io/MRouter/feature/shele-element.html)：支持共享元素的使用。<br>
+[手势操作](https://erolc.github.io/MRouter/feature/gesture.html)：支持后退时使用手势。<br>
+[局部路由](https://erolc.github.io/MRouter/feature/panel.html)：支持在一个页面的局部中进行页面路由。<br>
+[Lifecycle&VuewModel](https://erolc.github.io/MRouter/feature/lifecycle_vm.html)：接入了官方的`lifecycle`和`ViewModel`，并针对库本身做了调整和适配。<br>
+
+## 开始使用
+请访问[下载](https://erolc.github.io/MRouter/started/install.html)页面，学习如何将MRouter集成到你的项目中。然后可以从[入门](https://erolc.github.io/MRouter/started/started/introduction.html)页面学习如何使用。需要实现更多功能可前往功能的对应页面进行学习。

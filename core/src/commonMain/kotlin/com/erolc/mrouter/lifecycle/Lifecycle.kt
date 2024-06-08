@@ -7,7 +7,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 
-
+/**
+ * 添加事件监听
+ */
 fun Lifecycle.addEventObserver(body: (source: LifecycleOwner, event: Lifecycle.Event) -> Unit) {
     addObserver(LifecycleEventObserver { source, event ->
         body(source, event)

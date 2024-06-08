@@ -67,7 +67,7 @@ class WindowEntry(
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 val lifecycleOwner = LocalLifecycleOwner.current
-                pageRouter.HostContent(modifier, hostScope, lifecycleOwner) {
+                pageRouter.HostContent(modifier.background(Color.Black), hostScope, lifecycleOwner) {
                     ShareElementController.Overlay()
                 }
             }

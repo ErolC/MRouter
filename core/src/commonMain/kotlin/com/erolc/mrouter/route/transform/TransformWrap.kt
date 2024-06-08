@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
  */
 abstract class TransformWrap {
     internal var isUseContent = false
-    internal var pauseModifierPost = PauseModifierPost { prevPauseModifier() }
+    internal var pauseModifierPost = PauseModifierPost { prevPageModifier() }
     internal var gestureModifier = PauseModifierPost { Modifier }
 
     /**
@@ -58,7 +58,7 @@ abstract class TransformWrap {
      * 前一个页面在暂停时的modifier,用于控制在跳转过程中，上一个页面的页面变化
      */
     @Composable
-    open fun prevPauseModifier(): Modifier = Modifier
+    open fun prevPageModifier(): Modifier = Modifier
 
     internal fun setContent(content: @Composable () -> Unit) {
         this.content = content
@@ -74,7 +74,7 @@ abstract class TransformWrap {
     }
 
     internal fun releasePauseModifier() {
-        pauseModifierPost = PauseModifierPost { prevPauseModifier() }
+        pauseModifierPost = PauseModifierPost { prevPageModifier() }
     }
 }
 

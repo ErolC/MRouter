@@ -40,7 +40,7 @@ class ModalTransformWrap(private val proportion: Float) : TransformWrap() {
     }
 
     @Composable
-    override fun prevPauseModifier(): Modifier {
+    override fun prevPageModifier(): Modifier {
         val transform = rememberTransformTransition()
         val corner by transform.animateDp {
             it.between(prevCorner, 10f).dp

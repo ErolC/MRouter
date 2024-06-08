@@ -43,6 +43,12 @@ class RegisterModuleBuilder internal constructor(
     private val module: String
 ) {
 
+    /**
+     * 注册页面
+     * @param path 页面的地址
+     * @param config 页面配置
+     * @param content 页面
+     */
     fun page(
         path: String,
         config: PageConfig = emptyConfig,

@@ -59,6 +59,13 @@ inline fun <reified VM : ViewModel> viewModel(
     key: String? = null
 ): VM = viewModelImpl(getKClassForGenericType(), block = block, key = key)
 
+/**
+ * 实际构造ViewModel的方法
+ * @param modelClass ViewModel的KClass
+ * @param emptyBlock 空构造函数
+ * @param block 带有SaveStateHandle的构造函数
+ * @param key ViewModel的键。
+ */
 @Composable
 fun <T : ViewModel> viewModelImpl(
     modelClass: KClass<T>,

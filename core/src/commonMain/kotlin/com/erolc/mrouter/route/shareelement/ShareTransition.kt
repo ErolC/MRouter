@@ -97,31 +97,35 @@ class ShareTransition(
             current to endElement.styles.getOrNull(index) as? String
         else
             startElement.styles.getOrNull(index) as? String to current
-        val alpha by updateValue(1f, 1f, 1f, sharing = { _, _ ->
-            isSharing = true
-            if (progress < 0.5f) {
-                onChangeText(if (isStart) next ?: current else pre ?: current)
-                1 - progress * 2
-            } else {
-                onChangeText(current)
-                progress * 2 - 1
-            }
-        }, anim = { func ->
-            transition.animateFloat({
-                keyframes {
-                    0f.atFraction(0.5f)
-                    1f.atFraction(1f)
+        val alpha = if (pre != null && next != null) {
+            val _alpha by updateValue(1f, 1f, 1f, sharing = { _, _ ->
+                isSharing = true
+                if (progress < 0.5f) {
+                    onChangeText(if (isStart) next else pre)
+                    1 - progress * 2
+                } else {
+                    onChangeText(current)
+                    progress * 2 - 1
                 }
-            }) {
-                func(it)
+            }, anim = { func ->
+                transition.animateFloat({
+                    keyframes {
+                        0f.atFraction(0.5f)
+                        1f.atFraction(1f)
+                    }
+                }) {
+                    func(it)
+                }
+            })
+            if (!isSharing) {
+                onChangeText(
+                    if (result.value < _alpha) if (isStart) next else pre
+                    else current
+                )
             }
-        })
-        if (!isSharing) {
-            onChangeText(
-                if (result.value < alpha) if (isStart) next ?: current else pre
-                    ?: current else current
-            )
-        }
+            _alpha
+        } else 1f
+
         result.value = alpha
         return result
     }

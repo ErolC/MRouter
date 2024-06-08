@@ -37,13 +37,13 @@ private val modalProportion: Float =
 
 fun modal() = buildTransform {
     enter = slideInVertically { it }
-    prevPause = scaleOut(targetScale = modalScale)
+    exit = scaleOut(targetScale = modalScale)
     wrap = ModalTransformWrap(modalProportion)
 }
 
 fun normal() = buildTransform {
     enter = slideInHorizontally { it }
-    prevPause = slideOutHorizontally { -it / 7 }
+    exit = slideOutHorizontally { -it / 7 }
     wrap = NormalTransformWrap()
 }
 
@@ -332,13 +332,26 @@ private fun Alignment.Vertical.toAlignment() =
         else -> Alignment.Center
     }
 
+
 class TransformBuilder {
+    /**
+     * 进入时新页面的动画效果
+     */
     var enter: EnterTransition = EnterTransition.None
-    var exit: ExitTransition = ExitTransition.None
-    var prevPause: ExitTransition = slideOutHorizontally { 0 }
+
+    /**
+     * 进入时，旧页面的退出效果
+     */
+    var exit: ExitTransition = slideOutHorizontally { 0 }
+
+    /**
+     * 退出时，新页面的动画效果，
+     */
+    var popExit: ExitTransition = ExitTransition.None
+
     var wrap: TransformWrap = NoneTransformWrap()
     internal fun build(): Transform {
-        return Transform(enter, exit, prevPause, wrap)
+        return Transform(enter, popExit, exit, wrap)
     }
 }
 
@@ -350,15 +363,15 @@ fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
  * 一个transform代表的是一次页面变换
  *
  * @param enter 本页面进入的动画
- * @param _exit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
- * @param prevPause 上一个页面在本次变换中的动画
+ * @param _popExit 本页面退出的动画,如果为空，那么退出时将会使用enter做逆向变换
+ * @param exit 上一个页面在本次变换中的动画
  * @param wrap 包装，页面切换包装，可以在其中实现一些功能，比如手势操作
  */
 @Immutable
 data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
-    private val _exit: ExitTransition = ExitTransition.None,
-    internal val prevPause: ExitTransition = slideOutHorizontally { 0 },
+    private val _popExit: ExitTransition = ExitTransition.None,
+    internal val exit: ExitTransition = slideOutHorizontally { 0 },
     internal val wrap: TransformWrap = NoneTransformWrap()
 ) {
 
@@ -366,21 +379,20 @@ data class Transform internal constructor(
         val None = Transform()
     }
 
-    val exit get() = if (_exit == ExitTransition.None) ExitTransitionImpl(enter.data) else _exit
-
+    val popExit get() = if (_popExit == ExitTransition.None) ExitTransitionImpl(enter.data) else _popExit
 
     internal fun trackActive(transition: Transition<TransformState>): TransformData {
         return with(transition.segment) {
             when {
                 EnterState isTransitioningTo EnterState -> enter.data
                 EnterState isTransitioningTo ResumeState || ResumeState isTransitioningTo ResumeState -> enter.data
-                ResumeState isTransitioningTo ExitState -> exit.data
-                ResumeState isTransitioningTo StopState
-                        || StopState isTransitioningTo ResumeState
-                        || StopState isTransitioningTo StopState -> prevPause.data
+                ResumeState isTransitioningTo ExitState -> popExit.data
+                ResumeState isTransitioningTo StopState -> exit.data
+                StopState isTransitioningTo ResumeState
+                        || StopState isTransitioningTo StopState -> exit.data
 
-                targetState is StoppingState || initialState is StoppingState -> prevPause.data
-                targetState is ExitingState || initialState is ExitingState -> exit.data
+                targetState is StoppingState || initialState is StoppingState -> exit.data
+                targetState is ExitingState || initialState is ExitingState -> popExit.data
                 else -> TransformData.None
             }
         }
@@ -859,7 +871,7 @@ private fun Transition<TransformState>.createGraphicsLayerBlock(
             label = remember { "$label alpha" }
         )
     else {
-        progressAlpha = transform.prevPause.data.fade?.run { alpha * targetState.progress } ?: 1f
+        progressAlpha = transformData.fade?.run { alpha * targetState.progress } ?: 1f
         null
     }
 

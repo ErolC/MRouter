@@ -1,21 +1,12 @@
 package com.erolc.mrouter.backstack.entry
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.model.Address
 import com.erolc.mrouter.route.router.PageRouter
-import com.erolc.mrouter.route.shareelement.ShareElementController
-import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.scope.HostScope
 import com.erolc.mrouter.utils.HostContent
 

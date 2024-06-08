@@ -33,7 +33,7 @@ import com.erolc.mrouter.utils.PageCache
 import com.erolc.mrouter.utils.rememberPrivateInPage
 
 /**
- * 页面载体，承载着页面的生命周期，代表一个页面。
+ * 页面载体，代表一个页面。
  */
 class PageEntry internal constructor(
     val scope: PageScope,
@@ -225,7 +225,7 @@ class PageEntry internal constructor(
      */
     private fun updatePrevTransform(prev: PageEntry): TransformState {
         if (prev.isUpdateTransform) return StopState
-        prev.transform.value = prev.transform.value.copy(prevPause = transform.value.prevPause)
+        prev.transform.value = prev.transform.value.copy(exit = transform.value.exit)
         prev.transform.value.wrap.updatePauseModifier(transform.value.wrap.pauseModifierPost)
         prev.isUpdateTransform = true
         return StopState

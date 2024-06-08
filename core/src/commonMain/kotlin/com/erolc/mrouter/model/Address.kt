@@ -8,6 +8,7 @@ import com.erolc.mrouter.register.emptyConfig
  * @param path 该地址的路径
  * @param config 页面的配置
  * @param content 页面内容本体
+ * @param matchKey 用于匹配的key
  */
 data class Address(
     val path: String,
@@ -15,5 +16,8 @@ data class Address(
     val content: @Composable () -> Unit = {},
     val matchKey:String = path
 ){
+    /**
+     * 匹配地址
+     */
     fun match(address:String) = matchKey.toRegex().matches(address)
 }

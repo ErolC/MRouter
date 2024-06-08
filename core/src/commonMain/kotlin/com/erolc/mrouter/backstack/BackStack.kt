@@ -1,6 +1,5 @@
 package com.erolc.mrouter.backstack
 
-import androidx.compose.ui.util.fastLastOrNull
 import com.erolc.mrouter.backstack.entry.PageEntry
 import com.erolc.mrouter.backstack.entry.StackEntry
 import com.erolc.mrouter.model.LaunchMode
@@ -8,7 +7,6 @@ import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.SingleTop
 import com.erolc.mrouter.route.ClearTaskFlag
 import com.erolc.mrouter.route.ReplaceFlag
-import com.erolc.mrouter.route.ResourcePool
 import com.erolc.mrouter.route.RouteFlag
 import com.erolc.mrouter.route.StackFlag
 import com.erolc.mrouter.route.router.Router
