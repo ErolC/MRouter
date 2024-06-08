@@ -85,6 +85,13 @@ plugins:
             Overview: 概述
             Install: 安装
             Introduction: 入门
+            Route: 路由
+            Register: 注册
+            Feature: 功能
+            Gesture: 手势
+            Panel: 局部路由
+            ShareElement: 共享元素
+            Transform: 变换
 
 nav:
   - Getting started:

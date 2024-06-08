@@ -35,14 +35,14 @@ MRouter提供了灵活的参数传递设置方式，可以使用上述的`argBui
 在desktop平台，可通过`window`方法传入不同的`windowId`打开不同的窗口，窗口的`menu`将通过该id在注册表中寻找。
 
 ### 局部路由
-在路由时可通过`panel`方法指定该页面路由到当前页面的哪个panel上，除了使用`panel`方法之外，还可以直接在路径上表示`panelId:path`,如果当前页面不存在该panel，将以一个普通页面进行打开，结果和`path`无异。可查看[局部路由](https://erolc.github.io/MRouter/feature/panel.html)页面
+在路由时可通过`panel`方法指定该页面路由到当前页面的哪个panel上，除了使用`panel`方法之外，还可以直接在路径上表示`panelId:path`,如果当前页面不存在该panel，将以一个普通页面进行打开，结果和`path`无异。可查看[局部路由](../feature/panel.md)页面
 
 ### 变换
 在路由时可通过`transform`设置页面变换效果，在路由时可直接使用内置的变换组合，比如<br>
 `normal`是从右到左进入，从左到右退出，在界面左侧存在手势区域，可向右滑动退出界面<br>
 `modal`是从下到上进入，从上到下退出，效果是ios的`presentViewController`实现的模态效果。且可在界面任意部分下滑退出。<br>
 `none`则是无手势版的`normal`。<br>
-除此之外，也可以使用第二种方式组合出你想要的变换效果。更详细的使用方式，请参考[变换](https://erolc.github.io/MRouter/feature/transform.html)
+除此之外，也可以使用第二种方式组合出你想要的变换效果。更详细的使用方式，请参考[变换](../feature/transform.md)
 ### flag
 目前只支持一种`ClearTaskFlag`，即在打开该页面时，清空当前回退栈。
 
