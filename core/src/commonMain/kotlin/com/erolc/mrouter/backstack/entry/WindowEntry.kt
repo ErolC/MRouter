@@ -21,6 +21,7 @@ import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.platform.PlatformWindow
 import com.erolc.mrouter.scope.HostScope
 import com.erolc.mrouter.utils.HostContent
+import com.erolc.mrouter.window.HostSize
 
 /**
  * window域
@@ -43,7 +44,6 @@ class WindowEntry(
     internal lateinit var pageRouter: PageRouter
 
     val scope = WindowScope(address.path)
-    internal val hostScope = HostScope()
 
     fun shouldExit(): Boolean {
         return (pageRouter.parentRouter as WindowRouter)
@@ -62,12 +62,13 @@ class WindowEntry(
     override fun Content(modifier: Modifier) {
         CompositionLocalProvider(
             LocalWindowScope provides scope,
-            LocalHostScope provides hostScope
+            LocalHostScope provides scope
         ) {
             val options by remember(options) { options }
             PlatformWindow(options, this) {
                 val lifecycleOwner = LocalLifecycleOwner.current
-                pageRouter.HostContent(modifier.background(Color.Black), hostScope, lifecycleOwner) {
+                scope.setWindowHostSize(HostSize.withWindowSize(scope.windowSize.value))
+                pageRouter.HostContent(modifier.background(Color.Black), scope, lifecycleOwner) {
                     ShareElementController.Overlay()
                 }
             }

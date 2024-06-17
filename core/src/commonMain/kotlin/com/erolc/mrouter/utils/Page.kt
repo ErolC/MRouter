@@ -13,16 +13,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.erolc.mrouter.backstack.entry.PageEntry
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.router.PageRouter
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.route.transform.ResumeState
 import com.erolc.mrouter.scope.HostScope
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.scope.PageScope
+import com.erolc.mrouter.scope.WindowScope
+import com.erolc.mrouter.window.HostSize
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -63,8 +69,12 @@ internal fun PageRouter.HostContent(
         setLifecycleOwner(lifecycleOwner)
         onDispose { }
     }
+    val density = LocalDensity.current
     Box(modifier.fillMaxSize().onGloballyPositioned {
-        hostScope.size.value = it.boundsInRoot().size
+        hostScope.run {
+            size.value = it.boundsInRoot().size
+            setHostSize(HostSize.calculateFromSize(with(density) { size.value.toDpSize() }))
+        }
     }) {
         val stack by getPlayStack()
             .collectAsState(getBackStack().value.map { it as PageEntry })
