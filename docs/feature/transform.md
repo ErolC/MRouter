@@ -1,11 +1,11 @@
 # 变换
 在路由的过程中，MRouter支持设置页面的变换效果，通过`RouteBuild`里的`transform`进行设置。<br>
-`transform`接收一个`Transform`对象，可通过`buildTransform`函数构造获得。`Transform`存在四个参数，分别是：enter，exit，prePause，wrap。
+`transform`接收一个`Transform`对象，可通过`buildTransform`函数构造获得。`Transform`存在四个参数，分别是：enter，exit，popExit，wrap。
 
 ## 过渡动画
 `enter`，`exit`，`popExit`都是描述页面过渡动画的。<br>
 `enter`是新页面进入的动画效果<br>
-`exit`是新页面进入时，旧页面退出的动画效果<br>
+`exit`旧页面退出的动画效果<br>
 `popExit`则是新页面退出的动画效果。其中`popExit`时可缺省的，缺省的时候将会使用`enter`的反效果<br>
 旧页面的进入动画效果是不可设置的。
 ```kotlin

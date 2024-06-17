@@ -1,11 +1,15 @@
 package com.erolc.mrouter.route.shareelement
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -28,9 +32,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * @param styles 样式列表，给共享元素内的元素使用
  * @param content 共享元素的界面
  */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Element(
-    key: String,
+    key: Any,
     modifier: Modifier = Modifier,
     styles: List<Any> = listOf(),
     content: @Composable ShareTransition.() -> Unit
@@ -42,21 +47,39 @@ fun Element(
         ShareElementController.addElement(element)
         element
     }
-
+    var lifecycle by rememberInPage("key") {
+        mutableStateOf(Lifecycle.Event.ON_RESUME)
+    }
     LifecycleObserver { _, event ->
+        lifecycle = event
         if (event == Lifecycle.Event.ON_DESTROY) {
             ShareElementController.removeElement(element.tag)
         }
     }
     val state by element.state
+    val transition = updateTransition(state)
+    val shareTransition = remember(element) {
+        ShareTransition(element, element, element, transition)
+    }
+    ElementContent(modifier, state, shareTransition, onChange = { position.value = it }) {
+        content(this)
+    }
+}
+
+@Composable
+private fun ElementContent(
+    modifier: Modifier = Modifier,
+    state: ShareState,
+    shareTransition: ShareTransition,
+    onChange: (Rect) -> Unit,
+    content: @Composable ShareTransition.() -> Unit
+) {
     Box(modifier = modifier.background(Color.Transparent).onGloballyPositioned {
         val bound = it.boundsInRoot()
-        if (!bound.isEmpty) position.value = bound
+        if (!bound.isEmpty) onChange(bound)
     }) {
-        val transition = updateTransition(state)
-        val shareTransition = remember(element) {
-            ShareTransition(element, element, element, transition)
+        if (state == Init || state == BeforeStart || state == BeforeEnd) {
+            content(shareTransition)
         }
-        if (state == Init || state == BeforeStart || state == BeforeEnd) content(shareTransition)
     }
 }

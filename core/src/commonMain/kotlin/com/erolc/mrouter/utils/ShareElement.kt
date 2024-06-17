@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.erolc.mrouter.route.shareelement.ShareElementController
 import com.erolc.mrouter.scope.LocalPageScope
 
-typealias UpdateElementListener = (Array<out String>) -> Unit
+typealias UpdateElementListener = (Array<out Any>) -> Unit
 
 typealias ShareAnim<T> = (ShareState) -> T
 
@@ -26,7 +26,7 @@ typealias ShareAnimBody<T> = @Composable ShareAnim<T>.() -> State<T>
  * 更新元素，在使用共享元素动画跳转到目标页面之后，可以通过该方法更新共享的元素，（必须是原页面和当前界面都有的元素），那么在退出的时候，就可以使用新的共享元素实现动画。
  * 重申一遍，必须要在当前界面存在该元素时，才可更新，如果原页面不存在该元素，则会通过[onUpdateElement]进行通知，如果更新失败，那么将按照原共享元素执行。
  */
-fun updateElement(vararg keys: String) {
+fun updateElement(vararg keys: Any) {
     ShareElementController.updateShareGroup(*keys)
 }
 
@@ -35,7 +35,7 @@ fun updateElement(vararg keys: String) {
  * @param block 该回调函数的参数是缺少的元素的key集合
  */
 @Composable
-fun onUpdateElement(block: (Array<out String>) -> Unit) {
+fun onUpdateElement(block: (Array<out Any>) -> Unit) {
     val scope = LocalPageScope.current
     DisposableEffect(scope) {
         ShareElementController.addUploadElementListener(scope.name, block)

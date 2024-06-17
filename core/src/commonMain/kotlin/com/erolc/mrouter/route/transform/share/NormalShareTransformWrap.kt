@@ -16,7 +16,7 @@ import com.erolc.mrouter.utils.ShareState
  */
 class NormalShareTransformWrap(
     shareAnimationSpec: FiniteAnimationSpec<Rect>,
-    vararg keys: String
+    vararg keys: Any
 ) : ShareTransformWrap(shareAnimationSpec, *keys) {
 
     @Composable

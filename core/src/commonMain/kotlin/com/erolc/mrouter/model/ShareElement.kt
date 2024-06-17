@@ -20,13 +20,13 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @Immutable
 data class ShareElement internal constructor(
-    val key: String,
+    val key: Any,
     val content: @Composable ShareTransition.() -> Unit,
     val address: String,
     val position: StateFlow<Rect>,
     val styles:List<Any>,
     ) {
-    val tag get() = "${address}_$key"
+    val tag get() = "${address}_${key.hashCode()}"
 
     /**
      * 该共享元素的状态

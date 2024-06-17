@@ -14,7 +14,7 @@ import com.erolc.mrouter.utils.ShareState
  * @param start 开始页面的共享元素
  * @param end 结束页面的共享元素
  */
-data class ShareElementGroup(val start: ShareElement, val end: ShareElement, val key: String)
+data class ShareElementGroup(val start: ShareElement, val end: ShareElement, val key: Any)
 
 /**
  * 共享条目

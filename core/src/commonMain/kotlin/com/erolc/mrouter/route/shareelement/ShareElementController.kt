@@ -47,7 +47,7 @@ internal object ShareElementController {
     private val onUploadElements = mutableMapOf<String, UpdateElementListener>()
 
 
-    val updateKeys = mutableMapOf<String, MutableList<String>>()
+    val updateKeys = mutableMapOf<String, MutableList<Any>>()
     var updateEntry: ShareEntry? = null
 
     /**
@@ -97,7 +97,7 @@ internal object ShareElementController {
         onUploadElements.remove(address)
     }
 
-    fun updateShareGroup(vararg keys: String) {
+    fun updateShareGroup(vararg keys: Any) {
         val oldEntry = shareStack.value.last()
         val newEntry = oldEntry.let {
             val group = it.groups.first()
@@ -106,7 +106,10 @@ internal object ShareElementController {
             val newGroup = getElementGroups(keys, start, end)
             val keyStr = keys.makeKeys()
             if (newGroup.size == keys.size) {
-                it.copy(groups = newGroup, keys = keyStr)
+                it.groups.forEach { it.start._state.value = Init }
+                it.copy(groups = newGroup, keys = keyStr).apply {
+                    groups.forEach { it.start._state.value = resetState.value }
+                }
             } else {
                 val newKeys = newGroup.map { it.key }
                 val lackKeys = keys.toMutableList().run {
@@ -115,15 +118,18 @@ internal object ShareElementController {
                 }
                 updateKeys[start] = lackKeys.toMutableList()
                 onUploadElements[start]?.invoke(lackKeys)
-                updateEntry = it.copy(groups = newGroup, keys = keyStr)
+                it.groups.forEach { it.start._state.value = Init }
+                updateEntry = it.copy(groups = newGroup, keys = keyStr).apply {
+                    groups.forEach { it.start._state.value = resetState.value }
+                }
                 null
             }
         }
         newEntry?.let { shareStack.updateEntry(it) }
     }
 
-    private fun Array<out String>.makeKeys() = fold("") { a, b ->
-        "$a$b|"
+    private fun Array<out Any>.makeKeys() = fold("") { a, b ->
+        "${a.hashCode()}${b.hashCode()}|"
     }
 
     /**
@@ -175,12 +181,12 @@ internal object ShareElementController {
         value += newEntry
     }
 
-    private fun getElementGroups(keys: Array<out String>, start: String, end: String) =
+    private fun getElementGroups(keys: Array<out Any>, start: String, end: String) =
         keys.mapNotNull { getElementGroup(it, start, end) }
 
-    private fun getElementGroup(key: String, start: String, end: String): ShareElementGroup? {
-        val startTag = "${start}_$key"
-        val endTag = "${end}_$key"
+    private fun getElementGroup(key: Any, start: String, end: String): ShareElementGroup? {
+        val startTag = "${start}_${key.hashCode()}"
+        val endTag = "${end}_${key.hashCode()}"
         val startEle = elements[startTag]
         val endEle = elements[endTag]
         return startEle?.let { endEle?.let { end -> ShareElementGroup(it, end, key) } }
@@ -259,7 +265,7 @@ internal fun ShareElementController.Overlay() {
         if (transition.currentState == resetState && transition.targetState == resetState) {
             shareState.value = Init
             groups.forEach {
-                it.start._state.value = Init
+                it.start._state.value = if (resetState == ExitShare) resetState else Init
                 it.end._state.value = Init
             }
         }

@@ -61,7 +61,7 @@ fun none() = buildTransform {
  * 需要注意的是，如果给[shareAnimationSpec]或[animationSpec]设置[tween]那么请给另一个也加上，并且给予相同的时间，如此两者的进度才是一致的。
  */
 fun share(
-    vararg keys: String,
+    vararg keys: Any,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     shareAnimationSpec: FiniteAnimationSpec<Rect> = spring(visibilityThreshold = Rect.VisibilityThreshold),
     wrap: TransformWrap = NormalShareTransformWrap(shareAnimationSpec, *keys)
