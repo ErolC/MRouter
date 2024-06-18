@@ -11,7 +11,7 @@ import com.erolc.mrouter.route.transform.rememberDraggableModifier
 import com.erolc.mrouter.utils.ShareState
 
 /**
- * 普通的（手势区在页面左侧）共享元素变换包装
+ * 普通的共享元素变换包装
  * 需要注意的是，共享元素的基础是两个确定位置大小的元素，所以不可以改变两个页面的位置
  */
 class NormalShareTransformWrap(
@@ -22,9 +22,8 @@ class NormalShareTransformWrap(
     @Composable
     override fun Wrap(modifier: Modifier) {
         val gestureModifier = rememberDraggableModifier(Orientation.Horizontal)
-        Box(modifier) {
+        Box(modifier then gestureModifier) {
             PageContent(Modifier)
-            Box(modifier = gestureModifier) // 手势触发部分
         }
     }
 }

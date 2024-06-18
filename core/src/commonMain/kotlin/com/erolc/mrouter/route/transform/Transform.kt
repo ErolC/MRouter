@@ -35,20 +35,22 @@ private val modalScale: Float =
 private val modalProportion: Float =
     if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_PROPORTION else if (getPlatform() == Windows) 0.96f else 0.956f
 
-fun modal() = buildTransform {
+fun modal(hasGesture: Boolean = true) = buildTransform {
     enter = slideInVertically { it }
     exit = scaleOut(targetScale = modalScale)
-    wrap = ModalTransformWrap(modalProportion)
+    wrap = ModalTransformWrap(modalProportion, hasGesture)
 }
 
-fun normal() = buildTransform {
+/**
+ * @param hasGesture 是否可以手势返回
+ */
+fun normal(hasGesture: Boolean = true) = buildTransform {
     enter = slideInHorizontally { it }
     exit = slideOutHorizontally { -it / 7 }
-    wrap = NormalTransformWrap()
+    wrap = if (hasGesture) NormalTransformWrap() else NoneTransformWrap()
 }
 
 fun none() = buildTransform {
-    enter = slideInHorizontally { it }
     wrap = NoneTransformWrap()
 }
 

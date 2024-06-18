@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Size
 import com.erolc.mrouter.backstack.entry.LocalHostScope
 import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.scope.LocalPageScope
+import kotlin.math.abs
 import kotlin.reflect.KClass
 
 val LocalTransformWrapScope = compositionLocalOf { TransformWrapScope() }
@@ -72,6 +73,40 @@ class TransformWrapScope {
         }
         val pageScope = LocalPageScope.current
         val anchoredDraggableState = rememberAnchoredDraggableState(pageScope, 0f, anchors)
+        var offset = anchoredDraggableState.offset
+        if (offset.isNaN())
+            offset = 0f
+        val offsetProgress = if (max == 0f) 0f else offset / max //0-1
+        remember(offsetProgress) {
+            //1-postExit;0-resume
+            progress(offsetProgress)
+        }
+        return anchoredDraggableState
+    }
+
+    /**
+     * @param proportion 百分比，即该手势范围占页面的多少。
+     * @param progress 手势的进度，0-1
+     * @param orientation 手势的方向
+     */
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun rememberEndDraggableState(
+        progress: (Float) -> Unit,
+        orientation: Orientation = Orientation.Horizontal
+    ): AnchoredDraggableState<Float> {
+        val size by LocalHostScope.current.size.collectAsState()
+        val gapSize by gapSize
+        val squareSize = if (orientation == Orientation.Horizontal) size.width else size.height
+        val max = squareSize - gapSize
+        val anchors = remember(max) {
+            DraggableAnchors {
+                0f at -max
+                1f at 0f
+            }
+        }
+        val pageScope = LocalPageScope.current
+        val anchoredDraggableState = rememberAnchoredDraggableState("end_$pageScope", max, anchors)
         var offset = anchoredDraggableState.offset
         if (offset.isNaN())
             offset = 0f

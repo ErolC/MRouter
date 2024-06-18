@@ -14,8 +14,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.utils.rememberInPage
 
 
 /**
@@ -82,8 +91,6 @@ abstract class TransformWrap {
  * 由拖拽手势生成的两个modifier，具体可参考[ModalTransformWrap]和[NormalTransformWrap]
  * 该方法有一定的局限性，如果需要不同的手势操作请自行实现
  * @param orientation 方向
- * @param progress 进度
- * @param proportion 比例
  * @param reverseDirection 翻转
  * @return 应用在手势控件的Modifier，
  */
@@ -99,7 +106,93 @@ fun rememberDraggableModifier(
     }
     val modifier =
         if (orientation == Orientation.Horizontal)
-            Modifier.fillMaxHeight().width(15.dp)
+            Modifier.width(15.dp)
+        else
+            Modifier.fillMaxWidth().height(15.dp)
+
+    val shouldHasGesture = shouldHasGesture()
+    return if (shouldHasGesture) modifier
+        .nestedScroll(nestScrollConnection(orientation, anchoredDraggableState))
+        .anchoredDraggable(
+            state = anchoredDraggableState,
+            orientation = orientation,
+            reverseDirection = reverseDirection
+        ) else modifier
+}
+
+/**
+ * 将anchor的拖拽手势加入到嵌套滑动系统中
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun nestScrollConnection(
+    orientation: Orientation = Orientation.Horizontal,
+    anchoredDraggableState: AnchoredDraggableState<Float>
+): NestedScrollConnection {
+    var shouldDraggable by rememberInPage("should_draggable") {
+        mutableStateOf(false)
+    }
+    return rememberInPage("modal_nest_conn") {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val (data, result) = getConsumed(available, orientation)
+
+                if (shouldDraggable) {
+                    anchoredDraggableState.dispatchRawDelta(data)
+                    return result
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val (data, result) = getConsumed(available, orientation)
+                if (data > 0) {
+                    anchoredDraggableState.dispatchRawDelta(data)
+                    shouldDraggable = true
+                    return result
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                anchoredDraggableState.settle(available.y)
+                shouldDraggable = false
+                return super.onPreFling(available)
+            }
+        }
+    }
+}
+
+private fun getConsumed(available: Offset, orientation: Orientation) =
+    if (orientation == Orientation.Vertical)
+        available.y to Offset(0f, available.y)
+    else
+        available.x to Offset(available.x, 0f)
+
+/**
+ * 是否应该有手势
+ */
+@Composable
+fun shouldHasGesture() = !LocalPageScope.current.router.parentRouter.backStack.isBottom()
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun rememberEndDraggableModifier(
+    orientation: Orientation = Orientation.Horizontal,
+    reverseDirection: Boolean = false
+): Modifier {
+    val scope = LocalTransformWrapScope.current
+    val anchoredDraggableState = scope.run {
+        rememberEndDraggableState(progress, orientation)
+    }
+    val modifier =
+        if (orientation == Orientation.Horizontal)
+            Modifier.width(15.dp)
         else
             Modifier.fillMaxWidth().height(15.dp)
 
@@ -109,7 +202,6 @@ fun rememberDraggableModifier(
         reverseDirection = reverseDirection
     )
 }
-
 
 /**
  * @param initialValue 初始值
