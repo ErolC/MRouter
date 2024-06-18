@@ -23,7 +23,7 @@ fun normal() = buildTransform {
 `TransformWrap`是变换包裹层，这里有三个主要的方法：
 
 `PageContent`:代表当前页面。<br>
-`Wrap`:包裹层实现，主要是结合PageContent设置一些所有页面通用且额外的控件或Modifier，比如手势区域。<br>
+`Wrap`:包裹层实现，主要是结合PageContent设置一些所有页面通用且额外的控件或Modifier，比如**手势**。<br>
 `prevPageModifier`:前一个页面的Modifier。可设置一次变换过程中前一个页面参与变化的部分。比如`modal`变换时，前一个页面的页面角需要发生圆角变化。
 
 > 在实现`Wrap`时，必须使用`PageContent`函数
