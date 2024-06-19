@@ -125,53 +125,68 @@ fun rememberDraggableModifier(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun nestScrollConnection(
+private fun nestScrollConnection(
     orientation: Orientation = Orientation.Horizontal,
     anchoredDraggableState: AnchoredDraggableState<Float>
 ): NestedScrollConnection {
-    var shouldDraggable by rememberInPage("should_draggable") {
-        mutableStateOf(false)
-    }
     return rememberInPage("modal_nest_conn") {
         object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val (data, result) = getConsumed(available, orientation)
+            var canDigestion = false
 
-                if (shouldDraggable) {
-                    anchoredDraggableState.dispatchRawDelta(data)
-                    return result
-                }
-                return Offset.Zero
+            //计算我能消费多少，然后返回给子控件的是我消费了多少
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                //这里并不是计算我能消费多少，而是我优先消费，我如果不消费则是让子控件消费
+                if (source != NestedScrollSource.Drag)
+                    return Offset.Zero
+                val myFirst =
+                    if (orientation == Orientation.Vertical) available.y < 0 else available.x < 0
+                return if (canDigestion && myFirst)
+                    getConsumed(orientation, anchoredDraggableState, available)
+                else Offset.Zero
             }
 
+            //子控件已经消化完了，这时我再计算我能消费多少，然后返回给子控件的是我消费了多少
             override fun onPostScroll(
                 consumed: Offset,
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                val (data, result) = getConsumed(available, orientation)
-                if (data > 0) {
-                    anchoredDraggableState.dispatchRawDelta(data)
-                    shouldDraggable = true
-                    return result
+                if (source != NestedScrollSource.Drag)
+                    return Offset.Zero
+                canDigestion = consumed != Offset.Zero
+                return if (canDigestion) {
+                    getConsumed(orientation, anchoredDraggableState, available)
+                } else {
+                    super.onPostScroll(consumed, available, source)
                 }
-                return Offset.Zero
             }
 
-            override suspend fun onPreFling(available: Velocity): Velocity {
-                anchoredDraggableState.settle(available.y)
-                shouldDraggable = false
-                return super.onPreFling(available)
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                anchoredDraggableState.settle(if (orientation == Orientation.Vertical) available.y else available.x)
+                return Velocity.Zero
             }
+
+            @OptIn(ExperimentalFoundationApi::class)
+            fun getConsumed(
+                orientation: Orientation,
+                anchoredDraggableState: AnchoredDraggableState<Float>,
+                available: Offset
+            ) =
+                when (orientation) {
+                    Orientation.Vertical -> {
+                        val y = anchoredDraggableState.dispatchRawDelta(available.y)
+                        Offset(available.x, y)
+                    }
+
+                    else -> {
+                        val x = anchoredDraggableState.dispatchRawDelta(available.x)
+                        Offset(x, available.y)
+                    }
+                }
         }
     }
 }
 
-private fun getConsumed(available: Offset, orientation: Orientation) =
-    if (orientation == Orientation.Vertical)
-        available.y to Offset(0f, available.y)
-    else
-        available.x to Offset(available.x, 0f)
 
 /**
  * 是否应该有手势
