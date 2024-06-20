@@ -137,7 +137,8 @@ class PageEntry internal constructor(
                 }
             }
         }
-        if (scope.transformTransition == null) scope.transformTransition = newState
+        //这里必须如此
+        if (scope.transformTransition.toString() == "null") scope.transformTransition = newState
 
         val transform by rememberPrivateInPage("page_transform", transform) { transform }
         Box(newState.createModifier(transform, modifier, "Built-in")) {

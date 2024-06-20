@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /**
  * 在一个页面中可以有多个局部路由，如果需要路由到这些界面上则需要指明key。
  * 比如 key:page?var=data,即可跳转到当前页面中的key局部路由的page页面上，并传入参数data
- * @param key 局部路由的id,默认的key是[Constants.DEFAULT_PANEL]，只有该局部路由可以在界面变小时（局部路由消失时）并入到主路由上。
+ * @param key 局部路由的id,默认的key是[Constants.DEFAULT_PANEL]，只有该局部路由可以在界面变小时（局部路由消失时）并入到主路由上。请不要设置root
  * @param startRoute 当直接显示时所路由的第一个页面
  * @param panelState 面板状态
  * @param onPanelChange 面板显示状态改变（是否附着在页面上）
@@ -36,6 +36,9 @@ fun PanelHost(
     modifier: Modifier = Modifier
 ) {
     val scope = LocalPageScope.current
+    if (key == Constants.ROOT)
+        throw RuntimeException("The key of the panel cannot be set to 'root'")
+
     val router = rememberPrivateInPage("panel_router_$key", key) {
         scope.router
     }

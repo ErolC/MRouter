@@ -1,11 +1,7 @@
 package page
 
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateInt
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -93,12 +89,9 @@ fun Anim() = Page {
 fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
     val args = rememberArgs()
     //页面元素如果希望在页面过程中也有动画的表现，可以使用该方法获得转换过程，
-    val transition = rememberTransformTransition()
-    val padding by transition.animateInt {
-        when (it) {
-            EnterState -> 200// 页面进入
-            else -> it.between(30f, 300f).toInt()
-        }
+    val transition = rememberTransformState()
+    val y by transition.animateInt {
+        it.between(30, 300)
     }
     Column {
         val gesture = args.getString("gesture")
@@ -113,7 +106,7 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
             else -> Button(onClick = {
                 backPressed()
             }, modifier = Modifier.offset {
-                IntOffset(0,padding)
+                IntOffset(0,y)
             }) {
                 Text("back")
             }

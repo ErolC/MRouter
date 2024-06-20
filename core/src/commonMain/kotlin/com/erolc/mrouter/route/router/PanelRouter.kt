@@ -2,6 +2,7 @@ package com.erolc.mrouter.route.router
 
 import androidx.lifecycle.Lifecycle
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.MRouter
 import com.erolc.mrouter.backstack.entry.*
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.model.Address
@@ -51,7 +52,12 @@ class PanelRouter(
     }
 
     override fun dispatchRoute(route: Route) {
-        val panel = panelStacks[route.panelOptions?.key]
+        val key = route.panelOptions?.key
+        if (key == Constants.ROOT) {
+            MRouter.route(route)
+            return
+        }
+        val panel = panelStacks[key]
         if (panel == null || !showPanels.contains(route.panelOptions?.key))
             parentRouter.dispatchRoute(route)
         else panel.pageRouter.route(route)

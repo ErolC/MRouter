@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.scope.rememberLazyListState
 import com.erolc.mrouter.utils.Page
@@ -26,14 +27,10 @@ fun Gesture() = Page {
             Future("modal", "modal")
         )
     }
-    val transition = rememberTransformTransition()
+    val transition = rememberTransformState()
     val padding by transition.animateDp {
-        when (it) {
-            EnterState -> 200.dp
-            else -> it.between(300f, 30f).dp
-        }
+        it.between(300.dp, 30.dp)
     }
-
     Row(modifier = Modifier.fillMaxWidth()) {
         Button(onClick = {
             backPressed()

@@ -55,12 +55,13 @@ object MRouter {
         return rootRouter.getBackStack().collectAsState(listOf<WindowEntry>())
     }
 
-    private fun route(route: Route) {
+    internal fun route(route: Route) {
         rootRouter.run {
             val entry = backStack.findEntry(route.windowOptions.id) as? WindowEntry
             entry?.pageRouter?.dispatchRoute(route) ?: dispatchRoute(route)
         }
     }
+
 
     /**
      * 在compose外部（各个平台）使用该方法可路由到对应页面，但无法路由到对应页面的对应面板/局部（panel)中。

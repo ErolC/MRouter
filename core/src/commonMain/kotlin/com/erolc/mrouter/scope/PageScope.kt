@@ -7,12 +7,9 @@ import androidx.core.bundle.Bundle
 import androidx.core.bundle.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import com.erolc.mrouter.lifecycle.LifecycleOwnerDelegate
 import com.erolc.mrouter.lifecycle.addEventObserver
-import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.*
 import com.erolc.mrouter.route.router.PanelRouter
-import com.erolc.mrouter.route.router.Router
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.route.transform.EnterState
 import com.erolc.mrouter.utils.PageCache
@@ -109,7 +106,7 @@ class PageScope {
     }
 
     @Composable
-    internal fun rememberTransform(): Transition<TransformState>? {
+    internal fun getTransformState(): Transition<TransformState>? {
         return transformTransition
     }
 }

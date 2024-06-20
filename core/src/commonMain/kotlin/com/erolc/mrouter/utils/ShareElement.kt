@@ -9,6 +9,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -87,10 +89,11 @@ data class Sharing(val progress: Float) : ShareState {
      * 将是当前界面元素的值[between]到上一个页面元素的值
      * @param pre 上一个页面元素的值
      */
-    infix fun Float.between(pre: Float): Float {
+    internal infix fun Float.between(pre: Float): Float {
         return pre - (pre - this) * progress
     }
 }
+
 
 /**
  * 共享结束
@@ -100,22 +103,12 @@ data object ExitShare : ShareState
 val ShareState.preShare get() = this is PreShare
 
 
-internal fun Sharing.updateRect(startRect: Rect, endRect: Rect): Rect {
-    val sTop = startRect.top
-    val sLeft = startRect.left
-    val sRight = startRect.right
-    val sBottom = startRect.bottom
-    val eTop = endRect.top
-    val eLeft = endRect.left
-    val eRight = endRect.right
-    val eBottom = endRect.bottom
-    return Rect(
-        eLeft between sLeft,
-        eTop between sTop,
-        eRight between sRight,
-        eBottom between sBottom
-    )
-}
+internal fun Sharing.updateRect(startRect: Rect, endRect: Rect) = Rect(
+    endRect.left between startRect.left,
+    endRect.top between startRect.top,
+    endRect.right between startRect.right,
+    endRect.bottom between startRect.bottom
+)
 
 /**
  *
@@ -153,7 +146,7 @@ fun <T> updateValue(
 
 
 internal fun Sharing.between(pre: Int, current: Int) =
-    run { pre - (pre - current) * progress }.toInt()
+    (current.toFloat() between pre.toFloat()).toInt()
 
 fun sharing(sharing: Sharing, pre: Float, current: Float) = sharing.run { current between pre }
 fun sharing(sharing: Sharing, pre: Int, current: Int): Int = sharing.between(pre, current)
@@ -162,10 +155,23 @@ fun sharing(sharing: Sharing, pre: Dp, current: Dp) =
 
 fun sharing(sharing: Sharing, pre: Rect, current: Rect) = sharing.updateRect(pre, current)
 fun sharing(sharing: Sharing, pre: Offset, current: Offset) =
-    pre - (pre - current) * sharing.progress
+    Offset(
+        sharing(sharing, pre.x, current.x),
+        sharing(sharing, pre.y, current.y)
+    )
 
 fun sharing(sharing: Sharing, pre: IntOffset, current: IntOffset) =
-    pre - (pre - current) * sharing.progress
+    IntOffset(
+        sharing(sharing, pre.x, current.x),
+        sharing(sharing, pre.y, current.y)
+    )
+
+fun sharing(sharing: Sharing, pre: DpOffset, current: DpOffset) =
+    DpOffset(
+        sharing(sharing, pre.x, current.x),
+        sharing(sharing, pre.y, current.y)
+    )
+
 
 fun sharing(sharing: Sharing, pre: Size, current: Size) = sharing.run {
     Size(pre.width between current.width, pre.height between current.height)
@@ -174,6 +180,12 @@ fun sharing(sharing: Sharing, pre: Size, current: Size) = sharing.run {
 fun sharing(sharing: Sharing, pre: IntSize, current: IntSize) = sharing.run {
     IntSize(between(pre.width, current.width), between(pre.height, current.height))
 }
+
+fun sharing(sharing: Sharing, pre: DpSize, current: DpSize) = DpSize(
+    sharing(sharing, pre.width, current.width),
+    sharing(sharing, pre.height, current.height)
+)
+
 
 fun sharing(sharing: Sharing, pre: Color, current: Color) = sharing.run {
     val converter = Color.VectorConverter(pre.colorSpace)
