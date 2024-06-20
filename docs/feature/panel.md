@@ -42,6 +42,9 @@
 通过给路径加前缀`local:`或者使用RouteBuild的`panel`
 方法都可以在路由时将地址路由到panel中，其中的local就是这个panel的key。<br>
 如果当前页面并不存在key为local的panel，那么将和普通的路由别无二致。
+## 局部路由到主路由
+在局部内使用路由，可以在路径上加`root`前缀，比如：`root:path`，这样path对应的地址将路由到主路由（window下的首层page）<br>
+因此局部路由创建是不可使用root作为key。
 
 ## HostSize
 
