@@ -25,7 +25,7 @@ open class HostScope {
     private val _hostSize = mutableStateOf(DefHostSize)
     val hostSize: State<HostSize> = _hostSize
 
-    open fun setHostSize(size: HostSize) {
+    internal open fun setHostSize(size: HostSize) {
         _hostSize.value = size
     }
 }

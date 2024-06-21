@@ -115,8 +115,14 @@ class PageScope {
  * 获取上一个页面传递过来的数据
  */
 @Composable
-fun rememberArgs(): Bundle {
-    val args by LocalPageScope.current.args
+fun rememberArgs() = LocalPageScope.current.rememberArgs()
+
+/**
+ * 获取上一个页面传递过来的数据
+ */
+@Composable
+fun PageScope.rememberArgs(): Bundle {
+    val args by this.args
     return args
 }
 

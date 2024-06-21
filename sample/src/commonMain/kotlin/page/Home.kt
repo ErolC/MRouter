@@ -22,6 +22,7 @@ import com.erolc.mrouter.platform.isDesktop
 import com.erolc.mrouter.platform.loge
 import com.erolc.mrouter.route.transform.fadeIn
 import com.erolc.mrouter.route.transform.modal
+import com.erolc.mrouter.route.transform.normal
 import com.erolc.mrouter.route.transform.share
 
 data class Future(val name: String, val value: String)
@@ -58,7 +59,9 @@ fun Home() = Page {
                                 "share" -> route("share")
                                 "anim" -> route("anim")
                                 "list" -> route("list")
-                                "gesture" -> route("gesture")
+                                "gesture" -> route("gesture"){
+                                    transform = normal()
+                                }
                                 "window" -> route("sample/first") {
                                     window("secondWindow", "这是第二个窗口")
                                 }

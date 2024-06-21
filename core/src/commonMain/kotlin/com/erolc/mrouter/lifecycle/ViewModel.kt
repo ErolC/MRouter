@@ -18,7 +18,7 @@ import com.erolc.mrouter.platform.getViewModelProvider
 import com.erolc.mrouter.platform.isAndroid
 import kotlin.reflect.KClass
 
-interface MRouterViewModelStoreProvider {
+internal interface MRouterViewModelStoreProvider {
     fun getViewModelStore(entryId: String): ViewModelStore
 }
 
@@ -32,7 +32,9 @@ internal expect class MRouterControllerViewModel : ViewModel, MRouterViewModelSt
     override fun getViewModelStore(entryId: String): ViewModelStore
 }
 
-
+/**
+ * 包装获取泛型类型
+ */
 inline fun <reified T : Any> getKClassForGenericType(): KClass<T> = T::class
 
 /**
@@ -69,8 +71,8 @@ inline fun <reified VM : ViewModel> viewModel(
 @Composable
 fun <T : ViewModel> viewModelImpl(
     modelClass: KClass<T>,
-    emptyBlock: (() -> T)? = null,
-    block: ((SavedStateHandle) -> T)? = null,
+    emptyBlock: EmptyConstructor? = null,
+    block: SSHConstructor? = null,
     key: String? = null
 ): T {
     val viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
@@ -84,20 +86,24 @@ fun <T : ViewModel> viewModelImpl(
     block?.let { extras[SavedStateHandleCreateKey] = it }
         ?: emptyBlock?.let { extras[EmptyCreateKey] = it }
     return viewModelStoreOwner.createVM(modelClass, key, extras)
-
 }
 
 internal typealias EmptyConstructor = () -> ViewModel
 internal typealias SSHConstructor = (SavedStateHandle) -> ViewModel
+/**
+ * 空构造函数的key
+ */
+internal object EmptyCreateKey : CreationExtras.Key<EmptyConstructor>
 
-object EmptyCreateKey : CreationExtras.Key<EmptyConstructor>
-object SavedStateHandleCreateKey : CreationExtras.Key<SSHConstructor>
+/**
+ * 拥有SaveStateHandle构造函数的key
+ */
+internal object SavedStateHandleCreateKey : CreationExtras.Key<SSHConstructor>
+
 
 /**
  * 用于构造简单的ViewModel的工厂
  */
-
-
 @Composable
 fun <VM : ViewModel> ViewModelStoreOwner.createVM(
     modelClass: KClass<VM>,

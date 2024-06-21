@@ -1,7 +1,5 @@
 package com.erolc.mrouter.route.shareelement
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,7 +30,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * @param styles 样式列表，给共享元素内的元素使用
  * @param content 共享元素的界面
  */
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Element(
     key: Any,

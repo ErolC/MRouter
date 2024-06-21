@@ -16,18 +16,23 @@ import com.erolc.mrouter.platform.safeAreaInsetsTop
 /**
  * 类ios的Modal手势实现，在页面route时设置[modal]即可使用
  */
-class ModalTransformWrap(private val proportion: Float, private val hasGesture: Boolean) :
-    TransformWrap() {
+class ModalTransformWrap(private val proportion: Float, gestureModel: GestureModel) :
+    TransformWrap(gestureModel) {
     private val prevCorner = if (iosHasNotch) safeAreaInsetsTop() else 0f
 
     @Composable
     override fun Wrap(modifier: Modifier) {
         val scope = LocalTransformWrapScope.current
         val padding by scope.getGapSize(proportion)
-        Box(modifier = modifier.padding(top = with(LocalDensity.current) {
-            padding.toDp()
-        }) then if (hasGesture) rememberDraggableModifier(Orientation.Vertical) else Modifier) {
+        val gestureModifier = rememberDraggableModifier(Orientation.Vertical)
+        Box(
+            modifier = matchModifier(
+                modifier.padding(top = with(LocalDensity.current) { padding.toDp() }),
+                gestureModifier
+            )
+        ) {
             PageContent(Modifier.clip(RoundedCornerShape(10.dp)))
+            Gesture(gestureModifier)
         }
     }
 

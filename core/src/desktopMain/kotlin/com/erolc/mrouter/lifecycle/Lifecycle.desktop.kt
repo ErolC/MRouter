@@ -38,7 +38,7 @@ actual class LifecycleOwnerDelegate private constructor(
             Bundle(immutableArgs)
         }
 
-    actual constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?) : this(
+    internal actual constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?) : this(
         delegate.viewModelStoreProvider,
         delegate.hostLifecycleState,
         arguments,
@@ -53,7 +53,7 @@ actual class LifecycleOwnerDelegate private constructor(
     }
 
     companion object {
-        fun create(
+        internal fun create(
             viewModelStoreProvider: MRouterViewModelStoreProvider?,
             hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
             immutableArgs: Bundle?,
@@ -176,7 +176,7 @@ actual class LifecycleOwnerDelegate private constructor(
     private class SavedStateViewModel(val handle: SavedStateHandle) : ViewModel()
 }
 
-actual fun createLifecycleOwnerDelegate(
+internal actual fun createLifecycleOwnerDelegate(
     viewModelStoreProvider: MRouterViewModelStoreProvider?,
     hostLifecycleState: Lifecycle.State,
     immutableArgs: Bundle?

@@ -17,7 +17,7 @@ import com.erolc.mrouter.platform.WeakReference
 import com.erolc.mrouter.platform.randomUUID
 
 @Composable
-actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
+internal actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
     saveableStateHolder: SaveableStateHolder,
     pageScope: PageScope,
     content: @Composable () -> Unit

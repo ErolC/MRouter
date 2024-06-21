@@ -3,6 +3,7 @@ package com.erolc.mrouter.route.transform
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
 import com.erolc.mrouter.Constants
+import com.erolc.mrouter.model.ShareGesture
 import com.erolc.mrouter.platform.Mac
 import com.erolc.mrouter.platform.Windows
 import com.erolc.mrouter.platform.getPlatform
@@ -25,33 +27,35 @@ import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
-/**
- * 转换动画，从一个页面到另外一个页面可设置相应的动画效果，其中的[fadeIn]，[fadeOut]等一众方法都与系统提供的一致，可直接使用，无学习成本
- * 并在此之上增加了[Transform]，该类描述了一次转换所需要的动画以及手势
- */
-
 private val modalScale: Float =
     if (iosHasNotch) Constants.IOS_NOTCH_MODAL_SCALE else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_SCALE else 0.96f
 private val modalProportion: Float =
     if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_PROPORTION else if (getPlatform() == Windows) 0.96f else 0.956f
 
-fun modal(hasGesture: Boolean = true) = buildTransform {
+/**
+ * modal的页面过渡动画，类ios的modal效果
+ */
+fun modal() = buildTransform {
     enter = slideInVertically { it }
     exit = scaleOut(targetScale = modalScale)
-    wrap = ModalTransformWrap(modalProportion, hasGesture)
+    wrap = ModalTransformWrap(modalProportion, GestureModel.Full)
 }
 
 /**
- * @param hasGesture 是否可以手势返回
+ * 普通的页面过渡动画，主要为：页面从右到左进入，上一个页面也是从右到左进入到栈内，但是幅度较小，支持从左到右滑动手势退出。
+ * @param gestureModel  手势模式。[GestureModel.None]：无手势；[GestureModel.Local]:局部手势，仅在页面左侧拥有15dp宽度的手势区域，如果是android则会现在在左侧中间200dp高度内；[GestureModel.Full]：全面手势，在页面任何地方都可使用手势后退；[GestureModel.Both]：相当于同时设置了[GestureModel.Full]和[GestureModel.Local]
  */
-fun normal(hasGesture: Boolean = true) = buildTransform {
+fun normal(gestureModel: GestureModel = GestureModel.Both) = buildTransform {
     enter = slideInHorizontally { it }
     exit = slideOutHorizontally { -it / 7 }
-    wrap = if (hasGesture) NormalTransformWrap() else NoneTransformWrap()
+    wrap = NormalTransformWrap(gestureModel)
 }
 
+/**
+ * 没有任何过渡动画和手势
+ */
 fun none() = buildTransform {
-    wrap = NoneTransformWrap()
+    wrap = NormalTransformWrap(GestureModel.None)
 }
 
 /**
@@ -59,17 +63,22 @@ fun none() = buildTransform {
  * @param keys 指定参与该次页面切换的共享控件
  * @param animationSpec 页面转换动画使用
  * @param shareAnimationSpec 共享元素变换使用,控制共享元素尺寸的变化
- * @param wrap 变换包装类，可以在这里处理变换过程中两个页面的一些变化，可以通过该类给共享元素变换加上手势退出，可参考[NormalShareTransformWrap]
+ * @param gesture 手势设置，目前仅支持设置手势的模式和方向
  * 需要注意的是，如果给[shareAnimationSpec]或[animationSpec]设置[tween]那么请给另一个也加上，并且给予相同的时间，如此两者的进度才是一致的。
  */
 fun share(
     vararg keys: Any,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     shareAnimationSpec: FiniteAnimationSpec<Rect> = spring(visibilityThreshold = Rect.VisibilityThreshold),
-    wrap: TransformWrap = NormalShareTransformWrap(shareAnimationSpec, *keys)
+    gesture: ShareGesture = ShareGesture(GestureModel.None, Orientation.Horizontal)
 ) = buildTransform {
     enter = fadeIn(animationSpec)
-    this.wrap = wrap
+    this.wrap = NormalShareTransformWrap(
+        shareAnimationSpec,
+        gesture.gestureModel,
+        gesture.orientation,
+        *keys
+    )
 }
 
 @Stable
@@ -334,7 +343,9 @@ private fun Alignment.Vertical.toAlignment() =
         else -> Alignment.Center
     }
 
-
+/**
+ * 变换构造类，用于构造[Transform]
+ */
 class TransformBuilder {
     /**
      * 进入时新页面的动画效果
@@ -351,12 +362,15 @@ class TransformBuilder {
      */
     var popExit: ExitTransition = ExitTransition.None
 
-    var wrap: TransformWrap = NoneTransformWrap()
+    var wrap: TransformWrap = NormalTransformWrap(GestureModel.None)
     internal fun build(): Transform {
         return Transform(enter, popExit, exit, wrap)
     }
 }
 
+/**
+ * transform构造方法
+ */
 fun buildTransform(body: TransformBuilder.() -> Unit = {}): Transform {
     return TransformBuilder().apply(body).build()
 }
@@ -374,14 +388,14 @@ data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _popExit: ExitTransition = ExitTransition.None,
     internal val exit: ExitTransition = slideOutHorizontally { 0 },
-    internal val wrap: TransformWrap = NoneTransformWrap()
+    internal val wrap: TransformWrap = NormalTransformWrap(GestureModel.None)
 ) {
 
     companion object {
         val None = Transform()
     }
 
-    val popExit get() = if (_popExit == ExitTransition.None) ExitTransitionImpl(enter.data) else _popExit
+    private val popExit get() = if (_popExit == ExitTransition.None) ExitTransitionImpl(enter.data) else _popExit
 
     internal fun trackActive(transition: Transition<TransformState>): TransformData {
         return with(transition.segment) {

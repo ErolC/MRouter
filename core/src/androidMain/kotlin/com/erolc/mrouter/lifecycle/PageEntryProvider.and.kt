@@ -17,7 +17,7 @@ import java.lang.ref.WeakReference
 import java.util.UUID.randomUUID
 
 @Composable
-actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
+internal actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
     saveableStateHolder: SaveableStateHolder,
     pageScope: PageScope,
     content: @Composable () -> Unit

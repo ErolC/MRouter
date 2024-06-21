@@ -18,7 +18,7 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.WeakReference
 
 @Composable
-actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
+internal actual fun LifecycleOwnerDelegate.LocalOwnersProvider(
     saveableStateHolder: SaveableStateHolder,
     pageScope: PageScope,
     content: @Composable () -> Unit

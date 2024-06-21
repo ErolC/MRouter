@@ -97,11 +97,11 @@ fun Target() = Page(modifier = Modifier.background(Color.Gray)) {
         val gesture = args.getString("gesture")
         when (gesture) {
             "normal" -> Text(
-                "可将手指或鼠标通过拖拽页面的最左侧实现右滑动后退",
+                "可将手指或鼠标通过拖拽页面的任何地方进行右滑动后退",
                 modifier = Modifier
             )
 
-            "modal" -> Text("可将手指或鼠标通过拖拽页面的最上方实现向下滑动后退",
+            "modal" -> Text("可将手指或鼠标通过拖拽页面的任何地方进行下滑动后退",
                 modifier = Modifier)
             else -> Button(onClick = {
                 backPressed()

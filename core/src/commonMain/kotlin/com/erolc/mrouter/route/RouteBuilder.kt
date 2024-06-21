@@ -21,14 +21,14 @@ fun routeBuild(route: String, optionsBuilder: RouteBuilder.() -> Unit = {}): Rou
  * 路由构建类，用于构建路由到下一个页面所需的一些数据：参数，回调等。
  */
 class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
-    internal var onResult: (Bundle) -> Unit = {}
+    private var onResult: (Bundle) -> Unit = {}
     private var windowOptions: WindowOptions = WindowOptions(currentWindowId, "")
 
     private val args = bundleOf()
 
     var flag: RouteFlag = NormalFlag
 
-    var transform: Transform = normal(isMobile)
+    var transform: Transform = normal(if (isMobile) GestureModel.Both else GestureModel.None)
 
     private var panelOptions: PanelOptions? = null
 

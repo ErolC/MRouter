@@ -1,5 +1,6 @@
 package com.erolc.mrouter.model
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpOffset
@@ -19,6 +20,7 @@ import com.erolc.mrouter.Constants
  * @param position window位置
  * @param alignment 对齐方式，比如说window居中：[Alignment.Center],请注意，在[alignment] 设置了值之后，[position]将失效
  */
+@Immutable
 data class WindowOptions(
     val id: String,
     val title: String = "",

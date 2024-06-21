@@ -27,7 +27,7 @@ class WindowScope(val id: String = "") : HostScope() {
     override fun setHostSize(size: HostSize) {
     }
 
-    fun setWindowHostSize(size: HostSize) {
+    internal fun setWindowHostSize(size: HostSize) {
         super.setHostSize(size)
     }
 }

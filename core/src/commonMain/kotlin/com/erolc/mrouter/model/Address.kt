@@ -1,6 +1,7 @@
 package com.erolc.mrouter.model
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import com.erolc.mrouter.register.emptyConfig
 
 /**
@@ -10,6 +11,7 @@ import com.erolc.mrouter.register.emptyConfig
  * @param content 页面内容本体
  * @param matchKey 用于匹配的key
  */
+@Immutable
 data class Address(
     val path: String,
     val config: PageConfig = emptyConfig,

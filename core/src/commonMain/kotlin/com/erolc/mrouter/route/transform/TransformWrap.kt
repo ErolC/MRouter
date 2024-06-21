@@ -17,12 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.erolc.mrouter.platform.loge
+import com.erolc.mrouter.platform.GestureContent
 import com.erolc.mrouter.scope.LocalPageScope
 import com.erolc.mrouter.utils.rememberInPage
 
@@ -30,10 +29,24 @@ import com.erolc.mrouter.utils.rememberInPage
 /**
  * 变换包裹层，在这里可以同时控制当前页面和前一个页面的变化。
  */
-abstract class TransformWrap {
+abstract class TransformWrap(private val gestureModel: GestureModel = GestureModel.Local) {
     internal var isUseContent = false
     internal var pauseModifierPost = PauseModifierPost { prevPageModifier() }
     internal var gestureModifier = PauseModifierPost { Modifier }
+
+    fun matchModifier(modifier: Modifier, gestureModifier: Modifier) = when (gestureModel) {
+        GestureModel.Local, GestureModel.None -> modifier
+        else -> modifier then gestureModifier
+
+    }
+
+    @Composable
+    fun BoxScope.Gesture(gestureModifier: Modifier) {
+        when (gestureModel) {
+            GestureModel.Full, GestureModel.None -> {}
+            else -> GestureContent(gestureModifier)
+        }
+    }
 
     /**
      * 这是内容部分，应当被包裹的部分，必须调用
@@ -255,3 +268,28 @@ fun <T : Any> rememberAnchoredDraggableState(
         )
     }
 }
+
+
+sealed interface GestureModel {
+
+    /**
+     * 全面手势，在页面任何地方都可使用手势，请页面内元素做好滑动冲突
+     */
+    data object Full : GestureModel
+
+    /**
+     * 局部手势，在特定区域才能使用的手势，一般来说向下滑动的那么手势将在页面上方高占位15dp，向右滑动的则在页面左侧
+     */
+    data object Local : GestureModel
+
+    /**
+     * 两者兼容，该模式下上述的两个区域同时都可使用
+     */
+    data object Both : GestureModel
+
+    /**
+     * 无手势，该模式下将无任何手势
+     */
+    data object None : GestureModel
+}
+

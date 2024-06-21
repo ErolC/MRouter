@@ -3,6 +3,7 @@ package com.erolc.mrouter.model
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Rect
@@ -14,11 +15,13 @@ import com.erolc.mrouter.utils.ShareState
  * @param start 开始页面的共享元素
  * @param end 结束页面的共享元素
  */
+@Immutable
 data class ShareElementGroup(val start: ShareElement, val end: ShareElement, val key: Any)
 
 /**
  * 共享条目
  */
+@Immutable
 data class ShareEntry(
     val groups: List<ShareElementGroup>,
     val shareAnimationSpec: FiniteAnimationSpec<Rect>,

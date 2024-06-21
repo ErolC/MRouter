@@ -9,6 +9,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 
 /**
  * 添加事件监听
+ * @param body 事件回调
  */
 fun Lifecycle.addEventObserver(body: (source: LifecycleOwner, event: Lifecycle.Event) -> Unit) {
     addObserver(LifecycleEventObserver { source, event ->
@@ -16,10 +17,13 @@ fun Lifecycle.addEventObserver(body: (source: LifecycleOwner, event: Lifecycle.E
     })
 }
 
+/**
+ * 生命周期拥有者的代理，
+ */
 expect class LifecycleOwnerDelegate :
     LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner,
     HasDefaultViewModelProviderFactory {
-    constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?)
+    internal constructor(delegate: LifecycleOwnerDelegate, arguments: Bundle?)
 
     override val lifecycle: Lifecycle
 
@@ -49,7 +53,7 @@ expect class LifecycleOwnerDelegate :
     fun handleLifecycleEvent(event: Lifecycle.Event)
 }
 
-expect fun createLifecycleOwnerDelegate(
+internal expect fun createLifecycleOwnerDelegate(
     viewModelStoreProvider: MRouterViewModelStoreProvider?,
     hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
     immutableArgs: Bundle?
