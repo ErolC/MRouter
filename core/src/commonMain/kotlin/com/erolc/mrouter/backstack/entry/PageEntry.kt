@@ -43,6 +43,7 @@ class PageEntry internal constructor(
 
     private val pageCache = PageCache()
     internal var callBack: ResultCallBack? = null
+    private lateinit var original:Transform
 
 
     init {
@@ -91,6 +92,11 @@ class PageEntry internal constructor(
 
     // 管理当前页面的路由器
     private val pageRouter: PageRouter get() = scope.router.parentRouter
+
+    internal fun setTransform(transform: Transform){
+        original = transform
+        this.transform.value = original
+    }
 
     @Composable
     override fun Content(modifier: Modifier) {
@@ -226,6 +232,7 @@ class PageEntry internal constructor(
      */
     private fun updatePrevTransform(prev: PageEntry): TransformState {
         if (prev.isUpdateTransform) return StopState
+        transform.value = original
         prev.transform.value = prev.transform.value.copy(exit = transform.value.exit)
         prev.transform.value.wrap.updatePauseModifier(transform.value.wrap.pauseModifierPost)
         prev.isUpdateTransform = true

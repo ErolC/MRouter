@@ -44,7 +44,7 @@ internal fun createPageEntry(
         createLifecycleOwnerDelegate(viewModelStoreProvider, hostLifecycleState, route.args)
     ).apply {
         flag = if (isReplace) route.flag + ReplaceFlag else route.flag
-        transform.value = route.transform
+        setTransform(route.transform)
         callBack = route.callback
         scope.run {
             this.router = router

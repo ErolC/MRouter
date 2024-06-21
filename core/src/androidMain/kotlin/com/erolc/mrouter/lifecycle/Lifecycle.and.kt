@@ -52,7 +52,7 @@ actual class LifecycleOwnerDelegate private constructor(
     }
 
     companion object {
-        fun create(
+        internal fun create(
             viewModelStoreProvider: MRouterViewModelStoreProvider?,
             hostLifecycleState: Lifecycle.State = Lifecycle.State.CREATED,
             immutableArgs: Bundle?,

@@ -23,6 +23,7 @@ import com.erolc.mrouter.platform.Windows
 import com.erolc.mrouter.platform.getPlatform
 import com.erolc.mrouter.platform.iosHasNotch
 import com.erolc.mrouter.platform.isIos
+import com.erolc.mrouter.platform.safeAreaInsetsTop
 import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
 import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
@@ -32,6 +33,9 @@ private val modalScale: Float =
 private val modalProportion: Float =
     if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_PROPORTION else if (getPlatform() == Windows) 0.96f else 0.956f
 
+internal val corner = (if (iosHasNotch) safeAreaInsetsTop() -5 else 0f).dp
+
+private val normalTransformWrap = NormalTransformWrap(if (isIos) GestureModel.Local else GestureModel.None)
 /**
  * modal的页面过渡动画，类ios的modal效果
  */
@@ -362,7 +366,7 @@ class TransformBuilder {
      */
     var popExit: ExitTransition = ExitTransition.None
 
-    var wrap: TransformWrap = NormalTransformWrap(GestureModel.None)
+    var wrap: TransformWrap = normalTransformWrap
     internal fun build(): Transform {
         return Transform(enter, popExit, exit, wrap)
     }
@@ -388,7 +392,7 @@ data class Transform internal constructor(
     internal val enter: EnterTransition = EnterTransition.None,
     private val _popExit: ExitTransition = ExitTransition.None,
     internal val exit: ExitTransition = slideOutHorizontally { 0 },
-    internal val wrap: TransformWrap = NormalTransformWrap(GestureModel.None)
+    internal val wrap: TransformWrap = normalTransformWrap
 ) {
 
     companion object {

@@ -7,6 +7,7 @@ import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.platform.isMobile
 import com.erolc.mrouter.model.WindowOptions
+import com.erolc.mrouter.platform.isAndroid
 import com.erolc.mrouter.platform.isIos
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.window.WindowOptionsBuilder
@@ -28,7 +29,7 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
 
     var flag: RouteFlag = NormalFlag
 
-    var transform: Transform = normal(if (isMobile) GestureModel.Both else GestureModel.None)
+    var transform: Transform = normal(if (isAndroid) GestureModel.Both else if(isIos) GestureModel.Local else GestureModel.None)
 
     private var panelOptions: PanelOptions? = null
 
