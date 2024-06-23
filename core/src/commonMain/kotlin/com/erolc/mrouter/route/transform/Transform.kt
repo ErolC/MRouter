@@ -23,6 +23,7 @@ import com.erolc.mrouter.platform.Windows
 import com.erolc.mrouter.platform.getPlatform
 import com.erolc.mrouter.platform.iosHasNotch
 import com.erolc.mrouter.platform.isIos
+import com.erolc.mrouter.platform.isMobile
 import com.erolc.mrouter.platform.safeAreaInsetsTop
 import com.erolc.mrouter.route.transform.share.NormalShareTransformWrap
 import com.erolc.mrouter.utils.*
@@ -35,7 +36,7 @@ private val modalProportion: Float =
 
 internal val corner = (if (iosHasNotch) safeAreaInsetsTop() -5 else 0f).dp
 
-private val normalTransformWrap = NormalTransformWrap(if (isIos) GestureModel.Local else GestureModel.None)
+private val normalTransformWrap = NormalTransformWrap(if (isMobile) GestureModel.Both else GestureModel.None)
 /**
  * modal的页面过渡动画，类ios的modal效果
  */
