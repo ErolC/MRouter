@@ -7,7 +7,10 @@ import com.erolc.mrouter.model.PanelOptions
 import com.erolc.mrouter.model.Route
 import com.erolc.mrouter.platform.isMobile
 import com.erolc.mrouter.model.WindowOptions
+import com.erolc.mrouter.platform.Web
+import com.erolc.mrouter.platform.getPlatform
 import com.erolc.mrouter.platform.isAndroid
+import com.erolc.mrouter.platform.isDesktop
 import com.erolc.mrouter.platform.isIos
 import com.erolc.mrouter.route.transform.*
 import com.erolc.mrouter.window.WindowOptionsBuilder
@@ -29,7 +32,7 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
 
     var flag: RouteFlag = NormalFlag
 
-    var transform: Transform = normal(if (isAndroid) GestureModel.Both else if(isIos) GestureModel.Local else GestureModel.None)
+    var transform: Transform = if (getPlatform() == Web) none() else normal()
 
     private var panelOptions: PanelOptions? = null
 
@@ -74,14 +77,14 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
         panelOptions = PanelOptions(key, clearTask)
     }
 
-    internal fun build(callBack: ResultCallBack? = null,route: String): Route {
+    internal fun build(callBack: ResultCallBack? = null, route: String): Route {
         val index = route.indexOfFirst { it == '?' }
-        var query:String? = null
+        var query: String? = null
         val path = if (index == -1)
             route
         else {
-            query = route.substring(index+1)
-            route.substring(0,index)
+            query = route.substring(index + 1)
+            route.substring(0, index)
         }
         val (key, address) = getPaths(path)
         query?.let {
