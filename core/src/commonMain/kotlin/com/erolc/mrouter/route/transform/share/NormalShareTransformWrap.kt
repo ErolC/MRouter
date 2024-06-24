@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import com.erolc.mrouter.model.SimpleGesture
 import com.erolc.mrouter.route.transform.GestureModel
 import com.erolc.mrouter.route.transform.rememberDraggableModifier
 
@@ -15,14 +16,13 @@ import com.erolc.mrouter.route.transform.rememberDraggableModifier
  */
 internal class NormalShareTransformWrap(
     shareAnimationSpec: FiniteAnimationSpec<Rect>,
-    gestureModel: GestureModel,
-    private val orientation: Orientation,
+    private val gesture: SimpleGesture,
     vararg keys: Any
-) : ShareTransformWrap(shareAnimationSpec, gestureModel, *keys) {
+) : ShareTransformWrap(shareAnimationSpec, gesture.gestureModel, *keys) {
 
     @Composable
     override fun Wrap(modifier: Modifier) {
-        val gestureModifier = rememberDraggableModifier(orientation)
+        val gestureModifier = rememberDraggableModifier(gesture.orientation)
         Box(matchModifier(modifier, gestureModifier)) {
             PageContent(Modifier)
             Gesture(gestureModifier)

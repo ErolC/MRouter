@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+
 /**
  * 类ios的Modal手势实现，在页面route时设置[modal]即可使用
  */
@@ -38,6 +39,11 @@ class ModalTransformWrap(private val proportion: Float, gestureModel: GestureMod
         val corner by transform.animateDp {
             it.between(corner, corner, pause = 10.dp)
         }
-        return Modifier.clip(RoundedCornerShape(corner))
+
+        return Modifier.clip(
+            RoundedCornerShape(
+                if (corner < 0.dp) 0.dp else corner
+            )
+        )
     }
 }

@@ -17,7 +17,7 @@ import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.*
 import com.erolc.mrouter.Constants
-import com.erolc.mrouter.model.ShareGesture
+import com.erolc.mrouter.model.SimpleGesture
 import com.erolc.mrouter.platform.Mac
 import com.erolc.mrouter.platform.Windows
 import com.erolc.mrouter.platform.getPlatform
@@ -30,13 +30,22 @@ import com.erolc.mrouter.utils.*
 import kotlin.math.roundToInt
 
 private val modalScale: Float =
-    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_SCALE else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_SCALE else 0.96f
+    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_SCALE
+    else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_SCALE
+    else 0.96f
+
 private val modalProportion: Float =
-    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_PROPORTION else if (getPlatform() == Windows) 0.96f else 0.956f
+    if (iosHasNotch) Constants.IOS_NOTCH_MODAL_PROPORTION
+    else if (isIos || getPlatform() == Mac) Constants.IOS_MODAL_PROPORTION
+    else if (getPlatform() == Windows) 0.96f
+    else 0.956f
 
-internal val corner = (if (iosHasNotch) safeAreaInsetsTop() -5 else 0f).dp
+internal val corner = (if (iosHasNotch) safeAreaInsetsTop() - 5 else 0f).dp
 
-private val normalTransformWrap = NormalTransformWrap(if (isMobile) GestureModel.Both else GestureModel.None)
+private val normalSimpleGesture =
+    SimpleGesture(if (isMobile) GestureModel.Both else GestureModel.None)
+private val normalTransformWrap = NormalTransformWrap(normalSimpleGesture)
+
 /**
  * modal的页面过渡动画，类ios的modal效果
  */
@@ -48,19 +57,19 @@ fun modal() = buildTransform {
 
 /**
  * 普通的页面过渡动画，主要为：页面从右到左进入，上一个页面也是从右到左进入到栈内，但是幅度较小，支持从左到右滑动手势退出。
- * @param gestureModel  手势模式。[GestureModel.None]：无手势；[GestureModel.Local]:局部手势，仅在页面左侧拥有15dp宽度的手势区域，如果是android则会现在在左侧中间200dp高度内；[GestureModel.Full]：全面手势，在页面任何地方都可使用手势后退；[GestureModel.Both]：相当于同时设置了[GestureModel.Full]和[GestureModel.Local]
+ * @param gesture  简单手势。
  */
-fun normal(gestureModel: GestureModel = GestureModel.Both) = buildTransform {
+fun normal(gesture: SimpleGesture = normalSimpleGesture) = buildTransform {
     enter = slideInHorizontally { it }
     exit = slideOutHorizontally { -it / 7 }
-    wrap = NormalTransformWrap(gestureModel)
+    wrap = NormalTransformWrap(gesture)
 }
 
 /**
  * 没有任何过渡动画和手势
  */
 fun none() = buildTransform {
-    wrap = NormalTransformWrap(GestureModel.None)
+    wrap = NormalTransformWrap(SimpleGesture(GestureModel.None))
 }
 
 /**
@@ -68,20 +77,19 @@ fun none() = buildTransform {
  * @param keys 指定参与该次页面切换的共享控件
  * @param animationSpec 页面转换动画使用
  * @param shareAnimationSpec 共享元素变换使用,控制共享元素尺寸的变化
- * @param gesture 手势设置，目前仅支持设置手势的模式和方向
+ * @param gesture 简单手势设置，支持设置手势的模式和方向
  * 需要注意的是，如果给[shareAnimationSpec]或[animationSpec]设置[tween]那么请给另一个也加上，并且给予相同的时间，如此两者的进度才是一致的。
  */
 fun share(
     vararg keys: Any,
     animationSpec: FiniteAnimationSpec<Float> = spring(stiffness = Spring.StiffnessMediumLow),
     shareAnimationSpec: FiniteAnimationSpec<Rect> = spring(visibilityThreshold = Rect.VisibilityThreshold),
-    gesture: ShareGesture = ShareGesture(GestureModel.None, Orientation.Horizontal)
+    gesture: SimpleGesture = normalSimpleGesture
 ) = buildTransform {
     enter = fadeIn(animationSpec)
-    this.wrap = NormalShareTransformWrap(
+    wrap = NormalShareTransformWrap(
         shareAnimationSpec,
-        gesture.gestureModel,
-        gesture.orientation,
+        gesture,
         *keys
     )
 }
