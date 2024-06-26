@@ -64,6 +64,9 @@ class PageEntry internal constructor(
         flag = entry.flag
     }
 
+    /**
+     * 页面唯一标识
+     */
     val id get() = lifecycleOwnerDelegate.id
 
     //是否已冻结,冻结的entry的lifecycle是不会发生变化的

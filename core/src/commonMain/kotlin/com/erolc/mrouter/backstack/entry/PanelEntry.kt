@@ -39,7 +39,7 @@ class PanelEntry(override val address: Address) : StackEntry {
         pageRouter.backStack.pop()
     }
 
-    fun dispatchOnAddressChange() {
+    internal fun dispatchOnAddressChange() {
         pageRouter.dispatchOnAddressChange()
     }
 }

@@ -54,7 +54,7 @@ class WindowEntry(
             }
     }
 
-    fun dispatchOnAddressChange() {
+    internal fun dispatchOnAddressChange() {
         pageRouter.dispatchOnAddressChange()
     }
 

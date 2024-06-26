@@ -20,19 +20,34 @@ internal object ResourcePool {
             normal.add(address)
     }
 
+    /**
+     * 添加所有地址和资源
+     */
     fun addAll(addresses: List<Address>, platformRes: Map<String, Any>) {
         addresses.forEach { addAddress(it) }
         this.platformRes.putAll(platformRes)
     }
 
+    /**
+     * 添加平台资源
+     */
     fun addPlatformRes(pair: Pair<String, Any>) {
         platformRes[pair.first] = pair.second
     }
 
+    /**
+     * 是否没有任何地址
+     */
     fun isEmpty() = normal.isEmpty() && dynamic.isEmpty()
 
+    /**
+     * 获取平台资源
+     */
     fun getPlatformRes(): Map<String, Any> = platformRes
 
+    /**
+     * 根据[route]寻找对应的地址
+     */
     fun findAddress(route: Route): Pair<Address, Route>? {
         return normal.find { it.match(route.address) }?.let { it to route }
             ?: findDynamicAddress(route)

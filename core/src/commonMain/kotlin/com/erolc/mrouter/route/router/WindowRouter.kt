@@ -40,7 +40,7 @@ class WindowRouter : Router {
     }
 
     /**
-     * 该路由器已经是最高级的路由器，其没有父路由器
+     * 该路由器已经是最高层的路由器，其没有父路由器
      */
     override val parentRouter: Router? = null
 

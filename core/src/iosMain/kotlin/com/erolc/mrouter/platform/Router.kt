@@ -18,7 +18,7 @@ internal actual fun WindowRouter.route(
     callBack: ResultCallBack?
 ) {
     val rootVC = getRootViewController() ?: topViewController
-    val target = route.routerDispatcher as UIViewController
+    val target = route.routerSource as UIViewController
     val delegate = ResourcePool.getPlatformRes()["route_delegate"] as? RouteUIViewControllerDelegate
         ?: RouteDelegate
     delegate.route(IosRouteSource(rootVC, args, callBack), target)

@@ -19,7 +19,7 @@ data class Address(
     val matchKey:String = path
 ){
     /**
-     * 匹配地址
+     * 匹配地址，当路由时，需要通过路由匹配到对应的地址
      */
     fun match(address:String) = matchKey.toRegex().matches(address)
 }

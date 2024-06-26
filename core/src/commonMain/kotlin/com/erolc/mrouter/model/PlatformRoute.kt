@@ -1,4 +1,6 @@
 package com.erolc.mrouter.model
 
-
-internal data class PlatformRoute(val routerDispatcher: Any)
+/**
+ * 平台路由对象
+ */
+internal data class PlatformRoute(val routerSource: Any)

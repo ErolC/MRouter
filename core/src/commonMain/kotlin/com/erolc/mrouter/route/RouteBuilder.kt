@@ -32,20 +32,32 @@ class RouteBuilder(currentWindowId: String = Constants.DEFAULT_WINDOW) {
 
     var flag: RouteFlag = NormalFlag
 
+    /**
+     * 页面变换效果
+     */
     var transform: Transform = if (getPlatform() == Web) none() else normal()
 
     private var panelOptions: PanelOptions? = null
 
+    /**
+     * 页面变换效果
+     */
     fun transform(body: TransformBuilder.() -> Unit) {
         transform = buildTransform(body)
     }
 
+    /**
+     * 参数构建
+     */
     fun argBuild(block: Bundle.() -> Unit) {
         args.block()
     }
 
     fun getArgs() = args
 
+    /**
+     * 获取后退是传回来的数据
+     */
     fun onResult(body: (Bundle) -> Unit) {
         onResult = body
 

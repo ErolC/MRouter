@@ -60,12 +60,6 @@ fun Modifier.clearFocusWithClick():Modifier{
     return pointerInput(scope) { detectTapGestures { fManager.clearFocus(false) } }
 }
 
-suspend fun LifecycleOwner.repeatOnLifecycle(
-    state: Lifecycle.State,
-    block: suspend CoroutineScope.() -> Unit
-): Unit = lifecycle.repeatOnLifecycle(state, block)
-
-
 @Composable
 internal fun PageRouter.HostContent(
     modifier: Modifier,

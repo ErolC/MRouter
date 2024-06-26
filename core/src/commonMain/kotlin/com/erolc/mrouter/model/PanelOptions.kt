@@ -11,5 +11,5 @@ import androidx.core.bundle.Bundle
 data class PanelOptions(
     val key: String,
     val clearTask: Boolean = true,
-    val block: (Bundle) -> Unit = {}
+//    val block: (Bundle) -> Unit = {}
 )

@@ -6,7 +6,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.erolc.mrouter.utils.rememberInPage
 
-
+/**
+ * 当使用LazyList时，请使用该方法
+ */
 @Composable
 fun rememberLazyListState(
     key: String,
@@ -24,7 +26,9 @@ fun rememberLazyListState(
     }
 }
 
-
+/**
+ * 当使用LazyGirdState时，请使用该方法
+ */
 @Composable
 fun rememberLazyGirdState(key: String,
     initialFirstVisibleItemIndex: Int = 0,

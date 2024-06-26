@@ -76,7 +76,7 @@ class PanelRouter(
         panelStacks[panelKey]?.maxLifecycle(Lifecycle.State.STARTED)
     }
 
-    fun dispatchOnAddressChange() {
+    internal fun dispatchOnAddressChange() {
         panelStacks.forEach { (key, panelEntry) ->
             if (showPanels.contains(key))
                 panelEntry.dispatchOnAddressChange()

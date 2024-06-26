@@ -106,7 +106,7 @@ class PageRouter(
 
     internal fun getBackStack() = backStack.backStack
 
-    fun dispatchOnAddressChange() {
+    internal fun dispatchOnAddressChange() {
         val oldEntries = backStack.backStack.value.takeLast(2)
         val newEntries = oldEntries.map {
             it as PageEntry

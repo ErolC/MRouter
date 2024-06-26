@@ -2,14 +2,14 @@ package com.erolc.mrouter.utils
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import com.erolc.mrouter.backstack.entry.LocalWindowScope
 import com.erolc.mrouter.scope.LocalPageScope
+import com.erolc.mrouter.backstack.entry.PageEntry
 
 
 /**
  * 页面缓存类，用于记住页面中那些变量。
- * 使用该类构造的remember方法：[rememberPrivateInPage],[rememberInPage]的生命周期长度将处在[remember]和[rememberSaveable]之间。
+ * 使用该类构造的remember方法：[rememberPrivateInPage],[rememberInPage]的生命周期长度比普通的[remember]要长，和当前页面[PageEntry]的生命周期一样长。
  */
 class PageCache {
     private val values = mutableMapOf<String, Any>()

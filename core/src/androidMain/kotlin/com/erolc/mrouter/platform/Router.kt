@@ -14,5 +14,5 @@ internal actual fun WindowRouter.route(
     callBack: ResultCallBack?
 ) {
     val activity = getContext() as ComponentActivity
-    (route.routerDispatcher as? ActivityRouterLauncher<*, *>)?.launch(activity, args, callBack)
+    (route.routerSource as? ActivityRouterLauncher<*, *>)?.launch(activity, args, callBack)
 }

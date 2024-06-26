@@ -13,7 +13,7 @@ internal actual fun WindowRouter.route(
     args: Bundle,
     callBack: ResultCallBack?
 ) {
-    val webRoute = route.routerDispatcher as WebRoute
+    val webRoute = route.routerSource as WebRoute
     val url = if (args.isEmpty()) webRoute.url else {
         val str = StringBuilder()
         args.keySet().forEach {

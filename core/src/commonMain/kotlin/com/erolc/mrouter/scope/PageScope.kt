@@ -55,8 +55,8 @@ class PageScope {
 
     /**
      * 路由到下一个页面
-     * @param route 路由，其标准格式是: `[key|]`address`[?argKey=arg&argKey1=arg1]`
-     * 其中只有address是必须的，?后面接的是参数；而key是[PanelEntry]的某个layout
+     * @param route 路由，其标准格式是: `[key:]`address`[?argKey=arg&argKey1=arg1]`
+     * 其中只有address是必须的，?后面接的是参数；而key是PanelEntry的某个layout
      */
     fun route(route: String, builder: RouteBuilder.() -> Unit = {}) {
         val routeObj = RouteBuilder(windowId).apply(builder).build(callBack, route).let {
@@ -67,6 +67,9 @@ class PageScope {
         router.dispatchRoute(routeObj)
     }
 
+    /**
+     * 在使用[route]方法进行路由之前，可以先通过该方法预先设置一些需要传递给下一个页面的参数
+     */
     fun setArgs(body: Bundle.() -> Unit) {
         preArgs.apply(body)
     }
