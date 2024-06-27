@@ -113,10 +113,7 @@ fun rememberDraggableModifier(
     orientation: Orientation = Orientation.Horizontal,
     reverseDirection: Boolean = false
 ): Modifier {
-    val scope = LocalTransformWrapScope.current
-    val anchoredDraggableState = scope.run {
-        rememberDraggableState(progress, orientation)
-    }
+    val anchoredDraggableState = rememberDraggableState(orientation)
     val modifier =
         if (orientation == Orientation.Horizontal)
             Modifier.width(15.dp)
@@ -206,30 +203,6 @@ private fun nestScrollConnection(
  */
 @Composable
 fun shouldHasGesture() = !LocalPageScope.current.router.parentRouter.backStack.isBottom()
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun rememberEndDraggableModifier(
-    orientation: Orientation = Orientation.Horizontal,
-    reverseDirection: Boolean = false
-): Modifier {
-    val scope = LocalTransformWrapScope.current
-    val anchoredDraggableState = scope.run {
-        rememberEndDraggableState(progress, orientation)
-    }
-    val modifier =
-        if (orientation == Orientation.Horizontal)
-            Modifier.width(15.dp)
-        else
-            Modifier.fillMaxWidth().height(15.dp)
-
-    return modifier.anchoredDraggable(
-        state = anchoredDraggableState,
-        orientation = orientation,
-        reverseDirection = reverseDirection
-    )
-}
 
 /**
  * @param initialValue 初始值
