@@ -130,7 +130,7 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
-    coordinates("cn.erolc.mrouter", "core", "1.0.0-beta04")
+    coordinates("cn.erolc.mrouter", "core", "1.0.0")
 
     pom {
         name.set("MRouter")
